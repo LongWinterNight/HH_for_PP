@@ -35,7 +35,14 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    
+
+    - name: Create .env file for tests
+      run: |
+        echo "HH_USER_EMAIL=test@example.com" > .env
+        echo "API_REQUEST_DELAY=0.1" >> .env
+        echo "MAX_PAGES=2" >> .env
+        echo "DAYS_BACK=7" >> .env
+
     - name: Lint with flake8
       run: |
         pip install flake8
