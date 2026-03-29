@@ -1,0 +1,365 @@
+﻿category,skill,count
+hard_skills,sql,316
+hard_skills,git,295
+hard_skills,postgresql,232
+hard_skills,docker,219
+hard_skills,ci/cd,166
+hard_skills,javascript,150
+hard_skills,jira,148
+hard_skills,python,142
+hard_skills,linux,140
+hard_skills,react,138
+hard_skills,typescript,136
+hard_skills,высшее образование,118
+hard_skills,redis,111
+hard_skills,java,107
+hard_skills,kubernetes,106
+hard_skills,зарплата,95
+hard_skills,confluence,92
+hard_skills,документооборот,73
+hard_skills,postman,73
+hard_skills,go,71
+hard_skills,mysql,70
+hard_skills,spring,67
+hard_skills,подарки,64
+hard_skills,php,61
+hard_skills,vue,55
+hard_skills,swagger,54
+hard_skills,clickhouse,53
+hard_skills,grafana,49
+hard_skills,fastapi,46
+hard_skills,golang,46
+hard_skills,webpack,45
+hard_skills,контроль качества,44
+hard_skills,spring boot,43
+hard_skills,активные продажи,42
+hard_skills,gitlab ci,40
+hard_skills,next.js,38
+hard_skills,vite,37
+hard_skills,корпоративы,37
+hard_skills,mongodb,35
+hard_skills,prometheus,35
+hard_skills,ведение переговоров,35
+hard_skills,заключение договоров,34
+hard_skills,django,33
+hard_skills,больничные,33
+hard_skills,jest,29
+hard_skills,командировки,28
+hard_skills,nginx,28
+hard_skills,oracle,28
+hard_skills,k8s,27
+hard_skills,jenkins,26
+hard_skills,llm,26
+hard_skills,bash,25
+hard_skills,счета,25
+hard_skills,сборка,24
+hard_skills,баланс,24
+hard_skills,laravel,24
+hard_skills,asp.net,23
+hard_skills,акты,23
+hard_skills,kotlin,22
+hard_skills,pytest,21
+hard_skills,отчётность,21
+hard_skills,b2b продажи,19
+hard_skills,аудит,19
+hard_skills,angular,18
+hard_skills,elasticsearch,18
+hard_skills,хранение,18
+hard_skills,ansible,18
+hard_skills,выполнение плана,18
+hard_skills,работа с возражениями,17
+hard_skills,vuejs,16
+hard_skills,делопроизводство,15
+hard_skills,повышение квалификации,15
+hard_skills,cypress,14
+hard_skills,гост,13
+hard_skills,сопровождение клиентов,13
+hard_skills,zabbix,12
+hard_skills,zoom,12
+hard_skills,pandas,12
+hard_skills,swift,12
+hard_skills,честный знак,12
+hard_skills,сверки,12
+hard_skills,selenium,11
+hard_skills,вэд,11
+hard_skills,flask,11
+hard_skills,билеты,11
+hard_skills,terraform,11
+hard_skills,github actions,11
+hard_skills,монтаж,10
+hard_skills,langchain,10
+hard_skills,nuxt,10
+hard_skills,helm,10
+hard_skills,ведение клиентов,10
+hard_skills,rag,9
+hard_skills,express,9
+hard_skills,сертификация,9
+hard_skills,reactjs,8
+hard_skills,azure,8
+hard_skills,чертежи,8
+hard_skills,поиск поставщиков,8
+hard_skills,отели,7
+hard_skills,индивидуальный подход,7
+hard_skills,организация мероприятий,7
+hard_skills,aws,7
+hard_skills,firebase,7
+hard_skills,eslint,7
+hard_skills,yandex cloud,7
+hard_skills,pytorch,7
+hard_skills,организация встреч,7
+hard_skills,работа с поставщиками,6
+hard_skills,инвентаризация,6
+hard_skills,курсы повышения,6
+hard_skills,cassandra,6
+hard_skills,numpy,6
+hard_skills,впр,6
+hard_skills,списание,6
+hard_skills,работа с кассой,6
+hard_skills,архив,6
+hard_skills,холодные звонки,6
+hard_skills,комплектация,5
+hard_skills,prettier,5
+hard_skills,счета-фактуры,5
+hard_skills,sqlite,5
+hard_skills,осно,5
+hard_skills,opencv,5
+hard_skills,егаис,5
+hard_skills,ндс,5
+hard_skills,накладные,5
+hard_skills,проверка контрагентов,5
+hard_skills,корпоративное право,4
+hard_skills,внесение изменений,4
+hard_skills,ескд,4
+hard_skills,svn,4
+hard_skills,визы,4
+hard_skills,машинное обучение,4
+hard_skills,пфр,4
+hard_skills,tensorflow,4
+hard_skills,заключение контрактов,4
+hard_skills,контроль поставок,4
+hard_skills,b2c продажи,4
+hard_skills,44-фз,4
+hard_skills,shell,3
+hard_skills,dart,3
+hard_skills,претензионная работа,3
+hard_skills,nlp,3
+hard_skills,проектная документация,3
+hard_skills,упаковка,3
+hard_skills,ruby,3
+hard_skills,сортировка,3
+hard_skills,усн,3
+hard_skills,microsoft sql server,3
+hard_skills,mariadb,3
+hard_skills,тендеры,3
+hard_skills,маркировка,3
+hard_skills,правка,3
+hard_skills,фсс,3
+hard_skills,работа с дебиторской задолженностью,3
+hard_skills,план продаж,3
+hard_skills,223-фз,3
+hard_skills,водоснабжение,2
+hard_skills,дополнительное образование,2
+hard_skills,отопление,2
+hard_skills,хранение документов,2
+hard_skills,babel,2
+hard_skills,диспетчеризация,2
+hard_skills,ппр,2
+hard_skills,онлайн обучение,2
+hard_skills,pl/sql,2
+hard_skills,отпускные,2
+hard_skills,gcp,2
+hard_skills,transformers,2
+hard_skills,гражданское право,2
+hard_skills,machine learning,2
+hard_skills,ту,2
+hard_skills,смр,2
+hard_skills,hugging face,2
+hard_skills,scikit-learn,2
+hard_skills,powershell,2
+hard_skills,istio,2
+hard_skills,росстат,2
+hard_skills,мсфо,2
+hard_skills,патент,2
+hard_skills,чпу,2
+hard_skills,разметка,2
+hard_skills,снип,2
+hard_skills,внутренний контроль,2
+hard_skills,атс,2
+hard_skills,охрана труда,2
+hard_skills,сопровождение гостей,2
+hard_skills,валютный контроль,2
+hard_skills,среднее образование,2
+hard_skills,приём заказов,2
+hard_skills,приём звонков,2
+hard_skills,заказ пропусков,2
+hard_skills,комплаенс,1
+hard_skills,розничные продажи,1
+hard_skills,мс,1
+hard_skills,глонасс,1
+hard_skills,мониторинг транспорта,1
+hard_skills,встреча посетителей,1
+hard_skills,tsql,1
+hard_skills,computer vision,1
+hard_skills,методика преподавания,1
+hard_skills,олимпиады,1
+hard_skills,rails,1
+hard_skills,арбитражные суды,1
+hard_skills,суды общей юрисдикции,1
+hard_skills,трудовое право,1
+hard_skills,электронный журнал,1
+hard_skills,rust,1
+hard_skills,deep learning,1
+hard_skills,nest.js,1
+hard_skills,svelte,1
+hard_skills,6-ндфл,1
+hard_skills,путевые листы,1
+hard_skills,matplotlib,1
+hard_skills,scala,1
+hard_skills,пожарная безопасность,1
+hard_skills,касса,1
+hard_skills,snowflake,1
+hard_skills,пайка,1
+hard_skills,дистанционное обучение,1
+hard_skills,контроль расходов,1
+hard_skills,cpp,1
+hard_skills,сп,1
+hard_skills,keras,1
+hard_skills,преподавание,1
+hard_skills,вентиляция,1
+hard_skills,due diligence,1
+hard_skills,репетиторство,1
+hard_skills,экзамены,1
+hard_skills,управление закупками,1
+hard_skills,исходящая документация,1
+hard_skills,отгрузка товара,1
+hard_skills,чтение чертежей,1
+hard_skills,глубокое обучение,1
+hard_skills,досудебное урегулирование,1
+hard_skills,составление договоров,1
+hard_skills,таможенное оформление,1
+hard_skills,тн,1
+hard_skills,сервировка,1
+hard_skills,погрузка,1
+hard_skills,фгис,1
+hard_skills,реорганизация,1
+hard_skills,мерчандайзинг,1
+hard_skills,госзакупки,1
+hard_skills,планирование маршрутов,1
+hard_skills,разгрузка,1
+hard_skills,расчёт стоимости,1
+hard_skills,правовая экспертиза,1
+hard_skills,представительские расходы,1
+soft_skills,контроль,387
+soft_skills,развитие,351
+soft_skills,взаимодействие,342
+soft_skills,ответственность,287
+soft_skills,внимательность,181
+soft_skills,организация,177
+soft_skills,планирование,123
+soft_skills,переговоры,98
+soft_skills,внимательность к деталям,85
+soft_skills,сервис,84
+soft_skills,коммуникабельность,83
+soft_skills,самостоятельность,71
+soft_skills,руководство,68
+soft_skills,стрессоустойчивость,62
+soft_skills,инициативность,61
+soft_skills,аналитическое мышление,58
+soft_skills,телефонные переговоры,55
+soft_skills,деловая переписка,54
+soft_skills,деловое общение,51
+soft_skills,грамотная речь,49
+soft_skills,управление командой,46
+soft_skills,наставничество,46
+soft_skills,аккуратность,45
+soft_skills,системное мышление,41
+soft_skills,проактивность,41
+soft_skills,обучаемость,38
+soft_skills,исполнительность,38
+soft_skills,мотивация,37
+soft_skills,презентации,33
+soft_skills,гибкость,29
+soft_skills,пунктуальность,28
+soft_skills,профессиональный рост,24
+soft_skills,клиентоориентированность,24
+soft_skills,активность,19
+soft_skills,приоритизация,19
+soft_skills,стратегическое мышление,17
+soft_skills,обратная связь,16
+soft_skills,многозадачность,15
+soft_skills,честность,15
+soft_skills,лидерство,14
+soft_skills,быстрая обучаемость,13
+soft_skills,дисциплинированность,11
+soft_skills,работа с клиентами,9
+soft_skills,креативность,9
+soft_skills,развитие сотрудников,9
+soft_skills,работоспособность,8
+soft_skills,адаптивность,8
+soft_skills,принятие решений,8
+soft_skills,энергичность,7
+soft_skills,критическое мышление,7
+soft_skills,надёжность,6
+soft_skills,решение проблем,6
+soft_skills,видение,5
+soft_skills,порядочность,5
+soft_skills,управление временем,4
+soft_skills,эмоциональная устойчивость,3
+soft_skills,кросс-функциональное взаимодействие,3
+soft_skills,командная работа,3
+soft_skills,оценка персонала,3
+soft_skills,тайм-менеджмент,2
+soft_skills,публичные выступления,2
+soft_skills,логическое мышление,2
+soft_skills,саморазвитие,1
+soft_skills,делегирование,1
+soft_skills,работа в коллективе,1
+tools,1с,371
+tools,bitrix24,284
+tools,excel,206
+tools,figma,92
+tools,word,87
+tools,ms office,86
+tools,microsoft office,27
+tools,google sheets,26
+tools,powerpoint,24
+tools,outlook,23
+tools,photoshop,21
+tools,google docs,18
+tools,illustrator,15
+tools,trello,14
+tools,autocad,12
+tools,notion,12
+tools,1с:предприятие,10
+tools,asana,7
+tools,access,5
+tools,1с:бухгалтерия,5
+tools,hubspot,5
+tools,after effects,4
+tools,indesign,4
+tools,sketch,4
+tools,эвотор,3
+tools,solidworks,3
+tools,revit,3
+tools,salesforce,3
+tools,google slides,2
+tools,nanocad,2
+tools,monday,2
+tools,1с:управление торговлей,2
+tools,узи,1
+tools,экг,1
+tools,premiere pro,1
+tools,davinci resolve,1
+tools,рентген,1
+tools,1с:зарплата,1
+tools,coreldraw,1
+tools,clickup,1
+tools,осциллограф,1
+tools,1с:розница,1
+tools,тестер,1
+tools,атол,1
+tools,1с:комплексная автоматизация,1
+tools,archicad,1
+tools,циркулярная пила,1
+tools,amo crm,1
+tools,zoho,1

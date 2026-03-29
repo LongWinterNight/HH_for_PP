@@ -1,0 +1,210 @@
+﻿category,skill,count
+hard_skills,python,1113
+hard_skills,llm,711
+hard_skills,sql,439
+hard_skills,api,436
+hard_skills,rag,194
+hard_skills,postgresql,178
+hard_skills,etl,171
+hard_skills,ci/cd,163
+hard_skills,rest,155
+hard_skills,fastapi,154
+hard_skills,linux,151
+hard_skills,java,123
+hard_skills,numpy,115
+hard_skills,pandas,109
+hard_skills,django,102
+hard_skills,bash,99
+hard_skills,pytorch,94
+hard_skills,claude,90
+hard_skills,clickhouse,83
+hard_skills,go,78
+hard_skills,javascript,71
+hard_skills,rest api,70
+hard_skills,tensorflow,61
+hard_skills,typescript,53
+hard_skills,langchain,52
+hard_skills,gpt,45
+hard_skills,flask,43
+hard_skills,fine-tuning,41
+hard_skills,mysql,37
+hard_skills,genai,37
+hard_skills,midjourney,33
+hard_skills,redis,32
+hard_skills,grpc,31
+hard_skills,golang,29
+hard_skills,http,28
+hard_skills,langgraph,25
+hard_skills,mongodb,19
+hard_skills,xgboost,18
+hard_skills,qdrant,18
+hard_skills,aiohttp,17
+hard_skills,scipy,17
+hard_skills,transformers,17
+hard_skills,openai api,16
+hard_skills,catboost,16
+hard_skills,anthropic,16
+hard_skills,scikit-learn,15
+hard_skills,matplotlib,14
+hard_skills,s3,14
+hard_skills,bert,12
+hard_skills,keras,12
+hard_skills,scala,12
+hard_skills,graphql,11
+hard_skills,prompt engineering,11
+hard_skills,transformer,11
+hard_skills,elasticsearch,11
+hard_skills,llama,11
+hard_skills,lightgbm,10
+hard_skills,sklearn,9
+hard_skills,embeddings,9
+hard_skills,deep learning,8
+hard_skills,webhooks,8
+hard_skills,rust,7
+hard_skills,snowflake,7
+hard_skills,линейная алгебра,6
+hard_skills,seaborn,6
+hard_skills,pinecone,6
+hard_skills,hugging face,5
+hard_skills,generative ai,5
+hard_skills,milvus,5
+hard_skills,эмбеддинги,5
+hard_skills,rl,5
+hard_skills,stable diffusion,5
+hard_skills,c++,4
+hard_skills,statistics,4
+hard_skills,математическая статистика,3
+hard_skills,weaviate,3
+hard_skills,chroma,3
+hard_skills,теория вероятностей,2
+hard_skills,sqlite,2
+hard_skills,graphrag,2
+hard_skills,faiss,2
+hard_skills,reinforcement learning,2
+hard_skills,data pipeline,2
+hard_skills,chromadb,2
+hard_skills,data visualization,2
+hard_skills,ml pipeline,1
+hard_skills,arangodb,1
+hard_skills,gpt-4,1
+hard_skills,vector db,1
+hard_skills,vector search,1
+hard_skills,plotly,1
+hard_skills,обучение с подкреплением,1
+hard_skills,cpp,1
+hard_skills,knowledge graph,1
+hard_skills,api integration,1
+hard_skills,neo4j,1
+hard_skills,retrieval augmented generation,1
+soft_skills,тестирование,171
+soft_skills,ответственность,73
+soft_skills,qa,73
+soft_skills,management,73
+soft_skills,agile,35
+soft_skills,внимательность,30
+soft_skills,testing,30
+soft_skills,самостоятельность,27
+soft_skills,документирование,25
+soft_skills,delivery,22
+soft_skills,scrum,21
+soft_skills,communication,21
+soft_skills,эксперименты,19
+soft_skills,documentation,16
+soft_skills,collaboration,15
+soft_skills,системное мышление,13
+soft_skills,leadership,12
+soft_skills,проактивность,12
+soft_skills,менторство,11
+soft_skills,коммуникабельность,10
+soft_skills,лидерство,10
+soft_skills,cross-functional,10
+soft_skills,ownership,10
+soft_skills,сбор требований,6
+soft_skills,аналитическое мышление,6
+soft_skills,обучаемость,5
+soft_skills,mentoring,5
+soft_skills,attention to detail,4
+soft_skills,team lead,4
+soft_skills,креативность,4
+soft_skills,инновации,4
+soft_skills,guidelines,3
+soft_skills,business analysis,3
+soft_skills,решение проблем,3
+soft_skills,innovation,3
+soft_skills,обучение пользователей,2
+soft_skills,критическое мышление,2
+soft_skills,stakeholder management,2
+soft_skills,quality assurance,2
+soft_skills,гибкость,2
+soft_skills,creativity,1
+soft_skills,critical thinking,1
+soft_skills,системный анализ,1
+soft_skills,разметка данных,1
+soft_skills,technical writing,1
+soft_skills,бизнес-анализ,1
+soft_skills,гайдлайны,1
+soft_skills,experiments,1
+soft_skills,командная работа,1
+soft_skills,нацеленность на результат,1
+tools,docker,160
+tools,kubernetes,116
+tools,git,99
+tools,airflow,89
+tools,excel,68
+tools,gitlab,68
+tools,spark,66
+tools,kafka,65
+tools,power bi,53
+tools,jira,49
+tools,gitlab ci,44
+tools,aws,41
+tools,mlflow,41
+tools,grafana,39
+tools,telegram,36
+tools,jenkins,32
+tools,azure,30
+tools,github,30
+tools,prometheus,30
+tools,figma,30
+tools,confluence,28
+tools,helm,28
+tools,tableau,28
+tools,dbt,23
+tools,google sheets,18
+tools,gcp,18
+tools,postman,16
+tools,kubeflow,16
+tools,swagger,15
+tools,notion,15
+tools,openapi,12
+tools,apache airflow,12
+tools,dvc,10
+tools,yandex cloud,9
+tools,prefect,9
+tools,apache spark,9
+tools,apache kafka,8
+tools,k8s,7
+tools,bitbucket,7
+tools,github actions,7
+tools,docker-compose,5
+tools,jupyter,5
+tools,looker,4
+tools,google cloud,4
+tools,jupyter notebook,3
+tools,zoom,3
+tools,azure devops,3
+tools,luigi,2
+tools,clickup,2
+tools,draw.io,2
+tools,svn,2
+tools,miro,2
+tools,trello,2
+tools,visual studio,2
+tools,elk stack,1
+tools,insomnia,1
+tools,aws lambda,1
+tools,datadog,1
+tools,slack,1
+tools,weights & biases,1
+tools,circleci,1
+tools,asana,1

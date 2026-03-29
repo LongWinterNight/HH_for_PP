@@ -1,0 +1,91 @@
+﻿category,skill,count
+hard_skills,python,1033
+hard_skills,llm,654
+hard_skills,sql,393
+hard_skills,rag,179
+hard_skills,postgresql,158
+hard_skills,ci/cd,155
+hard_skills,etl,153
+hard_skills,docker,144
+hard_skills,linux,138
+hard_skills,java,110
+hard_skills,numpy,110
+hard_skills,kubernetes,105
+hard_skills,pandas,103
+hard_skills,bash,96
+hard_skills,pytorch,90
+hard_skills,git,82
+hard_skills,clickhouse,75
+hard_skills,go,65
+hard_skills,javascript,61
+hard_skills,tensorflow,60
+hard_skills,langchain,49
+hard_skills,typescript,46
+hard_skills,fine-tuning,39
+hard_skills,gpt,36
+hard_skills,aws,36
+hard_skills,mysql,32
+hard_skills,redis,29
+hard_skills,golang,26
+hard_skills,azure,25
+hard_skills,xgboost,18
+hard_skills,transformers,17
+hard_skills,mongodb,17
+hard_skills,scipy,16
+hard_skills,catboost,16
+hard_skills,gcp,16
+hard_skills,matplotlib,14
+hard_skills,scikit-learn,14
+hard_skills,bert,12
+hard_skills,keras,12
+hard_skills,transformer,11
+hard_skills,llama,11
+hard_skills,scala,11
+hard_skills,prompt engineering,10
+hard_skills,elasticsearch,10
+hard_skills,lightgbm,10
+hard_skills,sklearn,8
+hard_skills,rust,7
+hard_skills,snowflake,7
+hard_skills,seaborn,6
+hard_skills,hugging face,5
+hard_skills,c++,4
+hard_skills,stable diffusion,3
+hard_skills,data pipeline,2
+hard_skills,data visualization,2
+hard_skills,plotly,1
+hard_skills,cpp,1
+hard_skills,retrieval augmented generation,1
+soft_skills,внимательность,19
+soft_skills,communication,18
+soft_skills,самостоятельность,15
+soft_skills,leadership,11
+soft_skills,менторство,11
+soft_skills,лидерство,8
+soft_skills,коммуникабельность,6
+soft_skills,обучаемость,4
+soft_skills,mentoring,4
+soft_skills,аналитическое мышление,3
+soft_skills,решение проблем,3
+soft_skills,attention to detail,2
+soft_skills,critical thinking,1
+soft_skills,критическое мышление,1
+tools,airflow,80
+tools,gitlab,65
+tools,spark,63
+tools,kafka,60
+tools,excel,49
+tools,mlflow,41
+tools,power bi,40
+tools,jira,40
+tools,github,30
+tools,confluence,25
+tools,tableau,21
+tools,postman,15
+tools,dvc,10
+tools,figma,9
+tools,bitbucket,7
+tools,jupyter,4
+tools,notion,3
+tools,jupyter notebook,2
+tools,slack,1

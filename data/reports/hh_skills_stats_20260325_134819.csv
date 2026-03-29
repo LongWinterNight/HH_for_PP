@@ -1,0 +1,83 @@
+﻿category,skill,count
+hard_skills,python,399
+hard_skills,llm,264
+hard_skills,sql,153
+hard_skills,rag,86
+hard_skills,pytorch,72
+hard_skills,postgresql,63
+hard_skills,docker,62
+hard_skills,ci/cd,58
+hard_skills,etl,55
+hard_skills,linux,43
+hard_skills,pandas,43
+hard_skills,tensorflow,37
+hard_skills,kubernetes,34
+hard_skills,clickhouse,33
+hard_skills,langchain,31
+hard_skills,git,31
+hard_skills,numpy,29
+hard_skills,java,27
+hard_skills,bash,25
+hard_skills,javascript,23
+hard_skills,fine-tuning,22
+hard_skills,xgboost,17
+hard_skills,transformers,15
+hard_skills,go,15
+hard_skills,mysql,14
+hard_skills,catboost,14
+hard_skills,typescript,13
+hard_skills,gpt,13
+hard_skills,azure,13
+hard_skills,aws,12
+hard_skills,redis,10
+hard_skills,golang,9
+hard_skills,scikit-learn,9
+hard_skills,lightgbm,9
+hard_skills,scipy,8
+hard_skills,bert,8
+hard_skills,gcp,8
+hard_skills,keras,8
+hard_skills,mongodb,7
+hard_skills,transformer,7
+hard_skills,sklearn,6
+hard_skills,prompt engineering,6
+hard_skills,matplotlib,5
+hard_skills,hugging face,5
+hard_skills,elasticsearch,5
+hard_skills,seaborn,4
+hard_skills,llama,4
+hard_skills,rust,3
+hard_skills,snowflake,3
+hard_skills,c++,2
+hard_skills,data pipeline,1
+soft_skills,communication,9
+soft_skills,самостоятельность,7
+soft_skills,внимательность,7
+soft_skills,leadership,6
+soft_skills,коммуникабельность,5
+soft_skills,лидерство,5
+soft_skills,менторство,3
+soft_skills,аналитическое мышление,2
+soft_skills,обучаемость,2
+soft_skills,attention to detail,1
+soft_skills,решение проблем,1
+soft_skills,critical thinking,1
+soft_skills,mentoring,1
+tools,airflow,34
+tools,gitlab,31
+tools,mlflow,26
+tools,excel,20
+tools,kafka,19
+tools,spark,15
+tools,jira,14
+tools,power bi,13
+tools,github,10
+tools,confluence,8
+tools,tableau,6
+tools,postman,5
+tools,figma,4
+tools,dvc,4
+tools,bitbucket,2
+tools,jupyter,2
+tools,jupyter notebook,1
+tools,notion,1
