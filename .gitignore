@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data files (игнорируем большие файлы данных)
+data/raw/*.json
+data/processed/*.csv
+data/processed/*.parquet
+data/reports/*.xlsx
+data/*.db
+logs/*.log
+
+# Environment variables (.env содержит секреты)
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Цифровые артефакты
+*.pid
+*.seed
+*.pyc

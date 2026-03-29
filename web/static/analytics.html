@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="container mx-auto px-4 py-6">
+        <!-- Заголовок -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">
+                <i class="fas fa-chart-bar text-blue-600"></i> Аналитика вакансий
+            </h1>
+            <p class="text-gray-600 text-sm">Всего вакансий: {{ totalVacancies }}</p>
+        </div>
+
+        <!-- KPI карточки -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                <p class="text-xs text-gray-500 uppercase">Средняя зарплата (RUB)</p>
+                <p class="text-xl font-bold text-gray-800">{{ formatNumber(salaryStats.avg) }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                <p class="text-xs text-gray-500 uppercase">Медианная (RUB)</p>
+                <p class="text-xl font-bold text-gray-800">{{ formatNumber(salaryStats.median) }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+                <p class="text-xs text-gray-500 uppercase">Валют в базе</p>
+                <p class="text-xl font-bold text-gray-800">{{ Object.keys(currencies).length }}</p>
+            </div>
+            <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                <p class="text-xs text-gray-500 uppercase">Регионов</p>
+                <p class="text-xl font-bold text-gray-800">{{ Object.keys(topAreas).length }}</p>
+            </div>
+        </div>
+
+        <!-- Графики -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Опыт работы -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-briefcase text-blue-600"></i> Опыт работы
+                </h3>
+                <div class="h-64">
+                    <canvas id="experienceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Занятость -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-clock text-green-600"></i> Занятость
+                </h3>
+                <div class="h-64">
+                    <canvas id="employmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Зарплаты и регионы -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Распределение зарплат -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-chart-pie text-yellow-600"></i> Распределение зарплат (RUB)
+                </h3>
+                <div class="h-64">
+                    <canvas id="salaryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Топ регионов -->
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-map-marker-alt text-red-600"></i> Топ регионов
+                </h3>
+                <div class="h-64">
+                    <canvas id="areasChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по валютам -->
+        <div class="bg-white rounded-lg shadow p-4 mb-6" v-if="Object.keys(salaryStatsByCurrency).length > 0">
+            <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                <i class="fas fa-coins text-purple-600"></i> Статистика по валютам
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left">Валюта</th>
+                            <th class="px-4 py-2 text-right">Мин</th>
+                            <th class="px-4 py-2 text-right">Макс</th>
+                            <th class="px-4 py-2 text-right">Медиана</th>
+                            <th class="px-4 py-2 text-right">Средняя</th>
+                            <th class="px-4 py-2 text-right">Вакансий</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(stats, currency) in salaryStatsByCurrency" :key="currency" class="border-t">
+                            <td class="px-4 py-2 font-semibold">{{ currency }}</td>
+                            <td class="px-4 py-2 text-right">{{ formatNumber(stats.min) }}</td>
+                            <td class="px-4 py-2 text-right">{{ formatNumber(stats.max) }}</td>
+                            <td class="px-4 py-2 text-right">{{ formatNumber(stats.median) }}</td>
+                            <td class="px-4 py-2 text-right">{{ formatNumber(stats.avg) }}</td>
+                            <td class="px-4 py-2 text-right">{{ stats.count }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Навыки -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-xs font-semibold mb-2 text-purple-600">
+                    <i class="fas fa-microchip"></i> Технологии
+                </h3>
+                <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
+                    <div v-for="skill in technologiesList" :key="skill.name"
+                         class="flex justify-between">
+                        <span class="text-gray-700 truncate">{{ skill.name }}</span>
+                        <span class="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-xs font-semibold mb-2 text-blue-600">
+                    <i class="fas fa-brain"></i> Hard Skills
+                </h3>
+                <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
+                    <div v-for="skill in hardSkillsList" :key="skill.name"
+                         class="flex justify-between">
+                        <span class="text-gray-700 truncate">{{ skill.name }}</span>
+                        <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-xs font-semibold mb-2 text-green-600">
+                    <i class="fas fa-users"></i> Soft Skills
+                </h3>
+                <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
+                    <div v-for="skill in softSkillsList" :key="skill.name"
+                         class="flex justify-between">
+                        <span class="text-gray-700 truncate">{{ skill.name }}</span>
+                        <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        const API_BASE = 'http://localhost:8000/api';
+
+        createApp({
+            data() {
+                return {
+                    totalVacancies: 0,
+                    analyticsData: {},
+                    charts: {}
+                };
+            },
+
+            computed: {
+                salaryStats() {
+                    return this.analyticsData.salary_stats || { min: null, max: null, median: null, avg: null };
+                },
+                currencies() {
+                    return this.analyticsData.currencies || {};
+                },
+                topAreas() {
+                    return this.analyticsData.top_areas || {};
+                },
+                salaryStatsByCurrency() {
+                    return this.analyticsData.salary_stats_by_currency || {};
+                },
+                technologiesList() {
+                    const tech = this.analyticsData.technologies || {};
+                    return Object.entries(tech).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+                },
+                hardSkillsList() {
+                    const skills = this.analyticsData.hard_skills || {};
+                    return Object.entries(skills).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+                },
+                softSkillsList() {
+                    const skills = this.analyticsData.soft_skills || {};
+                    return Object.entries(skills).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value }));
+                }
+            },
+
+            methods: {
+                async loadData() {
+                    try {
+                        const [advRes, distRes] = await Promise.all([
+                            fetch(`${API_BASE}/analytics/advanced`),
+                            fetch(`${API_BASE}/analytics/distribution`)
+                        ]);
+                        
+                        const advanced = await advRes.json();
+                        const distribution = await distRes.json();
+                        
+                        console.log('Advanced:', advanced);
+                        console.log('Distribution:', distribution);
+                        
+                        this.analyticsData = { ...advanced, ...distribution };
+                        this.totalVacancies = advanced.total_vacancies || 0;
+                        
+                        console.log('Combined:', this.analyticsData);
+                        
+                        this.$nextTick(() => this.initCharts());
+                    } catch (error) {
+                        console.error('Error loading data:', error);
+                    }
+                },
+
+                initCharts() {
+                    const data = this.analyticsData;
+                    
+                    // Опыт
+                    if (Object.keys(data.experience || {}).length > 0) {
+                        this.createChart('experienceChart', 'doughnut', 
+                            Object.keys(data.experience), 
+                            Object.values(data.experience),
+                            ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+                        );
+                    }
+                    
+                    // Занятость
+                    if (Object.keys(data.employment || {}).length > 0) {
+                        this.createChart('employmentChart', 'doughnut',
+                            Object.keys(data.employment),
+                            Object.values(data.employment),
+                            ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#EC4899']
+                        );
+                    }
+                    
+                    // Зарплаты
+                    if (Object.keys(data.salary_distribution || {}).length > 0) {
+                        this.createChart('salaryChart', 'doughnut',
+                            Object.keys(data.salary_distribution),
+                            Object.values(data.salary_distribution),
+                            ['#F59E0B', '#FBBF24', '#FCD34D', '#FDE68A', '#FEF3C7']
+                        );
+                    }
+                    
+                    // Регионы
+                    if (Object.keys(data.top_areas || {}).length > 0) {
+                        const sorted = Object.entries(data.top_areas).sort((a, b) => b[1] - a[1]).slice(0, 10);
+                        this.createChart('areasChart', 'bar',
+                            sorted.map(([k]) => k),
+                            sorted.map(([, v]) => v),
+                            ['#EF4444'],
+                            { indexAxis: 'y' }
+                        );
+                    }
+                },
+
+                createChart(canvasId, type, labels, data, colors, options = {}) {
+                    const ctx = document.getElementById(canvasId);
+                    if (!ctx) return;
+                    
+                    this.charts[canvasId] = new Chart(ctx, {
+                        type,
+                        data: {
+                            labels,
+                            datasets: [{
+                                data: type === 'bar' ? data : undefined,
+                                values: type !== 'bar' ? data : undefined,
+                                backgroundColor: colors
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { 
+                                    position: 'bottom',
+                                    labels: { boxWidth: 12, font: { size: 10 } }
+                                }
+                            },
+                            ...options
+                        }
+                    });
+                },
+
+                formatNumber(num) {
+                    if (!num && num !== 0) return 'N/A';
+                    return num.toLocaleString('ru-RU');
+                }
+            },
+
+            mounted() {
+                this.loadData();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

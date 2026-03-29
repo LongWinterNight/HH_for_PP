@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HH.ru Analytics — Панель управления</title>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Иконки -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        
+        .slide-enter-active, .slide-leave-active { transition: all 0.3s; }
+        .slide-enter-from, .slide-leave-to { transform: translateX(20px); opacity: 0; }
+        
+        [v-cloak] { display: none; }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen">
+        <!-- Навигация -->
+        <nav class="bg-white shadow-lg">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                        <h1 class="text-xl font-bold text-gray-800">HH.ru Analytics</h1>
+                    </div>
+                    
+                    <div class="hidden md:flex space-x-6">
+                        <a href="#" @click.prevent="currentTab = 'dashboard'"
+                           :class="currentTab === 'dashboard' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
+                            <i class="fas fa-home"></i> Дашборд
+                        </a>
+                        <a href="#" @click.prevent="currentTab = 'vacancies'"
+                           :class="currentTab === 'vacancies' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
+                            <i class="fas fa-briefcase"></i> Вакансии
+                        </a>
+                        <a href="#" @click.prevent="currentTab = 'professions'"
+                           :class="currentTab === 'professions' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
+                            <i class="fas fa-search"></i> Поиск профессий
+                        </a>
+                        <a href="#" @click.prevent="currentTab = 'analytics'"
+                           :class="currentTab === 'analytics' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
+                            <i class="fas fa-chart-bar"></i> Аналитика
+                        </a>
+                        <a href="#" @click.prevent="currentTab = 'parser'"
+                           :class="currentTab === 'parser' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
+                            <i class="fas fa-robot"></i> Парсер
+                        </a>
+                        <a href="#" @click.prevent="currentTab = 'reports'"
+                           :class="currentTab === 'reports' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
+                            <i class="fas fa-file-excel"></i> Отчёты
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-gray-600" v-if="dashboardData.total_vacancies">
+                            <i class="fas fa-database"></i> {{ dashboardData.total_vacancies }} вакансий
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Основной контент -->
+        <main class="container mx-auto px-4 py-6">
+            
+            <!-- Дашборд -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'dashboard'" key="dashboard">
+                    <!-- KPI карточки с улучшенным дизайном -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <!-- Всего вакансий -->
+                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                                    <i class="fas fa-briefcase text-2xl"></i>
+                                </div>
+                                <span class="text-blue-100 text-xs font-medium bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                                    <i class="fas fa-chart-up"></i> +{{ Math.floor(Math.random() * 20) }}%
+                                </span>
+                            </div>
+                            <p class="text-blue-100 text-sm font-medium">Всего вакансий</p>
+                            <p class="text-4xl font-bold mt-1">{{ dashboardData.total_vacancies }}</p>
+                            <div class="mt-4 flex items-center text-blue-100 text-xs">
+                                <i class="fas fa-database mr-2"></i>
+                                <span>В базе данных</span>
+                            </div>
+                        </div>
+
+                        <!-- Всего навыков -->
+                        <div @click="currentTab = 'professions'" 
+                             class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition duration-300 cursor-pointer">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                                    <i class="fas fa-tags text-2xl"></i>
+                                </div>
+                                <span class="text-green-100 text-xs font-medium bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                                    <i class="fas fa-star"></i> {{ dashboardData.total_skills }}
+                                </span>
+                            </div>
+                            <p class="text-green-100 text-sm font-medium">Всего навыков</p>
+                            <p class="text-4xl font-bold mt-1">{{ dashboardData.total_skills }}</p>
+                            <div class="mt-4 flex items-center text-green-100 text-xs">
+                                <i class="fas fa-brain mr-2"></i>
+                                <span>Уникальных компетенций</span>
+                            </div>
+                            <div class="mt-3 text-xs text-green-100 opacity-80">
+                                <i class="fas fa-arrow-right mr-1"></i>Нажмите для поиска
+                            </div>
+                        </div>
+
+                        <!-- Средняя зарплата -->
+                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                                    <i class="fas fa-ruble-sign text-2xl"></i>
+                                </div>
+                                <span class="text-purple-100 text-xs font-medium bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                                    <i class="fas fa-chart-line"></i> Тренд
+                                </span>
+                            </div>
+                            <p class="text-purple-100 text-sm font-medium">Средняя зарплата</p>
+                            <p class="text-3xl font-bold mt-1">{{ dashboardData.avg_salary ? formatNumber(dashboardData.avg_salary) : 'N/A' }}</p>
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span v-for="(data, currency) in dashboardData.vacancies_by_currency" :key="currency"
+                                      class="bg-white bg-opacity-20 px-2 py-1 rounded text-xs">
+                                    {{ currency }}: {{ formatNumber(data.avg_salary) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Статус парсера -->
+                        <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="bg-white bg-opacity-20 rounded-lg p-3">
+                                    <i class="fas fa-robot text-2xl"></i>
+                                </div>
+                                <span :class="parserState.is_running ? 'bg-white bg-opacity-30 animate-pulse' : 'bg-white bg-opacity-20'"
+                                      class="text-white text-xs font-medium px-3 py-1 rounded-full">
+                                    <i :class="parserState.is_running ? 'fas fa-spinner fa-spin' : 'fas fa-check-circle'" class="mr-1"></i>
+                                    {{ parserState.status }}
+                                </span>
+                            </div>
+                            <p class="text-orange-100 text-sm font-medium">Статус парсера</p>
+                            <div class="mt-3 space-y-2">
+                                <div v-if="parserState.is_running || parserState.progress > 0">
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span>Прогресс</span>
+                                        <span>{{ parserState.progress }}%</span>
+                                    </div>
+                                    <div class="w-full bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-white rounded-full h-2 transition-all"
+                                             :style="{ width: parserState.progress + '%' }"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center text-orange-100 text-xs">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>{{ parserState.vacancies_collected }} собрано</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Графики и таблицы -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Топ навыков с прогресс-барами -->
+                        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-gray-800">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>Топ навыков
+                                </h3>
+                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                    {{ dashboardData.top_skills.length }} навыков
+                                </span>
+                            </div>
+                            <div class="space-y-3 max-h-96 overflow-y-auto">
+                                <div v-for="(skill, index) in dashboardData.top_skills" :key="index"
+                                     class="group">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ skill.name }}</span>
+                                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{{ skill.value }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+                                             :style="{ width: Math.min((skill.value / (dashboardData.top_skills[0]?.value || 1)) * 100, 100) + '%' }"></div>
+                                    </div>
+                                </div>
+                                <div v-if="dashboardData.top_skills.length === 0" class="text-center py-8 text-gray-400">
+                                    <i class="fas fa-inbox text-4xl mb-2"></i>
+                                    <p class="text-sm">Навыки не найдены</p>
+                                    <p class="text-xs">Запустите парсер для сбора данных</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Недавние вакансии с валютами -->
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-gray-800">
+                                    <i class="fas fa-clock text-blue-500 mr-2"></i>Недавние вакансии
+                                </h3>
+                                <button @click="currentTab = 'vacancies'"
+                                        class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
+                                    Все вакансии <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Вакансия</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Компания</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Регион</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Зарплата</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="(vacancy, index) in dashboardData.recent_vacancies" :key="index"
+                                            class="hover:bg-blue-50 transition cursor-pointer"
+                                            @click="window.open(vacancy.vacancy_url || '#', '_blank')">
+                                            <td class="px-4 py-3">
+                                                <p class="text-sm font-semibold text-gray-800 truncate max-w-xs">{{ vacancy.name }}</p>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <p class="text-sm text-gray-600">{{ vacancy.company }}</p>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ vacancy.area }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-right">
+                                                <span v-if="vacancy.salary" class="text-sm font-bold text-green-600">
+                                                    {{ formatNumber(vacancy.salary) }} {{ getCurrencySymbol(vacancy.currency) }}
+                                                </span>
+                                                <span v-else class="text-sm text-gray-400">Не указана</span>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="dashboardData.recent_vacancies.length === 0">
+                                            <td colspan="4" class="px-4 py-12 text-center text-gray-400">
+                                                <i class="fas fa-inbox text-4xl mb-2"></i>
+                                                <p class="text-sm">Вакансий пока нет</p>
+                                                <p class="text-xs">Запустите парсер для сбора данных</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- График тренда зарплат -->
+                    <div class="mt-6 bg-white rounded-xl shadow-lg p-6" v-if="salaryTrend.length > 0">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">
+                            <i class="fas fa-chart-line text-green-500 mr-2"></i>Тренд средних зарплат (по неделям)
+                        </h3>
+                        <div class="h-64">
+                            <canvas id="salaryTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Быстрые действия -->
+                    <div class="mt-6 bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">
+                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>Быстрые действия
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button @click="currentTab = 'parser'"
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-play-circle text-3xl text-blue-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Запустить парсер</span>
+                            </button>
+                            <button @click="currentTab = 'vacancies'"
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-search text-3xl text-green-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Поиск вакансий</span>
+                            </button>
+                            <button @click="currentTab = 'analytics'"
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg hover:from-purple-100 hover:to-purple-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-chart-bar text-3xl text-purple-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Аналитика</span>
+                            </button>
+                            <button @click="exportData"
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg hover:from-orange-100 hover:to-orange-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-download text-3xl text-orange-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Экспорт данных</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Вакансии -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'vacancies'" key="vacancies">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <!-- Заголовок и статистика -->
+                        <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h1 class="text-2xl font-bold">
+                                        <i class="fas fa-briefcase mr-2"></i>Вакансии
+                                    </h1>
+                                    <p class="text-blue-100 text-sm mt-1">
+                                        Найдено: <span class="font-bold">{{ vacanciesList.total }}</span> вакансий
+                                    </p>
+                                </div>
+                                <div class="flex space-x-3">
+                                    <button @click="exportData"
+                                            class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition flex items-center">
+                                        <i class="fas fa-download mr-2"></i>
+                                        <span>Экспорт</span>
+                                    </button>
+                                    <button @click="showFilters = !showFilters"
+                                            class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition flex items-center">
+                                        <i :class="showFilters ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" class="mr-2"></i>
+                                        <span>Фильтры</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Фильтры -->
+                        <div v-show="showFilters" class="p-6 border-b bg-gray-50">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                                        <i class="fas fa-search mr-1"></i>Поиск
+                                    </label>
+                                    <input v-model="filters.search" type="text"
+                                           placeholder="Название вакансии"
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>Регион
+                                    </label>
+                                    <input v-model="filters.area" type="text"
+                                           placeholder="Москва, СПб..."
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                                        <i class="fas fa-briefcase mr-1"></i>Опыт
+                                    </label>
+                                    <select v-model="filters.experience"
+                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                        <option value="">Все</option>
+                                        <option value="От 1 года до 3 лет">1-3 года</option>
+                                        <option value="От 3 до 6 лет">3-6 лет</option>
+                                        <option value="Более 6 лет">Более 6 лет</option>
+                                        <option value="Нет опыта">Без опыта</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">
+                                        <i class="fas fa-tags mr-1"></i>Навык
+                                    </label>
+                                    <input v-model="filters.skill" type="text"
+                                           placeholder="Python, LLM..."
+                                           class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center space-x-3">
+                                <button @click="applyFilters"
+                                        class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg flex items-center">
+                                    <i class="fas fa-search mr-2"></i>
+                                    <span>Применить</span>
+                                </button>
+                                <button @click="resetFilters"
+                                        class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition flex items-center">
+                                    <i class="fas fa-redo mr-2"></i>
+                                    <span>Сбросить</span>
+                                </button>
+                                <button @click="toggleSalaryOnly"
+                                        :class="filters.salary_only ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300'"
+                                        class="px-4 py-2 rounded-lg transition flex items-center border-2">
+                                    <i class="fas fa-ruble-sign mr-2"></i>
+                                    <span>Только с зарплатой</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Таблица вакансий -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Вакансия</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Компания</th>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Регион</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Зарплата</th>
+                                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Навыки</th>
+                                        <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr v-for="vacancy in vacanciesList.items" :key="vacancy.vacancy_id"
+                                        class="hover:bg-blue-50 transition cursor-pointer group"
+                                        @click="viewVacancy(vacancy)">
+                                        <td class="px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
+                                                    {{ vacancy.vacancy_name ? vacancy.vacancy_name[0].toUpperCase() : 'V' }}
+                                                </div>
+                                                <div class="ml-4">
+                                                    <a :href="vacancy.vacancy_url" target="_blank" @click.stop
+                                                       class="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition block max-w-xs truncate">
+                                                        {{ vacancy.vacancy_name || 'N/A' }}
+                                                    </a>
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        <i class="far fa-clock mr-1"></i>
+                                                        {{ formatDateShort(vacancy.published_at) }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <div class="text-sm text-gray-900 font-medium">{{ vacancy.employer_name || 'N/A' }}</div>
+                                            <div class="text-xs text-gray-500">{{ vacancy.employer_id ? 'ID: ' + vacancy.employer_id : '' }}</div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-md">
+                                                <i class="fas fa-map-marker-alt mr-1 text-gray-400"></i>
+                                                {{ vacancy.area || 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <div v-if="vacancy.salary_from" class="text-sm font-bold text-green-600">
+                                                {{ formatNumber(vacancy.salary_from) }} {{ getCurrencySymbol(vacancy.salary_currency) }}
+                                            </div>
+                                            <div v-else class="text-xs text-gray-400 italic">Не указана</div>
+                                            <div v-if="vacancy.salary_to && vacancy.salary_to > vacancy.salary_from" class="text-xs text-gray-500">
+                                                до {{ formatNumber(vacancy.salary_to) }}
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <span :class="vacancy.skill_count > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'"
+                                                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold">
+                                                <i class="fas fa-tags mr-1"></i>
+                                                {{ vacancy.skill_count || 0 }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-center">
+                                            <div class="flex items-center justify-center space-x-2">
+                                                <button @click.stop="viewVacancy(vacancy)"
+                                                        class="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition"
+                                                        title="Просмотр">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <a :href="vacancy.vacancy_url" target="_blank"
+                                                   class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                                                   title="Открыть на HH.ru"
+                                                   @click.stop>
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="vacanciesList.items.length === 0">
+                                        <td colspan="6" class="px-6 py-16 text-center">
+                                            <i class="fas fa-inbox text-5xl text-gray-300 mb-4"></i>
+                                            <p class="text-gray-500 text-lg font-medium">Вакансий не найдено</p>
+                                            <p class="text-gray-400 text-sm mt-1">Измените параметры фильтра или запустите парсер</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Пагинация -->
+                        <div class="p-6 border-t bg-gray-50">
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-gray-600">
+                                    Показано <span class="font-semibold text-gray-900">{{ vacanciesList.items.length }}</span> из 
+                                    <span class="font-semibold text-gray-900">{{ vacanciesList.total }}</span> вакансий
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button @click="changePage(-1)" :disabled="pagination.page <= 1"
+                                            class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center">
+                                        <i class="fas fa-chevron-left mr-2"></i>
+                                        <span>Назад</span>
+                                    </button>
+                                    <div class="px-4 py-2 bg-white border rounded-lg">
+                                        <span class="text-sm font-medium">Стр. {{ pagination.page }}</span>
+                                        <span class="text-gray-400 mx-1">/</span>
+                                        <span class="text-sm text-gray-600">{{ vacanciesList.total_pages || 1 }}</span>
+                                    </div>
+                                    <button @click="changePage(1)" :disabled="pagination.page >= vacanciesList.total_pages"
+                                            class="px-4 py-2 bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center">
+                                        <span>Вперёд</span>
+                                        <i class="fas fa-chevron-right ml-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Поиск профессий -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'professions'" key="professions">
+                    <!-- Заголовок -->
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-search text-green-600"></i> Поиск профессий и навыков
+                        </h1>
+                        <p class="text-gray-600 text-sm mt-1">
+                            Найдите профессию и изучите требуемые навыки, технологии и инструменты
+                        </p>
+                    </div>
+
+                    <!-- Поисковая строка и фильтры -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-search mr-1"></i> Поиск профессии
+                                </label>
+                                <input v-model="professionSearch" 
+                                       @input="searchProfessions"
+                                       type="text" 
+                                       placeholder="Например: Python, Менеджер, Дизайнер..."
+                                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-filter mr-1"></i> Домен
+                                </label>
+                                <select v-model="selectedDomain"
+                                        @change="searchProfessions"
+                                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+                                    <option value="">Все домены</option>
+                                    <option v-for="(domainName, domainKey) in domains" :key="domainKey" :value="domainKey">{{ domainName }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-sort mr-1"></i> Сортировка
+                                </label>
+                                <select v-model="sortBy" 
+                                        @change="searchProfessions"
+                                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+                                    <option value="popularity">По популярности</option>
+                                    <option value="name">По названию (А-Я)</option>
+                                    <option value="vacancies_count">По количеству вакансий</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Результаты поиска -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div v-for="profession in filteredProfessions" :key="profession.key"
+                             @click="selectProfession(profession)"
+                             class="bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl hover:scale-105 transition duration-300 border-2 border-transparent hover:border-green-500">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-1">{{ profession.name }}</h3>
+                                    <p class="text-xs text-gray-500">{{ profession.domain }} • {{ profession.sphere }}</p>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                    {{ profession.vacancies_count }} вакансий
+                                </span>
+                            </div>
+                            
+                            <!-- Топ навыков -->
+                            <div class="mb-4">
+                                <p class="text-xs text-gray-500 mb-2">
+                                    <i class="fas fa-star text-yellow-500 mr-1"></i>Топ-3 навыка:
+                                </p>
+                                <div class="flex flex-wrap gap-1">
+                                    <span v-for="skill in profession.top_skills.slice(0, 3)" :key="skill"
+                                          class="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded">
+                                        {{ skill }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Статистика -->
+                            <div class="flex items-center justify-between text-xs text-gray-500 pt-4 border-t">
+                                <span>
+                                    <i class="fas fa-brain mr-1"></i>{{ profession.hard_skills_count }} Hard Skills
+                                </span>
+                                <span>
+                                    <i class="fas fa-tools mr-1"></i>{{ profession.tools_count }} Инструментов
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div v-if="filteredProfessions.length === 0" 
+                             class="col-span-full text-center py-16">
+                            <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">Профессии не найдены</p>
+                            <p class="text-gray-400 text-sm mt-2">Попробуйте изменить поисковый запрос</p>
+                        </div>
+                    </div>
+
+                    <!-- Модальное окно профессии -->
+                    <div v-if="selectedProfession" 
+                         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                         @click="selectedProfession = null">
+                        <div class="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto m-4 shadow-2xl"
+                             @click.stop>
+                            <!-- Заголовок -->
+                            <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-800">{{ selectedProfession.name }}</h2>
+                                    <p class="text-sm text-gray-500">
+                                        <span class="font-medium">{{ selectedProfession.domain }}</span>
+                                        <span class="mx-2">•</span>
+                                        <span>{{ selectedProfession.sphere }}</span>
+                                    </p>
+                                </div>
+                                <button @click="selectedProfession = null"
+                                        class="text-gray-400 hover:text-gray-600 transition">
+                                    <i class="fas fa-times text-2xl"></i>
+                                </button>
+                            </div>
+
+                            <!-- Содержимое -->
+                            <div class="p-6">
+                                <!-- Статистика -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                    <div class="bg-blue-50 rounded-lg p-4">
+                                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Вакансий найдено</p>
+                                        <p class="text-3xl font-bold text-blue-700">{{ selectedProfession.vacancies_count }}</p>
+                                    </div>
+                                    <div class="bg-green-50 rounded-lg p-4">
+                                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Уникальных навыков</p>
+                                        <p class="text-3xl font-bold text-green-700">{{ selectedProfession.total_skills }}</p>
+                                    </div>
+                                    <div class="bg-purple-50 rounded-lg p-4">
+                                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">Средняя зарплата</p>
+                                        <p class="text-xl font-bold text-purple-700">{{ selectedProfession.avg_salary ? formatNumber(selectedProfession.avg_salary) : 'N/A' }} ₽</p>
+                                    </div>
+                                </div>
+
+                                <!-- Hard Skills -->
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                        <i class="fas fa-brain text-blue-600 mr-2"></i>
+                                        Hard Skills ({{ selectedProfession.hard_skills.length }})
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span v-for="skill in selectedProfession.hard_skills" :key="skill"
+                                              class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                                            {{ skill }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Tools -->
+                                <div class="mb-6" v-if="selectedProfession.tools.length > 0">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                        <i class="fas fa-tools text-purple-600 mr-2"></i>
+                                        Инструменты и технологии ({{ selectedProfession.tools.length }})
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span v-for="tool in selectedProfession.tools" :key="tool"
+                                              class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                                            {{ tool }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Soft Skills -->
+                                <div class="mb-6" v-if="selectedProfession.soft_skills.length > 0">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                        <i class="fas fa-users text-green-600 mr-2"></i>
+                                        Soft Skills ({{ selectedProfession.soft_skills.length }})
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span v-for="skill in selectedProfession.soft_skills" :key="skill"
+                                              class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                                            {{ skill }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Вакансии -->
+                                <div class="mt-6">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                                        <i class="fas fa-briefcase text-orange-600 mr-2"></i>
+                                        Примеры вакансий
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div v-for="vacancy in selectedProfession.vacancies.slice(0, 5)" :key="vacancy.id"
+                                             class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition cursor-pointer"
+                                             @click="viewVacancyById(vacancy.id)">
+                                            <div class="flex justify-between items-start">
+                                                <div class="flex-1">
+                                                    <p class="font-semibold text-gray-800">{{ vacancy.title }}</p>
+                                                    <p class="text-sm text-gray-600">{{ vacancy.company }}</p>
+                                                </div>
+                                                <div class="text-right">
+                                                    <p class="font-bold text-green-600">{{ formatNumber(vacancy.salary) }} ₽</p>
+                                                    <p class="text-xs text-gray-500">{{ vacancy.area }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Кнопки действий -->
+                                <div class="flex gap-3 mt-6 pt-6 border-t">
+                                    <button @click="parseProfession(selectedProfession.name)"
+                                            class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition shadow-md">
+                                        <i class="fas fa-robot mr-2"></i>Спарсить эту профессию
+                                    </button>
+                                    <button @click="exportProfession(selectedProfession)"
+                                            class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition shadow-md">
+                                        <i class="fas fa-download mr-2"></i>Экспорт навыков
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Аналитика (новая) -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'analytics'" key="analytics">
+                    <!-- Заголовок -->
+                    <div class="mb-6">
+                        <h1 class="text-2xl font-bold text-gray-800">
+                            <i class="fas fa-chart-bar text-blue-600"></i> Аналитика вакансий
+                        </h1>
+                        <p class="text-gray-600 text-sm">Всего вакансий: {{ dashboardData.total_vacancies }}</p>
+                    </div>
+
+                    <!-- KPI карточки -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+                            <p class="text-xs text-gray-500 uppercase">Средняя зарплата (RUB)</p>
+                            <p class="text-xl font-bold text-gray-800">{{ formatNumber(salaryStats.avg) }}</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+                            <p class="text-xs text-gray-500 uppercase">Медианная (RUB)</p>
+                            <p class="text-xl font-bold text-gray-800">{{ formatNumber(salaryStats.median) }}</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+                            <p class="text-xs text-gray-500 uppercase">Валют в базе</p>
+                            <p class="text-xl font-bold text-gray-800">{{ Object.keys(currencies).length }}</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
+                            <p class="text-xs text-gray-500 uppercase">Регионов</p>
+                            <p class="text-xl font-bold text-gray-800">{{ Object.keys(topAreas).length }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Графики -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Опыт работы -->
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                                <i class="fas fa-briefcase text-blue-600"></i> Опыт работы
+                            </h3>
+                            <div class="h-64">
+                                <canvas id="experienceChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Занятость -->
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                                <i class="fas fa-clock text-green-600"></i> Занятость
+                            </h3>
+                            <div class="h-64">
+                                <canvas id="employmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Зарплаты и регионы -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Распределение зарплат -->
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                                <i class="fas fa-chart-pie text-yellow-600"></i> Распределение зарплат (RUB)
+                            </h3>
+                            <div class="h-64">
+                                <canvas id="salaryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Топ регионов -->
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                                <i class="fas fa-map-marker-alt text-red-600"></i> Топ регионов
+                            </h3>
+                            <div class="h-64">
+                                <canvas id="areasChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Статистика по валютам -->
+                    <div class="bg-white rounded-lg shadow p-4 mb-6" v-if="Object.keys(salaryStatsByCurrency).length > 0">
+                        <h3 class="text-sm font-semibold mb-3 text-gray-700">
+                            <i class="fas fa-coins text-purple-600"></i> Статистика по валютам
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Валюта</th>
+                                        <th class="px-4 py-2 text-right">Мин</th>
+                                        <th class="px-4 py-2 text-right">Макс</th>
+                                        <th class="px-4 py-2 text-right">Медиана</th>
+                                        <th class="px-4 py-2 text-right">Средняя</th>
+                                        <th class="px-4 py-2 text-right">Вакансий</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(stats, currency) in salaryStatsByCurrency" :key="currency" class="border-t">
+                                        <td class="px-4 py-2 font-semibold">{{ currency }}</td>
+                                        <td class="px-4 py-2 text-right">{{ formatNumber(stats.min) }}</td>
+                                        <td class="px-4 py-2 text-right">{{ formatNumber(stats.max) }}</td>
+                                        <td class="px-4 py-2 text-right">{{ formatNumber(stats.median) }}</td>
+                                        <td class="px-4 py-2 text-right">{{ formatNumber(stats.avg) }}</td>
+                                        <td class="px-4 py-2 text-right">{{ stats.count }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Навыки -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-xs font-semibold mb-2 text-purple-600">
+                                <i class="fas fa-microchip"></i> Технологии
+                            </h3>
+                            <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
+                                <div v-for="skill in technologiesList" :key="skill.name"
+                                     class="flex justify-between">
+                                    <span class="text-gray-700 truncate">{{ skill.name }}</span>
+                                    <span class="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-xs font-semibold mb-2 text-blue-600">
+                                <i class="fas fa-brain"></i> Hard Skills
+                            </h3>
+                            <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
+                                <div v-for="skill in hardSkillsList" :key="skill.name"
+                                     class="flex justify-between">
+                                    <span class="text-gray-700 truncate">{{ skill.name }}</span>
+                                    <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="text-xs font-semibold mb-2 text-green-600">
+                                <i class="fas fa-users"></i> Soft Skills
+                            </h3>
+                            <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
+                                <div v-for="skill in softSkillsList" :key="skill.name"
+                                     class="flex justify-between">
+                                    <span class="text-gray-700 truncate">{{ skill.name }}</span>
+                                    <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Парсер -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'parser'" key="parser">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h2 class="text-2xl font-bold mb-6">
+                                <i class="fas fa-robot text-purple-600"></i> Управление парсером
+                            </h2>
+                            
+                            <!-- Статус -->
+                            <div class="mb-6 p-4 rounded-lg" :class="statusBgColor">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium">Статус</p>
+                                        <p class="text-2xl font-bold">{{ parserState.status }}</p>
+                                    </div>
+                                    <div v-if="parserState.is_running" class="loading-spinner"></div>
+                                    <i v-else class="fas fa-check-circle text-4xl" :class="statusIconColor"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Прогресс -->
+                            <div v-if="parserState.is_running || parserState.progress > 0" class="mb-6">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-sm font-medium">Прогресс</span>
+                                    <span class="text-sm font-medium">{{ parserState.progress }}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div class="bg-blue-600 h-4 rounded-full transition-all"
+                                         :style="{ width: parserState.progress + '%' }"></div>
+                                </div>
+                                <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <p class="text-gray-600">Текущий запрос</p>
+                                        <p class="font-semibold text-blue-800">{{ parserState.current_keyword || 'N/A' }}</p>
+                                    </div>
+                                    <div class="bg-green-50 p-3 rounded">
+                                        <p class="text-gray-600">Собрано вакансий</p>
+                                        <p class="font-semibold text-green-800">{{ parserState.vacancies_collected }}</p>
+                                    </div>
+                                    <div class="bg-purple-50 p-3 rounded">
+                                        <p class="text-gray-600">Страница</p>
+                                        <p class="font-semibold text-purple-800">{{ parserState.current_page }} / {{ parserState.total_pages }}</p>
+                                    </div>
+                                    <div class="bg-orange-50 p-3 rounded">
+                                        <p class="text-gray-600">Всего запросов</p>
+                                        <p class="font-semibold text-orange-800">{{ parserState.keywords ? parserState.keywords.length : 0 }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Настройки -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ключевые слова</label>
+                                    <input v-model="parserSettings.keywords" type="text" 
+                                           placeholder="Python, LLM, AI"
+                                           class="w-full px-3 py-2 border rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Макс. страниц</label>
+                                    <input v-model.number="parserSettings.max_pages" type="number" 
+                                           class="w-full px-3 py-2 border rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Дней назад</label>
+                                    <input v-model.number="parserSettings.days_back" type="number" 
+                                           class="w-full px-3 py-2 border rounded-lg">
+                                </div>
+                            </div>
+                            
+                            <!-- Кнопки управления -->
+                            <div class="flex space-x-4">
+                                <button @click="startParser" :disabled="parserState.is_running"
+                                        class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-play"></i> Запустить
+                                </button>
+                                <button @click="stopParser" :disabled="!parserState.is_running"
+                                        class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i class="fas fa-stop"></i> Остановить
+                                </button>
+                                <button @click="refreshStatus"
+                                        class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                                    <i class="fas fa-sync"></i> Обновить
+                                </button>
+                            </div>
+                            
+                            <!-- Ошибка -->
+                            <div v-if="parserState.error_message" class="mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                                <i class="fas fa-exclamation-triangle"></i> {{ parserState.error_message }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Отчёты -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'reports'" key="reports">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold">
+                                <i class="fas fa-file-excel text-green-600"></i> Отчёты
+                            </h2>
+                            <button @click="generateReport" 
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-plus"></i> Сгенерировать
+                            </button>
+                        </div>
+                        
+                        <!-- Список отчётов -->
+                        <div class="space-y-3">
+                            <div v-for="report in reports" :key="report.name"
+                                 class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-file-excel text-green-600 text-2xl"></i>
+                                    <div>
+                                        <p class="font-semibold">{{ report.name }}</p>
+                                        <p class="text-sm text-gray-600">
+                                            {{ formatDate(report.created_at) }} • {{ formatFileSize(report.size) }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a :href="getDownloadUrl(report.name)" 
+                                   class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                                    <i class="fas fa-download"></i> Скачать
+                                </a>
+                            </div>
+                            
+                            <div v-if="reports.length === 0" class="text-center py-12 text-gray-500">
+                                <i class="fas fa-inbox text-4xl mb-4"></i>
+                                <p>Отчётов пока нет. Сгенерируйте новый отчёт.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+        </main>
+
+        <!-- Модальное окно вакансии -->
+        <div v-if="selectedVacancy" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+             @click="selectedVacancy = null">
+            <div class="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4 shadow-2xl"
+                 @click.stop>
+                <div class="flex justify-between items-start mb-6 pb-4 border-b">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900">{{ selectedVacancy.vacancy_name || 'Вакансия' }}</h3>
+                        <a :href="selectedVacancy.vacancy_url" target="_blank" 
+                           class="text-sm text-blue-600 hover:underline flex items-center mt-1">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            Открыть на HH.ru
+                        </a>
+                    </div>
+                    <button @click="selectedVacancy = null" class="text-gray-400 hover:text-gray-600 transition">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
+                <!-- Основная информация -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">
+                            <i class="fas fa-building mr-1"></i> Компания
+                        </p>
+                        <p class="font-semibold text-gray-900">{{ selectedVacancy.employer_name || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-4">
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">
+                            <i class="fas fa-map-marker-alt mr-1"></i> Регион
+                        </p>
+                        <p class="font-semibold text-gray-900">{{ selectedVacancy.area || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-4">
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">
+                            <i class="fas fa-briefcase mr-1"></i> Опыт
+                        </p>
+                        <p class="font-semibold text-gray-900">{{ selectedVacancy.experience || 'Не указан' }}</p>
+                    </div>
+                    <div class="bg-orange-50 rounded-lg p-4">
+                        <p class="text-xs text-gray-600 uppercase font-semibold mb-1">
+                            <i class="fas fa-clock mr-1"></i> Занятость
+                        </p>
+                        <p class="font-semibold text-gray-900">{{ selectedVacancy.employment || 'Не указана' }}</p>
+                    </div>
+                </div>
+
+                <!-- Зарплата -->
+                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 mb-6">
+                    <p class="text-xs text-gray-600 uppercase font-semibold mb-2">
+                        <i class="fas fa-ruble-sign mr-1"></i> Зарплата
+                    </p>
+                    <div v-if="selectedVacancy.salary_from" class="text-2xl font-bold text-green-700">
+                        {{ formatNumber(selectedVacancy.salary_from) }} {{ getCurrencySymbol(selectedVacancy.salary_currency) }}
+                        <span v-if="selectedVacancy.salary_to" class="text-lg text-green-600">
+                            - {{ formatNumber(selectedVacancy.salary_to) }} {{ getCurrencySymbol(selectedVacancy.salary_currency) }}
+                        </span>
+                    </div>
+                    <div v-else class="text-gray-500 italic">Не указана</div>
+                </div>
+
+                <!-- Навыки -->
+                <div class="mb-6">
+                    <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                        <i class="fas fa-brain text-blue-600 mr-2"></i>
+                        Hard Skills
+                        <span v-if="selectedVacancy.hard_skills" class="text-xs font-normal text-gray-500 ml-2">
+                            ({{ splitSkills(selectedVacancy.hard_skills).length }})
+                        </span>
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="skill in splitSkills(selectedVacancy.hard_skills)" :key="skill"
+                              class="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                            {{ skill }}
+                        </span>
+                        <span v-if="!selectedVacancy.hard_skills || splitSkills(selectedVacancy.hard_skills).length === 0"
+                              class="text-gray-400 text-sm italic">Не найдено</span>
+                    </div>
+                </div>
+
+                <div class="mb-6" v-if="selectedVacancy.soft_skills && splitSkills(selectedVacancy.soft_skills).length > 0">
+                    <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                        <i class="fas fa-users text-green-600 mr-2"></i>
+                        Soft Skills
+                        <span class="text-xs font-normal text-gray-500 ml-2">
+                            ({{ splitSkills(selectedVacancy.soft_skills).length }})
+                        </span>
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="skill in splitSkills(selectedVacancy.soft_skills)" :key="skill"
+                              class="bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                            {{ skill }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mb-6" v-if="selectedVacancy.tools && splitSkills(selectedVacancy.tools).length > 0">
+                    <h4 class="font-bold text-gray-900 mb-3 flex items-center">
+                        <i class="fas fa-tools text-purple-600 mr-2"></i>
+                        Инструменты
+                        <span class="text-xs font-normal text-gray-500 ml-2">
+                            ({{ splitSkills(selectedVacancy.tools).length }})
+                        </span>
+                    </h4>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="skill in splitSkills(selectedVacancy.tools)" :key="skill"
+                              class="bg-purple-100 text-purple-800 px-3 py-1.5 rounded-full text-sm font-medium">
+                            {{ skill }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Дата публикации -->
+                <div class="text-xs text-gray-500 pt-4 border-t">
+                    <i class="far fa-clock mr-1"></i>
+                    Опубликовано: {{ formatDate(selectedVacancy.published_at) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        
+        const API_BASE = 'http://localhost:8000/api';
+        
+        createApp({
+            data() {
+                return {
+                    currentTab: 'dashboard',
+                    
+                    // Данные дашборда
+                    dashboardData: {
+                        total_vacancies: 0,
+                        total_skills: 0,
+                        avg_salary: null,
+                        recent_vacancies: [],
+                        top_skills: []
+                    },
+                    
+                    // Вакансии
+                    vacanciesList: {
+                        total: 0,
+                        page: 1,
+                        per_page: 20,
+                        total_pages: 0,
+                        items: []
+                    },
+                    filters: {
+                        search: '',
+                        area: '',
+                        experience: '',
+                        skill: '',
+                        salary_only: false
+                    },
+                    showFilters: true,
+                    pagination: {
+                        page: 1,
+                        per_page: 20
+                    },
+                    
+                    // Аналитика
+                    analyticsData: {
+                        technologies: {},
+                        hard_skills: {},
+                        soft_skills: {}
+                    },
+                    
+                    // Парсер
+                    parserState: {
+                        is_running: false,
+                        status: 'idle',
+                        progress: 0,
+                        total_pages: 0,
+                        current_page: 0,
+                        vacancies_collected: 0,
+                        error_message: null,
+                        started_at: null,
+                        completed_at: null
+                    },
+                    parserSettings: {
+                        keywords: '',
+                        max_pages: 10,
+                        days_back: 30
+                    },
+                    
+                    // Отчёты
+                    reports: [],
+                    
+                    // Модальное окно
+                    selectedVacancy: null,
+
+                    // Загрузка
+                    loading: false,
+
+                    // Тренд зарплат
+                    salaryTrend: [],
+
+                    // Поиск профессий
+                    professionSearch: '',
+                    selectedDomain: '',
+                    selectedSphere: '',
+                    sortBy: 'popularity',
+                    filteredProfessions: [],
+                    allProfessions: [],
+                    selectedProfession: null,
+                    domains: {},
+                    spheres: {},
+
+                    // Экземпляры графиков
+                    experienceChartInstance: null,
+                    employmentChartInstance: null,
+                    salaryChartInstance: null,
+                    areasChartInstance: null
+                };
+            },
+            
+            computed: {
+                parserStatusColor() {
+                    const colors = {
+                        'idle': 'text-gray-600',
+                        'running': 'text-blue-600',
+                        'completed': 'text-green-600',
+                        'error': 'text-red-600',
+                        'stopped': 'text-yellow-600'
+                    };
+                    return colors[this.parserState.status] || 'text-gray-600';
+                },
+
+                statusBgColor() {
+                    const colors = {
+                        'idle': 'bg-gray-100',
+                        'running': 'bg-blue-100',
+                        'completed': 'bg-green-100',
+                        'error': 'bg-red-100',
+                        'stopped': 'bg-yellow-100'
+                    };
+                    return colors[this.parserState.status] || 'bg-gray-100';
+                },
+
+                statusIconColor() {
+                    const colors = {
+                        'idle': 'text-gray-400',
+                        'running': 'text-blue-600',
+                        'completed': 'text-green-600',
+                        'error': 'text-red-600',
+                        'stopped': 'text-yellow-600'
+                    };
+                    return colors[this.parserState.status] || 'text-gray-400';
+                },
+
+                // Статистика зарплат из distribution API (RUB)
+                salaryStats() {
+                    return this.analyticsData.salary_stats || { min: null, max: null, median: null, avg: null };
+                },
+
+                // Статистика зарплат по валютам
+                salaryStatsByCurrency() {
+                    return this.analyticsData.salary_stats_by_currency || {};
+                },
+
+                // Валюты
+                currencies() {
+                    return this.analyticsData.currencies || {};
+                },
+
+                // Топ регионов
+                topAreas() {
+                    return this.analyticsData.top_areas || {};
+                },
+
+                // Все технологии (отсортированные по убыванию)
+                technologiesList() {
+                    const tech = this.analyticsData.technologies || {};
+                    return Object.entries(tech)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([name, value]) => ({ name, value }));
+                },
+
+                // Все Hard Skills (отсортированные по убыванию)
+                hardSkillsList() {
+                    const skills = this.analyticsData.hard_skills || {};
+                    return Object.entries(skills)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([name, value]) => ({ name, value }));
+                },
+
+                // Все Soft Skills (отсортированные по убыванию)
+                softSkillsList() {
+                    const skills = this.analyticsData.soft_skills || {};
+                    return Object.entries(skills)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([name, value]) => ({ name, value }));
+                },
+
+                // Топ 5 технологий (для заголовка)
+                topTechnologiesList() {
+                    return this.technologiesList.slice(0, 5);
+                },
+
+                // Топ 5 Hard Skills (для заголовка)
+                topHardSkillsList() {
+                    return this.hardSkillsList.slice(0, 5);
+                },
+
+                // Топ 5 Soft Skills (для заголовка)
+                topSoftSkillsList() {
+                    return this.softSkillsList.slice(0, 5);
+                }
+            },
+            
+            methods: {
+                // API вызовы
+                async fetchDashboard() {
+                    try {
+                        const response = await fetch(`${API_BASE}/dashboard`);
+                        this.dashboardData = await response.json();
+                    } catch (error) {
+                        console.error('Ошибка загрузки дашборда:', error);
+                    }
+                },
+                
+                async loadVacancies() {
+                    this.loading = true;
+                    try {
+                        const params = new URLSearchParams({
+                            page: this.pagination.page,
+                            per_page: this.pagination.per_page,
+                            search: this.filters.search,
+                            area: this.filters.area,
+                            experience: this.filters.experience,
+                            skill: this.filters.skill,
+                            salary_only: this.filters.salary_only
+                        });
+
+                        const response = await fetch(`${API_BASE}/vacancies?${params}`);
+                        const data = await response.json();
+                        this.vacanciesList = data;
+                        // Вычисляем общее количество страниц
+                        this.vacanciesList.total_pages = Math.ceil(data.total / this.pagination.per_page) || 1;
+                    } catch (error) {
+                        console.error('Ошибка загрузки вакансий:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                applyFilters() {
+                    this.pagination.page = 1;
+                    this.loadVacancies();
+                },
+
+                toggleSalaryOnly() {
+                    this.filters.salary_only = !this.filters.salary_only;
+                    this.applyFilters(); // Сразу применяем фильтр
+                },
+                
+                async loadAnalytics() {
+                    try {
+                        // Загружаем расширенную аналитику
+                        const response = await fetch(`${API_BASE}/analytics/advanced`);
+                        const advancedData = await response.json();
+                        console.log('Advanced analytics:', advancedData);
+
+                        // Загружаем распределение
+                        const distResponse = await fetch(`${API_BASE}/analytics/distribution`);
+                        const distData = await distResponse.json();
+                        console.log('Distribution:', distData);
+
+                        // Объединяем данные
+                        this.analyticsData = {
+                            technologies: advancedData.technologies || {},
+                            hard_skills: advancedData.hard_skills || {},
+                            soft_skills: advancedData.soft_skills || {},
+                            salary_stats: advancedData.salary_stats || {},
+                            experience: distData.experience || {},
+                            employment: distData.employment || {},
+                            salary_distribution: distData.salary_distribution || {},
+                            top_areas: distData.top_areas || {}
+                        };
+                        
+                        console.log('Combined analyticsData:', this.analyticsData);
+                        
+                        // Инициализируем графики если мы на вкладке аналитики
+                        if (this.currentTab === 'analytics') {
+                            this.$nextTick(() => {
+                                this.initCharts();
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки аналитики:', error);
+                    }
+                },
+                
+                async loadParserStatus() {
+                    try {
+                        const response = await fetch(`${API_BASE}/parser/status`);
+                        const data = await response.json();
+                        this.parserState = data.state;
+                    } catch (error) {
+                        console.error('Ошибка загрузки статуса парсера:', error);
+                    }
+                },
+                
+                async loadReports() {
+                    try {
+                        const response = await fetch(`${API_BASE}/reports/list`);
+                        this.reports = (await response.json()).reports;
+                    } catch (error) {
+                        console.error('Ошибка загрузки отчётов:', error);
+                    }
+                },
+                
+                // Действия
+                async startParser() {
+                    try {
+                        // Формируем URL с query параметрами
+                        const params = new URLSearchParams();
+                        
+                        // Добавляем ключевые слова как отдельные параметры
+                        if (this.parserSettings.keywords && this.parserSettings.keywords.trim()) {
+                            const keywordsList = this.parserSettings.keywords.split(',').map(s => s.trim()).filter(s => s);
+                            keywordsList.forEach(kw => params.append('keywords', kw));
+                        }
+                        
+                        if (this.parserSettings.max_pages) {
+                            params.append('max_pages', this.parserSettings.max_pages);
+                        }
+                        if (this.parserSettings.days_back) {
+                            params.append('days_back', this.parserSettings.days_back);
+                        }
+
+                        const response = await fetch(`${API_BASE}/parser/start?${params.toString()}`, {
+                            method: 'POST'
+                        });
+
+                        if (response.ok) {
+                            alert('Парсер запущен');
+                            this.refreshStatus();
+                        } else {
+                            const error = await response.json();
+                            alert('Ошибка: ' + (error.detail || 'Неизвестная ошибка'));
+                        }
+                    } catch (error) {
+                        console.error('Ошибка запуска парсера:', error);
+                        alert('Ошибка: ' + error.message);
+                    }
+                },
+                
+                async stopParser() {
+                    try {
+                        const response = await fetch(`${API_BASE}/parser/stop`, { method: 'POST' });
+                        if (response.ok) {
+                            const data = await response.json();
+                            alert('Парсер остановлен: ' + (data.message || ''));
+                            this.refreshStatus();
+                        } else {
+                            const error = await response.json();
+                            alert('Ошибка: ' + (error.detail || 'Не удалось остановить парсер'));
+                        }
+                    } catch (error) {
+                        console.error('Ошибка остановки парсера:', error);
+                        alert('Ошибка остановки: ' + error.message);
+                    }
+                },
+                
+                refreshStatus() {
+                    this.loadParserStatus();
+                    this.fetchDashboard();
+                },
+                
+                async generateReport() {
+                    try {
+                        const response = await fetch(`${API_BASE}/reports/generate`, { method: 'POST' });
+                        if (response.ok) {
+                            alert('Генерация отчёта запущена');
+                            setTimeout(() => this.loadReports(), 5000);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка генерации отчёта:', error);
+                    }
+                },
+                
+                async exportData() {
+                    window.open(`${API_BASE}/export/vacancies?format=xlsx`, '_blank');
+                },
+                
+                changePage(delta) {
+                    this.pagination.page += delta;
+                    this.loadVacancies();
+                },
+                
+                resetFilters() {
+                    this.filters = { search: '', area: '', experience: '', skill: '' };
+                    this.pagination.page = 1;
+                    this.loadVacancies();
+                },
+                
+                viewVacancy(vacancy) {
+                    // Передаём весь объект вакансии напрямую
+                    this.selectedVacancy = vacancy;
+                },
+                
+                // Утилиты
+                formatNumber(num) {
+                    if (!num) return 'N/A';
+                    return num.toLocaleString('ru-RU');
+                },
+
+                getCurrencySymbol(currency) {
+                    const symbols = {
+                        'RUB': '₽',
+                        'KZT': '₸',
+                        'UZS': "so'm",
+                        'BYN': 'Br',
+                        'USD': '$',
+                        'EUR': '€'
+                    };
+                    return symbols[currency] || currency || '₽';
+                },
+                
+                formatFileSize(bytes) {
+                    if (!bytes) return '0 B';
+                    const k = 1024;
+                    const sizes = ['B', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                },
+                
+                formatDate(dateStr) {
+                    if (!dateStr) return 'N/A';
+                    return new Date(dateStr).toLocaleString('ru-RU');
+                },
+
+                formatDateShort(dateStr) {
+                    if (!dateStr) return '';
+                    const date = new Date(dateStr);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) return 'Только что';
+                    if (diffMins < 60) return `${diffMins} мин. назад`;
+                    if (diffHours < 24) return `${diffHours} ч. назад`;
+                    if (diffDays < 7) return `${diffDays} дн. назад`;
+                    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+                },
+                
+                truncate(str, len) {
+                    if (!str) return '';
+                    return str.length > len ? str.substring(0, len) + '...' : str;
+                },
+                
+                splitSkills(skillsStr) {
+                    if (!skillsStr) return [];
+                    return skillsStr.split(',').map(s => s.trim()).filter(s => s);
+                },
+                
+                getDownloadUrl(filename) {
+                    return `${API_BASE}/reports/download/${filename}`;
+                },
+
+                // Поиск профессий
+                async loadProfessions() {
+                    try {
+                        // Загружаем список доменов
+                        const domainsResponse = await fetch(`${API_BASE}/professions/domains`);
+                        const domainsData = await domainsResponse.json();
+                        this.domains = domainsData.domains || {};
+                        this.spheres = domainsData.areas || {};
+                        
+                        // Загружаем ВСЕ профессии (без ограничения)
+                        const response = await fetch(`${API_BASE}/professions/list?limit=2000`);
+                        const data = await response.json();
+                        this.allProfessions = data.professions || [];
+                        console.log(`Загружено профессий: ${this.allProfessions.length}`);
+                        this.searchProfessions();
+                    } catch (error) {
+                        console.error('Ошибка загрузки профессий:', error);
+                        // Демо данные если API не работает
+                        this.allProfessions = [];
+                        this.searchProfessions();
+                    }
+                },
+
+                searchProfessions() {
+                    let filtered = [...this.allProfessions];
+
+                    // Поиск по названию
+                    if (this.professionSearch) {
+                        const search = this.professionSearch.toLowerCase();
+                        filtered = filtered.filter(p => 
+                            p.name.toLowerCase().includes(search) ||
+                            (p.sphere && p.sphere.toLowerCase().includes(search)) ||
+                            (p.domain && p.domain.toLowerCase().includes(search))
+                        );
+                    }
+
+                    // Фильтр по домену
+                    if (this.selectedDomain) {
+                        filtered = filtered.filter(p => p.domain === this.selectedDomain);
+                    }
+
+                    // Сортировка
+                    if (this.sortBy === 'name') {
+                        filtered.sort((a, b) => a.name.localeCompare(b.name));
+                    } else if (this.sortBy === 'vacancies_count') {
+                        filtered.sort((a, b) => b.vacancies_count - a.vacancies_count);
+                    } else {
+                        // popularity
+                        filtered.sort((a, b) => b.vacancies_count - a.vacancies_count);
+                    }
+
+                    this.filteredProfessions = filtered;
+                    console.log(`Показано профессий: ${filtered.length} (домен: ${this.selectedDomain || 'все'})`);
+                },
+
+                selectProfession(profession) {
+                    this.selectedProfession = { ...profession };
+                    // Загружаем вакансии для этой профессии
+                    this.loadProfessionVacancies(profession.name);
+                },
+
+                async loadProfessionVacancies(professionName) {
+                    try {
+                        const response = await fetch(`${API_BASE}/professions/vacancies?name=${encodeURIComponent(professionName)}`);
+                        const data = await response.json();
+                        if (this.selectedProfession) {
+                            this.selectedProfession.vacancies = data.vacancies || [];
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки вакансий:', error);
+                    }
+                },
+
+                parseProfession(professionName) {
+                    // Запускаем парсер с этой профессией
+                    this.parserSettings.keywords = professionName;
+                    this.currentTab = 'parser';
+                },
+
+                exportProfession(profession) {
+                    // Экспортируем навыки профессии
+                    const text = `Профессия: ${profession.name}\nКатегория: ${profession.category}\n\nHard Skills:\n${profession.hard_skills.join(', ')}\n\nTools:\n${profession.tools.join(', ')}\n\nSoft Skills:\n${profession.soft_skills.join(', ')}`;
+                    const blob = new Blob([text], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${profession.name.replace(/\s+/g, '_')}_skills.txt`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                },
+
+                viewVacancyById(vacancyId) {
+                    // Находим вакансию по ID и открываем
+                    const vacancy = this.vacanciesList.items.find(v => v.vacancy_id === vacancyId);
+                    if (vacancy) {
+                        this.viewVacancy(vacancy);
+                    }
+                },
+
+                // Инициализация всех графиков
+                async initCharts() {
+                    if (this.currentTab !== 'analytics') return;
+
+                    console.log('initCharts called, analyticsData:', this.analyticsData);
+
+                    // Уничтожаем старые графики если существуют
+                    if (this.experienceChartInstance) {
+                        this.experienceChartInstance.destroy();
+                        this.experienceChartInstance = null;
+                    }
+                    if (this.employmentChartInstance) {
+                        this.employmentChartInstance.destroy();
+                        this.employmentChartInstance = null;
+                    }
+                    if (this.salaryChartInstance) {
+                        this.salaryChartInstance.destroy();
+                        this.salaryChartInstance = null;
+                    }
+                    if (this.areasChartInstance) {
+                        this.areasChartInstance.destroy();
+                        this.areasChartInstance = null;
+                    }
+
+                    // Очищаем canvas
+                    ['experienceChart', 'employmentChart', 'salaryChart', 'areasChart'].forEach(id => {
+                        const canvas = document.getElementById(id);
+                        if (canvas) {
+                            const ctx = canvas.getContext('2d');
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        }
+                    });
+
+                    setTimeout(() => {
+                        const data = this.analyticsData;
+                        console.log('Creating charts with data:', {
+                            experience: data.experience,
+                            employment: data.employment,
+                            salary_distribution: data.salary_distribution,
+                            top_areas: data.top_areas
+                        });
+
+                        // Опыт работы
+                        const expCtx = document.getElementById('experienceChart');
+                        console.log('experienceChart element:', expCtx);
+                        if (expCtx && Object.keys(data.experience || {}).length > 0) {
+                            this.experienceChartInstance = new Chart(expCtx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: Object.keys(data.experience),
+                                    datasets: [{
+                                        data: Object.values(data.experience),
+                                        backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                                    }
+                                }
+                            });
+                            console.log('Experience chart created');
+                        }
+
+                        // Занятость
+                        const empCtx = document.getElementById('employmentChart');
+                        if (empCtx && Object.keys(data.employment || {}).length > 0) {
+                            this.employmentChartInstance = new Chart(empCtx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: Object.keys(data.employment),
+                                    datasets: [{
+                                        data: Object.values(data.employment),
+                                        backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                                    }
+                                }
+                            });
+                            console.log('Employment chart created');
+                        }
+
+                        // Зарплаты
+                        const salCtx = document.getElementById('salaryChart');
+                        if (salCtx && Object.keys(data.salary_distribution || {}).length > 0) {
+                            this.salaryChartInstance = new Chart(salCtx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: Object.keys(data.salary_distribution),
+                                    datasets: [{
+                                        data: Object.values(data.salary_distribution),
+                                        backgroundColor: ['#F59E0B', '#FBBF24', '#FCD34D', '#FDE68A', '#FEF3C7']
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                                    }
+                                }
+                            });
+                            console.log('Salary chart created');
+                        }
+
+                        // Топ регионов (горизонтальная гистограмма)
+                        const areasCtx = document.getElementById('areasChart');
+                        if (areasCtx && Object.keys(data.top_areas || {}).length > 0) {
+                            const topAreas = Object.entries(data.top_areas)
+                                .sort((a, b) => b[1] - a[1])
+                                .slice(0, 10);
+                            
+                            this.areasChartInstance = new Chart(areasCtx, {
+                                type: 'bar',
+                                data: {
+                                    labels: topAreas.map(([k]) => k),
+                                    datasets: [{
+                                        label: 'Вакансий',
+                                        data: topAreas.map(([, v]) => v),
+                                        backgroundColor: '#EF4444'
+                                    }]
+                                },
+                                options: {
+                                    indexAxis: 'y',
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: false }
+                                    },
+                                    scales: {
+                                        x: { beginAtZero: true }
+                                    }
+                                }
+                            });
+                            console.log('Areas chart created');
+                        }
+                    }, 100);
+                }
+            },
+            
+            watch: {
+                currentTab(newTab) {
+                    // Очищаем графики при уходе с вкладки аналитики
+                    if (newTab !== 'analytics') {
+                        if (this.experienceChartInstance) this.experienceChartInstance.destroy();
+                        if (this.employmentChartInstance) this.employmentChartInstance.destroy();
+                        if (this.salaryChartInstance) this.salaryChartInstance.destroy();
+                        if (this.areasChartInstance) this.areasChartInstance.destroy();
+                    }
+
+                    if (newTab === 'analytics') {
+                        this.loadAnalytics();
+                        this.$nextTick(() => {
+                            this.initCharts();
+                        });
+                    } else if (newTab === 'professions') {
+                        this.loadProfessions();
+                    } else if (newTab === 'reports') {
+                        this.loadReports();
+                    } else if (newTab === 'vacancies') {
+                        this.loadVacancies();
+                    } else if (newTab === 'dashboard') {
+                        this.fetchDashboard();
+                    }
+                },
+                // Обновляем вакансии и дашборд когда парсер завершается
+                'parserState.status'(newStatus) {
+                    if (newStatus === 'completed') {
+                        this.fetchDashboard();
+                        if (this.currentTab === 'vacancies') {
+                            this.loadVacancies();
+                        } else if (this.currentTab === 'analytics') {
+                            this.loadAnalytics();
+                            this.$nextTick(() => {
+                                this.initCharts();
+                            });
+                        }
+                    }
+                },
+                // Инициализируем графики при загрузке данных аналитики
+                analyticsData: {
+                    handler(newData) {
+                        if (this.currentTab === 'analytics' && Object.keys(newData.experience || {}).length > 0) {
+                            this.$nextTick(() => {
+                                this.initCharts();
+                            });
+                        }
+                    },
+                    deep: true
+                }
+            },
+
+            mounted() {
+                this.fetchDashboard();
+                this.loadVacancies();
+                this.loadParserStatus();
+
+                // Добавляем Math в глобальную область видимости (для шаблона)
+                window.appMath = Math;
+                window.appWindow = window;
+
+                // Автообновление статуса парсера
+                setInterval(() => {
+                    this.loadParserStatus();
+                    this.fetchDashboard();
+                }, 5000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
