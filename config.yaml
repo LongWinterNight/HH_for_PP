@@ -98,6 +98,193 @@ hard_skills:
 - express
 - nest.js
 - laravel
+
+# Системное администрирование и сети
+- tcp/ip
+- tcpip
+- osi
+- vlan
+- vpn
+- ipsec
+- dns
+- dhcp
+- http
+- https
+- ftp
+- ssh
+- ssl
+- tls
+- nat
+- acl
+- routing
+- switching
+- lan
+- wan
+- wifi
+- wireless
+- ethernet
+- raid
+- cpu
+- ram
+- rom
+- bios
+- uefi
+- itil
+- itsm
+- active directory
+- ad
+- group policy
+- gpo
+- wsus
+- sccm
+- microsoft exchange
+- exchange server
+- iis
+- apache
+- nginx
+- haproxy
+- pfsense
+- mikrotik
+- cisco
+- huawei
+- juniper
+- ubiquiti
+
+# Операционные системы
+- linux
+- unix
+- windows server
+- windows 10
+- windows 11
+- ubuntu
+- debian
+- centos
+- rhel
+- red hat
+- fedora
+- suse
+- opensuse
+- arch linux
+- gentoo
+- freebsd
+- openbsd
+- netbsd
+- macos
+- os x
+- ios
+- android
+
+# Администрирование
+- администрирование серверов
+- администрирование linux
+- администрирование windows
+- настройка dns
+- настройка dhcp
+- настройка vpn
+- настройка vlan
+- маршрутизация
+- коммутация
+- межсетевые экраны
+- firewall
+- диагностика неисправностей
+- мониторинг систем
+- резервное копирование
+- backup
+- виртуализация
+- vmware
+- hyper-v
+- proxmox
+- openstack
+- kvm
+- xen
+
+# Мониторинг
+- zabbix
+- nagios
+- prometheus
+- grafana
+- cacti
+- mrtg
+- solarwinds
+- plesk
+- cpanel
+- directadmin
+- webmin
+- vcenter
+- esxi
+
+# Скрипты и автоматизация
+- ansible
+- puppet
+- chef
+- saltstack
+- terraform
+- vagrant
+- docker
+- kubernetes
+- k8s
+- openshift
+- helm
+- jenkins
+- gitlab ci
+- github actions
+- bamboo
+- teamcity
+- octopus deploy
+
+# Базы данных
+- postgresql
+- mysql
+- mariadb
+- microsoft sql server
+- mssql
+- oracle database
+- mongodb
+- redis
+- elasticsearch
+- clickhouse
+- cassandra
+- dynamodb
+- sqlite
+- firebird
+- db2
+- sybase
+
+# Облака
+- aws
+- amazon web services
+- azure
+- microsoft azure
+- gcp
+- google cloud platform
+- yandex cloud
+- selectel
+- reg.ru
+- beget
+- timeweb
+- nic.ru
+- cloudflare
+- akamai
+
+# Безопасность
+- информационная безопасность
+- кибербезопасность
+- security
+- penetration testing
+- pentesting
+- vulnerability assessment
+- siem
+- ids
+- ips
+- antivirus
+- antimalware
+- dlp
+- pam
+- soc
+- gdpr
+- 152-фз
+- pci dss
+- iso 27001
 - rails
 - asp.net
 - postgresql
@@ -660,6 +847,37 @@ tools:
 - asana
 - clickup
 - monday
+
+# Инструменты системного администратора
+- putty
+- winscp
+- filezilla
+- wireshark
+- nmap
+- burp suite
+- metasploit
+- john the ripper
+- hashcat
+- aircrack-ng
+- kali linux
+- teamviewer
+- anydesk
+- rdp
+- remote desktop
+- vnc
+- realvnc
+- tightvnc
+- logmein
+- splashtop
+- chrome remote desktop
+- microsoft teams
+- zoom
+- skype
+- slack
+- discord
+- telegram
+- whatsapp
+- viber
 - 1с
 - 1с:бухгалтерия
 - 1с:зарплата и кадры
