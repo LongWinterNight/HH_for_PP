@@ -173,11 +173,15 @@ class VacancyStorage:
         Если таблицы уже существуют — ничего не делает.
         """
         try:
-            Base.metadata.create_all(self.engine)
+            # Используем checkfirst=True для проверки существования таблиц
+            Base.metadata.create_all(self.engine, checkfirst=True)
             logger.debug("Таблицы созданы или уже существуют")
         except SQLAlchemyError as e:
-            logger.error(f"Ошибка создания таблиц: {e}")
-            raise
+            # Игнорируем ошибку если таблица уже существует
+            if "already exists" not in str(e):
+                logger.error(f"Ошибка создания таблиц: {e}")
+                raise
+            logger.debug("Таблицы уже существуют")
 
     def save_dataframe(self, df: pd.DataFrame, chunk_size: int = 1000) -> int:
         """
