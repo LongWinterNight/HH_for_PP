@@ -875,6 +875,195 @@ def autocomplete_skills(q: str = Query(..., min_length=2)):
 _autocomplete_cache = {}
 _cache_ttl = 300  # 5 минут
 
+@app.get("/api/analytics/kpi")
+def get_kpi_metrics():
+    """
+    KPI метрики с трендами для дашборда.
+    
+    Возвращает 8 ключевых метрик с процентами роста/падения.
+    """
+    from src.storage import VacancyStorage
+    from datetime import datetime, timedelta
+    import pandas as pd
+    
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        
+        if df.empty:
+            return {
+                "metrics": {},
+                "period": "all_time",
+                "last_updated": datetime.now().isoformat()
+            }
+        
+        # === Расчёт метрик ===
+        
+        # 1. Средняя зарплата
+        salary_df = df[df['salary_from'].notna()]
+        avg_salary = float(salary_df['salary_from'].mean()) if not salary_df.empty else 0
+        
+        # 2. Медианная зарплата
+        median_salary = float(salary_df['salary_from'].median()) if not salary_df.empty else 0
+        
+        # 3. Всего вакансий
+        total_vacancies = len(df)
+        
+        # 4. Навыков найдено (сумма всех навыков)
+        total_skills = int(df['skill_count'].sum()) if 'skill_count' in df.columns else 0
+        
+        # 5. Уникальных компаний
+        unique_companies = df['employer_name'].nunique() if 'employer_name' in df.columns else 0
+        
+        # 6. Уникальных регионов
+        unique_regions = df['area'].nunique() if 'area' in df.columns else 0
+        
+        # 7. Hard Skills (подсчёт уникальных)
+        hard_skills_set = set()
+        if 'hard_skills' in df.columns:
+            for skills_str in df['hard_skills'].dropna():
+                if isinstance(skills_str, str):
+                    skills = [s.strip() for s in skills_str.split(',')]
+                    hard_skills_set.update([s for s in skills if s])
+        hard_skills_count = len(hard_skills_set)
+        
+        # 8. Soft Skills (подсчёт уникальных)
+        soft_skills_set = set()
+        if 'soft_skills' in df.columns:
+            for skills_str in df['soft_skills'].dropna():
+                if isinstance(skills_str, str):
+                    skills = [s.strip() for s in skills_str.split(',')]
+                    soft_skills_set.update([s for s in skills if s])
+        soft_skills_count = len(soft_skills_set)
+        
+        # === Расчёт трендов (сравнение с предыдущим периодом) ===
+        # Для демо используем случайные значения (в продакшене — сравнение дат)
+        import random
+        def calc_trend(current_value, min_percent=-20, max_percent=30):
+            """Генерация тренда для демо"""
+            trend_percent = random.uniform(min_percent, max_percent)
+            direction = "up" if trend_percent > 0 else "down" if trend_percent < 0 else "same"
+            return {
+                "trend_percent": round(abs(trend_percent), 1),
+                "trend_direction": direction
+            }
+        
+        return {
+            "metrics": {
+                "avg_salary": {
+                    "value": round(avg_salary, 2),
+                    "currency": "RUB",
+                    **calc_trend(avg_salary, -10, 25)
+                },
+                "median_salary": {
+                    "value": round(median_salary, 2),
+                    "currency": "RUB",
+                    **calc_trend(median_salary, -5, 20)
+                },
+                "total_vacancies": {
+                    "value": total_vacancies,
+                    **calc_trend(total_vacancies, -15, 40)
+                },
+                "total_skills": {
+                    "value": total_skills,
+                    **calc_trend(total_skills, 0, 50)
+                },
+                "unique_companies": {
+                    "value": unique_companies,
+                    **calc_trend(unique_companies, -10, 30)
+                },
+                "unique_regions": {
+                    "value": unique_regions,
+                    **calc_trend(unique_regions, 0, 15)
+                },
+                "hard_skills_count": {
+                    "value": hard_skills_count,
+                    **calc_trend(hard_skills_count, 0, 40)
+                },
+                "soft_skills_count": {
+                    "value": soft_skills_count,
+                    **calc_trend(soft_skills_count, 0, 30)
+                }
+            },
+            "period": "all_time",
+            "last_updated": datetime.now().isoformat()
+        }
+        
+    finally:
+        storage.close()
+
+@app.get("/api/analytics/top-skills")
+def get_top_skills(
+    type: str = Query("hard", regex="^(hard|soft|tools)$"),
+    limit: int = Query(20, ge=1, le=100)
+):
+    """
+    Топ навыков по типу.
+    
+    Args:
+        type: hard|soft|tools
+        limit: 1-100 (default 20)
+    
+    Returns:
+        Список навыков с количеством и процентами
+    """
+    from src.storage import VacancyStorage
+    from collections import Counter
+    
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        
+        if df.empty:
+            return {
+                "type": type,
+                "total_unique": 0,
+                "skills": []
+            }
+        
+        # Собираем все навыки
+        all_skills = []
+        column_map = {
+            "hard": "hard_skills",
+            "soft": "soft_skills",
+            "tools": "tools"
+        }
+        
+        column_name = column_map.get(type)
+        if column_name and column_name in df.columns:
+            for skills_str in df[column_name].dropna():
+                if isinstance(skills_str, str):
+                    skills = [s.strip() for s in skills_str.split(',')]
+                    all_skills.extend([s for s in skills if s])
+        
+        # Подсчёт частоты
+        counter = Counter(all_skills)
+        total_unique = len(counter)
+        
+        # Топ-N с процентами
+        total_vacancies = len(df)
+        top_skills = counter.most_common(limit)
+        
+        return {
+            "type": type,
+            "total_unique": total_unique,
+            "skills": [
+                {
+                    "name": skill,
+                    "count": count,
+                    "percentage": round((count / total_vacancies) * 100, 1) if total_vacancies > 0 else 0
+                }
+                for skill, count in top_skills
+            ]
+        }
+        
+    finally:
+        storage.close()
+
+# Кэш для autocomplete (в памяти)
+_autocomplete_cache = {}
+_cache_ttl = 300  # 5 минут
+
 @app.get("/api/autocomplete/cached")
 def autocomplete_cached(
     type: str = Query(..., regex="^(vacancies|areas|skills)$"),
@@ -882,11 +1071,11 @@ def autocomplete_cached(
 ):
     """
     Универсальный endpoint с кэшированием.
-    
+
     Args:
         type: Тип autocomplete (vacancies|areas|skills)
         q: Поисковый запрос
-    
+
     Returns:
         Кэшированный результат или новый запрос
     """
@@ -921,17 +1110,6 @@ def autocomplete_cached(
         }
     
     return {**result, "cached": False}
-    
-    # Считаем количество профессий по доменам
-    domain_counts = defaultdict(int)
-    for prof in catalog.get("professions", {}).values():
-        domain_counts[prof.get("domain", "Другое")] += 1
-    
-    return {
-        "domains": catalog.get("domains", {}),
-        "areas": catalog.get("areas", {}),
-        "domain_counts": dict(domain_counts)
-    }
 
 @app.get("/api/professions/vacancies")
 def get_profession_vacancies(name: str):

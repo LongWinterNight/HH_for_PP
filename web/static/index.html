@@ -226,6 +226,38 @@
         .autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
         }
+        
+        /* KPI карточки - stagger animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .grid-cols-1 > div:nth-child(1) { animation: fadeInUp 0.4s ease-out 0.05s forwards; }
+        .grid-cols-1 > div:nth-child(2) { animation: fadeInUp 0.4s ease-out 0.1s forwards; }
+        .grid-cols-1 > div:nth-child(3) { animation: fadeInUp 0.4s ease-out 0.15s forwards; }
+        .grid-cols-1 > div:nth-child(4) { animation: fadeInUp 0.4s ease-out 0.2s forwards; }
+        .grid-cols-1 > div:nth-child(5) { animation: fadeInUp 0.4s ease-out 0.25s forwards; }
+        .grid-cols-1 > div:nth-child(6) { animation: fadeInUp 0.4s ease-out 0.3s forwards; }
+        .grid-cols-1 > div:nth-child(7) { animation: fadeInUp 0.4s ease-out 0.35s forwards; }
+        .grid-cols-1 > div:nth-child(8) { animation: fadeInUp 0.4s ease-out 0.4s forwards; }
+        
+        @media (min-width: 768px) {
+            .md\:grid-cols-4 > div:nth-child(1) { animation-delay: 0.05s; }
+            .md\:grid-cols-4 > div:nth-child(2) { animation-delay: 0.1s; }
+            .md\:grid-cols-4 > div:nth-child(3) { animation-delay: 0.15s; }
+            .md\:grid-cols-4 > div:nth-child(4) { animation-delay: 0.2s; }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg\:grid-cols-8 > div { animation-delay: calc(var(--index, 0) * 0.05s); }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -549,11 +581,11 @@
                                     <input v-model="filters.search" 
                                            @input="onSearchInput"
                                            @focus="onSearchFocus"
-                                           @blur="hideSearchSuggestions"
+                                           @blur="closeSearchSuggestions"
                                            @keydown.down="onSearchKeydownDown"
                                            @keydown.up="onSearchKeydownUp"
                                            @keydown.enter="onSearchKeydownEnter"
-                                           @keydown.escape="hideSearchSuggestions"
+                                           @keydown.escape="closeSearchSuggestions"
                                            placeholder="Название вакансии"
                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                                     
@@ -576,7 +608,7 @@
                                     </div>
                                     
                                     <!-- Нет результатов -->
-                                    <div v-else-if="filters.search.length >= 2 && searchSuggestions.length === 0 && !searchLoading" 
+                                    <div v-else-if="filters.search.length >= 2 && searchSuggestions.length === 0 && !searchLoading && !hideSuggestions"
                                          class="autocomplete-dropdown">
                                         <div class="autocomplete-empty">
                                             <i class="fas fa-search text-2xl mb-2"></i>
@@ -601,11 +633,11 @@
                                     <input v-model="filters.area" 
                                            @input="onAreaInput"
                                            @focus="onAreaFocus"
-                                           @blur="hideAreaSuggestions"
+                                           @blur="closeAreaSuggestions"
                                            @keydown.down="onAreaKeydownDown"
                                            @keydown.up="onAreaKeydownUp"
                                            @keydown.enter="onAreaKeydownEnter"
-                                           @keydown.escape="hideAreaSuggestions"
+                                           @keydown.escape="closeAreaSuggestions"
                                            placeholder="Москва, СПб..."
                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                                     
@@ -626,7 +658,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div v-else-if="filters.area.length >= 2 && areaSuggestions.length === 0 && !areaLoading" 
+                                    <div v-else-if="filters.area.length >= 2 && areaSuggestions.length === 0 && !areaLoading && !hideAreaSuggestions"
                                          class="autocomplete-dropdown">
                                         <div class="autocomplete-empty">
                                             <i class="fas fa-map text-2xl mb-2"></i>
@@ -665,11 +697,11 @@
                                     <input v-model="filters.skill" 
                                            @input="onSkillInput"
                                            @focus="onSkillFocus"
-                                           @blur="hideSkillSuggestions"
+                                           @blur="closeSkillSuggestions"
                                            @keydown.down="onSkillKeydownDown"
                                            @keydown.up="onSkillKeydownUp"
                                            @keydown.enter="onSkillKeydownEnter"
-                                           @keydown.escape="hideSkillSuggestions"
+                                           @keydown.escape="closeSkillSuggestions"
                                            placeholder="Python, LLM..."
                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                                     
@@ -690,7 +722,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div v-else-if="filters.skill.length >= 2 && skillSuggestions.length === 0 && !skillLoading" 
+                                    <div v-else-if="filters.skill.length >= 2 && skillSuggestions.length === 0 && !skillLoading && !hideSkillSuggestions"
                                          class="autocomplete-dropdown">
                                         <div class="autocomplete-empty">
                                             <i class="fas fa-tags text-2xl mb-2"></i>
@@ -1076,23 +1108,206 @@
                         <p class="text-gray-600 text-sm">Всего вакансий: {{ dashboardData.total_vacancies }}</p>
                     </div>
 
-                    <!-- KPI карточки -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-                            <p class="text-xs text-gray-500 uppercase">Средняя зарплата (RUB)</p>
-                            <p class="text-xl font-bold text-gray-800">{{ formatNumber(salaryStats.avg) }}</p>
+                    <!-- KPI карточки с трендами -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+                        <!-- Средняя зарплата -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    💰 Средняя ЗП
+                                </span>
+                                <span v-if="kpiMetrics.avg_salary" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.avg_salary.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.avg_salary.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.avg_salary.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.avg_salary.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.avg_salary.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.avg_salary.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ formatNumber(kpiMetrics.avg_salary?.value || 0) }} ₽
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                за период
+                            </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-                            <p class="text-xs text-gray-500 uppercase">Медианная (RUB)</p>
-                            <p class="text-xl font-bold text-gray-800">{{ formatNumber(salaryStats.median) }}</p>
+                        
+                        <!-- Медианная зарплата -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    📈 Медианная
+                                </span>
+                                <span v-if="kpiMetrics.median_salary" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.median_salary.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.median_salary.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.median_salary.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.median_salary.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.median_salary.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.median_salary.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ formatNumber(kpiMetrics.median_salary?.value || 0) }} ₽
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                за период
+                            </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
-                            <p class="text-xs text-gray-500 uppercase">Валют в базе</p>
-                            <p class="text-xl font-bold text-gray-800">{{ Object.keys(currencies).length }}</p>
+                        
+                        <!-- Всего вакансий -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    💼 Вакансий
+                                </span>
+                                <span v-if="kpiMetrics.total_vacancies" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.total_vacancies.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.total_vacancies.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.total_vacancies.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.total_vacancies.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.total_vacancies.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.total_vacancies.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ kpiMetrics.total_vacancies?.value || 0 }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                всего в базе
+                            </div>
                         </div>
-                        <div class="bg-white rounded-lg shadow p-4 border-l-4 border-yellow-500">
-                            <p class="text-xs text-gray-500 uppercase">Регионов</p>
-                            <p class="text-xl font-bold text-gray-800">{{ Object.keys(topAreas).length }}</p>
+                        
+                        <!-- Навыков найдено -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    🔥 Навыков
+                                </span>
+                                <span v-if="kpiMetrics.total_skills" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.total_skills.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.total_skills.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.total_skills.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.total_skills.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.total_skills.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.total_skills.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ kpiMetrics.total_skills?.value || 0 }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                всего найдено
+                            </div>
+                        </div>
+                        
+                        <!-- Компаний -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    🏢 Компаний
+                                </span>
+                                <span v-if="kpiMetrics.unique_companies" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.unique_companies.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.unique_companies.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.unique_companies.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.unique_companies.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.unique_companies.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.unique_companies.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ kpiMetrics.unique_companies?.value || 0 }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                уникальных
+                            </div>
+                        </div>
+                        
+                        <!-- Регионов -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    🌍 Регионов
+                                </span>
+                                <span v-if="kpiMetrics.unique_regions" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.unique_regions.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.unique_regions.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.unique_regions.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.unique_regions.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.unique_regions.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.unique_regions.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ kpiMetrics.unique_regions?.value || 0 }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                в базе
+                            </div>
+                        </div>
+                        
+                        <!-- Hard Skills -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-cyan-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    🛠 Hard Skills
+                                </span>
+                                <span v-if="kpiMetrics.hard_skills_count" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.hard_skills_count.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.hard_skills_count.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.hard_skills_count.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.hard_skills_count.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.hard_skills_count.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.hard_skills_count.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ kpiMetrics.hard_skills_count?.value || 0 }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                уникальных
+                            </div>
+                        </div>
+                        
+                        <!-- Soft Skills -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-pink-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    🤝 Soft Skills
+                                </span>
+                                <span v-if="kpiMetrics.soft_skills_count" 
+                                      class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
+                                      :class="{
+                                          'bg-green-100 text-green-700': kpiMetrics.soft_skills_count.trend_direction === 'up',
+                                          'bg-red-100 text-red-700': kpiMetrics.soft_skills_count.trend_direction === 'down',
+                                          'bg-gray-100 text-gray-700': kpiMetrics.soft_skills_count.trend_direction === 'same'
+                                      }">
+                                    <i :class="kpiMetrics.soft_skills_count.trend_direction === 'up' ? 'fa-arrow-up' : kpiMetrics.soft_skills_count.trend_direction === 'down' ? 'fa-arrow-down' : 'fa-minus'" class="fas mr-1"></i>
+                                    {{ kpiMetrics.soft_skills_count.trend_percent }}%
+                                </span>
+                            </div>
+                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                                {{ kpiMetrics.soft_skills_count?.value || 0 }}
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                уникальных
+                            </div>
                         </div>
                     </div>
 
@@ -1656,6 +1871,18 @@
                         top_skills: []
                     },
                     
+                    // KPI метрики с трендами
+                    kpiMetrics: {
+                        avg_salary: null,
+                        median_salary: null,
+                        total_vacancies: null,
+                        total_skills: null,
+                        unique_companies: null,
+                        unique_regions: null,
+                        hard_skills_count: null,
+                        soft_skills_count: null
+                    },
+
                     // Вакансии
                     vacanciesList: {
                         total: 0,
@@ -1885,17 +2112,18 @@
                     }
                 },
                 
-                hideSearchSuggestions() {
+                closeSearchSuggestions() {
                     setTimeout(() => {
                         this.hideSuggestions = true;
                         this.searchSelectedIndex = -1;
-                    }, 200);
+                    }, 150);
                 },
                 
                 selectSearchSuggestion(suggestion) {
                     this.filters.search = suggestion.value;
                     this.searchSuggestions = [];
                     this.hideSuggestions = true;
+                    this.searchSelectedIndex = -1;
                 },
                 
                 onSearchKeydownDown(e) {
@@ -1952,17 +2180,18 @@
                     }
                 },
                 
-                hideAreaSuggestions() {
+                closeAreaSuggestions() {
                     setTimeout(() => {
                         this.hideAreaSuggestions = true;
                         this.areaSelectedIndex = -1;
-                    }, 200);
+                    }, 150);
                 },
                 
                 selectAreaSuggestion(suggestion) {
                     this.filters.area = suggestion.value;
                     this.areaSuggestions = [];
                     this.hideAreaSuggestions = true;
+                    this.areaSelectedIndex = -1;
                 },
                 
                 onAreaKeydownDown(e) {
@@ -2019,17 +2248,18 @@
                     }
                 },
                 
-                hideSkillSuggestions() {
+                closeSkillSuggestions() {
                     setTimeout(() => {
                         this.hideSkillSuggestions = true;
                         this.skillSelectedIndex = -1;
-                    }, 200);
+                    }, 150);
                 },
                 
                 selectSkillSuggestion(suggestion) {
                     this.filters.skill = suggestion.value;
                     this.skillSuggestions = [];
                     this.hideSkillSuggestions = true;
+                    this.skillSelectedIndex = -1;
                 },
                 
                 onSkillKeydownDown(e) {
@@ -2112,6 +2342,9 @@
                 
                 async loadAnalytics() {
                     try {
+                        // Загружаем KPI метрики
+                        await this.loadKpiMetrics();
+                        
                         // Загружаем расширенную аналитику
                         const response = await fetch(`${API_BASE}/analytics/advanced`);
                         const advancedData = await response.json();
@@ -2133,9 +2366,9 @@
                             salary_distribution: distData.salary_distribution || {},
                             top_areas: distData.top_areas || {}
                         };
-                        
+
                         console.log('Combined analyticsData:', this.analyticsData);
-                        
+
                         // Инициализируем графики если мы на вкладке аналитики
                         if (this.currentTab === 'analytics') {
                             this.$nextTick(() => {
@@ -2144,6 +2377,20 @@
                         }
                     } catch (error) {
                         console.error('Ошибка загрузки аналитики:', error);
+                    }
+                },
+                
+                async loadKpiMetrics() {
+                    // Загрузка KPI метрик с трендами
+                    try {
+                        const response = await fetch(`${API_BASE}/analytics/kpi`);
+                        const data = await response.json();
+                        
+                        if (data.metrics) {
+                            this.kpiMetrics = data.metrics;
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки KPI:', error);
                     }
                 },
                 
