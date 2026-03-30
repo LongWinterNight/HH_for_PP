@@ -554,11 +554,19 @@ def start_parser(
             # Переопределяем метод сбора для обновления прогресса
             if hasattr(collector, '_collect_by_keyword'):
                 original_collect_by_keyword = collector._collect_by_keyword
-
+                
+                # Проверяем сколько аргументов принимает метод
+                import inspect
+                sig = inspect.signature(original_collect_by_keyword)
+                accepts_progress = 'progress_bar' in sig.parameters
+                
                 def collect_by_keyword_with_progress(keyword, delay_between_pages=1.0, progress_bar=None):
                     parser_state["current_keyword"] = keyword
                     logger.info(f"Запрос: {keyword}")
-                    return original_collect_by_keyword(keyword, delay_between_pages, progress_bar)
+                    if accepts_progress:
+                        return original_collect_by_keyword(keyword, delay_between_pages, progress_bar)
+                    else:
+                        return original_collect_by_keyword(keyword, delay_between_pages)
 
                 collector._collect_by_keyword = collect_by_keyword_with_progress
 

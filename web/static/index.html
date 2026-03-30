@@ -239,6 +239,23 @@
             }
         }
         
+        /* Skill bars - slide in animation */
+        @keyframes slideInRight {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: var(--target-width, 100%);
+                opacity: 1;
+            }
+        }
+        
+        .skill-bar {
+            animation: slideInRight 0.8s ease-out forwards;
+            animation-delay: calc(var(--index, 0) * 0.05s);
+        }
+        
         .grid-cols-1 > div:nth-child(1) { animation: fadeInUp 0.4s ease-out 0.05s forwards; }
         .grid-cols-1 > div:nth-child(2) { animation: fadeInUp 0.4s ease-out 0.1s forwards; }
         .grid-cols-1 > div:nth-child(3) { animation: fadeInUp 0.4s ease-out 0.15s forwards; }
@@ -1109,13 +1126,19 @@
                     </div>
 
                     <!-- KPI карточки с трендами -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <!-- Средняя зарплата -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    💰 Средняя ЗП
-                                </span>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-ruble-sign text-blue-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Средняя ЗП</p>
+                                        <p class="text-xs text-gray-400">по вакансиям</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.avg_salary" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1127,20 +1150,23 @@
                                     {{ kpiMetrics.avg_salary.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ formatNumber(kpiMetrics.avg_salary?.value || 0) }} ₽
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                за период
                             </div>
                         </div>
                         
                         <!-- Медианная зарплата -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    📈 Медианная
-                                </span>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-chart-line text-green-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Медиана</p>
+                                        <p class="text-xs text-gray-400">серединная ЗП</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.median_salary" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1152,20 +1178,23 @@
                                     {{ kpiMetrics.median_salary.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ formatNumber(kpiMetrics.median_salary?.value || 0) }} ₽
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                за период
                             </div>
                         </div>
                         
-                        <!-- Всего вакансий -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    💼 Вакансий
-                                </span>
+                        <!-- Вакансий -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-purple-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-briefcase text-purple-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Вакансий</p>
+                                        <p class="text-xs text-gray-400">в базе</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.total_vacancies" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1177,20 +1206,23 @@
                                     {{ kpiMetrics.total_vacancies.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ kpiMetrics.total_vacancies?.value || 0 }}
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                всего в базе
                             </div>
                         </div>
                         
-                        <!-- Навыков найдено -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    🔥 Навыков
-                                </span>
+                        <!-- Навыков -->
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-fire text-orange-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Навыков</p>
+                                        <p class="text-xs text-gray-400">найдено</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.total_skills" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1202,20 +1234,23 @@
                                     {{ kpiMetrics.total_skills.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ kpiMetrics.total_skills?.value || 0 }}
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                всего найдено
                             </div>
                         </div>
                         
                         <!-- Компаний -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    🏢 Компаний
-                                </span>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-building text-indigo-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Компаний</p>
+                                        <p class="text-xs text-gray-400">работодателей</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.unique_companies" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1227,20 +1262,23 @@
                                     {{ kpiMetrics.unique_companies.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ kpiMetrics.unique_companies?.value || 0 }}
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                уникальных
                             </div>
                         </div>
                         
                         <!-- Регионов -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    🌍 Регионов
-                                </span>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-yellow-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-map-marker-alt text-yellow-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Регионов</p>
+                                        <p class="text-xs text-gray-400">в базе</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.unique_regions" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1252,20 +1290,23 @@
                                     {{ kpiMetrics.unique_regions.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ kpiMetrics.unique_regions?.value || 0 }}
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                в базе
                             </div>
                         </div>
                         
                         <!-- Hard Skills -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-cyan-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    🛠 Hard Skills
-                                </span>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-cyan-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-code text-cyan-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Hard Skills</p>
+                                        <p class="text-xs text-gray-400">проф. навыки</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.hard_skills_count" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1277,20 +1318,23 @@
                                     {{ kpiMetrics.hard_skills_count.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ kpiMetrics.hard_skills_count?.value || 0 }}
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                уникальных
                             </div>
                         </div>
                         
                         <!-- Soft Skills -->
-                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-pink-500 hover:shadow-md transition-shadow transform hover:-translate-y-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    🤝 Soft Skills
-                                </span>
+                        <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-pink-500 hover:shadow-md transition-shadow">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center mr-3">
+                                        <i class="fas fa-users text-pink-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-semibold text-gray-500 uppercase">Soft Skills</p>
+                                        <p class="text-xs text-gray-400">личные качества</p>
+                                    </div>
+                                </div>
                                 <span v-if="kpiMetrics.soft_skills_count" 
                                       class="flex items-center text-xs font-semibold px-2 py-1 rounded-full"
                                       :class="{
@@ -1302,16 +1346,142 @@
                                     {{ kpiMetrics.soft_skills_count.trend_percent }}%
                                 </span>
                             </div>
-                            <div class="text-2xl font-bold text-gray-900 mb-1">
+                            <div class="text-2xl font-bold text-gray-900">
                                 {{ kpiMetrics.soft_skills_count?.value || 0 }}
-                            </div>
-                            <div class="text-xs text-gray-400">
-                                уникальных
                             </div>
                         </div>
                     </div>
 
-                    <!-- Графики -->
+                    <!-- Топ навыков - чистый дизайн -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+                        <!-- Header -->
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-900 flex items-center">
+                                        <i class="fas fa-fire text-orange-500 mr-2"></i>
+                                        Топ навыков
+                                    </h2>
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Основано на {{ dashboardData.total_vacancies || 0 }} вакансиях
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Tabs -->
+                            <div class="flex space-x-2">
+                                <button @click="activeSkillTab = 'hard'"
+                                        :class="activeSkillTab === 'hard' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                        class="px-5 py-2.5 text-sm font-medium rounded-lg transition flex items-center">
+                                    <i class="fas fa-code mr-2"></i>
+                                    Hard Skills
+                                    <span v-if="topSkills.hard.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.hard.length }}</span>
+                                </button>
+                                <button @click="activeSkillTab = 'soft'"
+                                        :class="activeSkillTab === 'soft' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                        class="px-5 py-2.5 text-sm font-medium rounded-lg transition flex items-center">
+                                    <i class="fas fa-users mr-2"></i>
+                                    Soft Skills
+                                    <span v-if="topSkills.soft.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.soft.length }}</span>
+                                </button>
+                                <button @click="activeSkillTab = 'tools'"
+                                        :class="activeSkillTab === 'tools' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                        class="px-5 py-2.5 text-sm font-medium rounded-lg transition flex items-center">
+                                    <i class="fas fa-tools mr-2"></i>
+                                    Tools
+                                    <span v-if="topSkills.tools.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.tools.length }}</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="p-6">
+                            <!-- Loading -->
+                            <div v-if="skillsLoading" class="text-center py-12">
+                                <i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i>
+                                <p class="mt-4 text-gray-500">Загрузка...</p>
+                            </div>
+                            
+                            <!-- Hard Skills -->
+                            <div v-else-if="activeSkillTab === 'hard' && topSkills.hard.length > 0" class="space-y-2">
+                                <div v-for="(skill, index) in topSkills.hard" :key="index" 
+                                     class="flex items-center group hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
+                                        {{ index + 1 }}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-900 truncate pr-4">{{ skill.name }}</span>
+                                            <div class="flex items-center space-x-3 flex-shrink-0">
+                                                <span class="text-sm font-semibold text-gray-900">{{ skill.count }}</span>
+                                                <span class="text-xs text-gray-500 w-10 text-right">{{ skill.percentage }}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-1.5 rounded-full transition-all duration-500" 
+                                                 :style="{ width: skill.percentage + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Soft Skills -->
+                            <div v-else-if="activeSkillTab === 'soft' && topSkills.soft.length > 0" class="space-y-2">
+                                <div v-for="(skill, index) in topSkills.soft" :key="index" 
+                                     class="flex items-center group hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
+                                        {{ index + 1 }}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-900 truncate pr-4">{{ skill.name }}</span>
+                                            <div class="flex items-center space-x-3 flex-shrink-0">
+                                                <span class="text-sm font-semibold text-gray-900">{{ skill.count }}</span>
+                                                <span class="text-xs text-gray-500 w-10 text-right">{{ skill.percentage }}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-gradient-to-r from-green-500 to-green-400 h-1.5 rounded-full transition-all duration-500" 
+                                                 :style="{ width: skill.percentage + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Tools -->
+                            <div v-else-if="activeSkillTab === 'tools' && topSkills.tools.length > 0" class="space-y-2">
+                                <div v-for="(skill, index) in topSkills.tools" :key="index" 
+                                     class="flex items-center group hover:bg-gray-50 rounded-lg transition-colors">
+                                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
+                                        {{ index + 1 }}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-gray-900 truncate pr-4">{{ skill.name }}</span>
+                                            <div class="flex items-center space-x-3 flex-shrink-0">
+                                                <span class="text-sm font-semibold text-gray-900">{{ skill.count }}</span>
+                                                <span class="text-xs text-gray-500 w-10 text-right">{{ skill.percentage }}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-gradient-to-r from-orange-500 to-orange-400 h-1.5 rounded-full transition-all duration-500" 
+                                                 :style="{ width: skill.percentage + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Empty state -->
+                            <div v-else class="text-center py-12">
+                                <i class="fas fa-inbox text-4xl text-gray-300"></i>
+                                <p class="mt-4 text-gray-500">Навыки не найдены</p>
+                                <p class="text-sm text-gray-400 mt-2">Запустите парсер для сбора данных</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Графики и статистика -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                         <!-- Опыт работы -->
                         <div class="bg-white rounded-lg shadow p-4">
@@ -1387,48 +1557,6 @@
                             </table>
                         </div>
                     </div>
-
-                    <!-- Навыки -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white rounded-lg shadow p-4">
-                            <h3 class="text-xs font-semibold mb-2 text-purple-600">
-                                <i class="fas fa-microchip"></i> Технологии
-                            </h3>
-                            <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
-                                <div v-for="skill in technologiesList" :key="skill.name"
-                                     class="flex justify-between">
-                                    <span class="text-gray-700 truncate">{{ skill.name }}</span>
-                                    <span class="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-lg shadow p-4">
-                            <h3 class="text-xs font-semibold mb-2 text-blue-600">
-                                <i class="fas fa-brain"></i> Hard Skills
-                            </h3>
-                            <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
-                                <div v-for="skill in hardSkillsList" :key="skill.name"
-                                     class="flex justify-between">
-                                    <span class="text-gray-700 truncate">{{ skill.name }}</span>
-                                    <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-lg shadow p-4">
-                            <h3 class="text-xs font-semibold mb-2 text-green-600">
-                                <i class="fas fa-users"></i> Soft Skills
-                            </h3>
-                            <div class="space-y-1 max-h-64 overflow-y-auto text-xs">
-                                <div v-for="skill in softSkillsList" :key="skill.name"
-                                     class="flex justify-between">
-                                    <span class="text-gray-700 truncate">{{ skill.name }}</span>
-                                    <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded font-semibold">{{ skill.value }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </transition>
 
@@ -1452,31 +1580,55 @@
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-4">
                                         <div class="flex-shrink-0">
-                                            <div v-if="parserState.is_running" class="loading-spinner"></div>
-                                            <i v-else-if="parserState.status === 'completed'" class="fas fa-check-circle text-5xl text-green-500"></i>
-                                            <i v-else-if="parserState.status === 'error'" class="fas fa-exclamation-circle text-5xl text-red-500"></i>
-                                            <i v-else class="fas fa-info-circle text-5xl text-gray-400"></i>
+                                            <!-- Анимированная иконка для running -->
+                                            <div v-if="parserState.is_running" class="relative">
+                                                <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                                                <div class="absolute inset-0 flex items-center justify-center">
+                                                    <i class="fas fa-robot text-blue-600 text-xl"></i>
+                                                </div>
+                                            </div>
+                                            <!-- Иконки для других статусов -->
+                                            <i v-else-if="parserState.status === 'completed'" class="fas fa-check-circle text-6xl text-green-500"></i>
+                                            <i v-else-if="parserState.status === 'error'" class="fas fa-exclamation-circle text-6xl text-red-500"></i>
+                                            <i v-else-if="parserState.status === 'stopping'" class="fas fa-stop-circle text-6xl text-orange-500"></i>
+                                            <i v-else class="fas fa-robot text-6xl text-gray-400"></i>
                                         </div>
                                         <div>
                                             <p class="text-sm font-medium text-gray-600 uppercase tracking-wide">Статус</p>
-                                            <p class="text-3xl font-bold" :class="{
+                                            <p class="text-3xl font-bold mt-1" :class="{
                                                 'text-green-700': parserState.status === 'completed',
                                                 'text-blue-700': parserState.status === 'running',
                                                 'text-red-700': parserState.status === 'error',
                                                 'text-orange-700': parserState.status === 'stopping',
                                                 'text-gray-700': parserState.status === 'idle'
-                                            }">{{ parserState.status || 'Готов к запуску' }}</p>
-                                            <p v-if="parserState.error_message" class="text-sm text-red-600 mt-1">
-                                                <i class="fas fa-exclamation-triangle"></i> {{ parserState.error_message }}
+                                            }">
+                                                {{ parserState.status === 'running' ? 'Работает' : parserState.status === 'completed' ? 'Готово' : parserState.status === 'error' ? 'Ошибка' : parserState.status === 'stopping' ? 'Остановка' : 'Готов к запуску' }}
                                             </p>
+                                            <p v-if="parserState.error_message" class="text-sm text-red-600 mt-2 flex items-center">
+                                                <i class="fas fa-exclamation-triangle mr-1"></i> {{ parserState.error_message }}
+                                            </p>
+                                            <!-- Прогресс бар для running -->
+                                            <div v-if="parserState.is_running && parserState.total_pages > 0" class="mt-3">
+                                                <div class="flex items-center justify-between text-xs text-gray-600 mb-1">
+                                                    <span>Прогресс</span>
+                                                    <span>{{ Math.round((parserState.current_page / parserState.total_pages) * 100) }}%</span>
+                                                </div>
+                                                <div class="w-64 bg-white rounded-full h-2">
+                                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                                         :style="{ width: Math.min((parserState.current_page / parserState.total_pages) * 100, 100) + '%' }"></div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <p v-if="parserState.started_at" class="text-xs text-gray-500">
-                                            <i class="far fa-clock"></i> Начат: {{ new Date(parserState.started_at).toLocaleString('ru-RU') }}
+                                        <p v-if="parserState.started_at" class="text-xs text-gray-500 flex items-center justify-end">
+                                            <i class="far fa-clock mr-1"></i> Начат: {{ new Date(parserState.started_at).toLocaleString('ru-RU') }}
                                         </p>
-                                        <p v-if="parserState.completed_at" class="text-xs text-gray-500">
-                                            <i class="fas fa-flag-checkered"></i> Завершён: {{ new Date(parserState.completed_at).toLocaleString('ru-RU') }}
+                                        <p v-if="parserState.completed_at" class="text-xs text-gray-500 flex items-center justify-end mt-1">
+                                            <i class="fas fa-flag-checkered mr-1"></i> Завершён: {{ new Date(parserState.completed_at).toLocaleString('ru-RU') }}
+                                        </p>
+                                        <p v-if="parserState.is_running" class="text-xs text-blue-600 mt-2 font-semibold">
+                                            <i class="fas fa-sync fa-spin mr-1"></i> Обновляется
                                         </p>
                                     </div>
                                 </div>
@@ -1487,7 +1639,8 @@
                                 <h3 class="text-lg font-semibold text-gray-800 mb-4">
                                     <i class="fas fa-chart-line"></i> Статистика в реальном времени
                                 </h3>
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                    <!-- Собрано вакансий -->
                                     <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-xl border-2 border-green-300 shadow-sm hover:shadow-md transition-shadow">
                                         <div class="flex items-center justify-between">
                                             <div>
@@ -1502,6 +1655,8 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Текущий запрос -->
                                     <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-xl border-2 border-blue-300 shadow-sm hover:shadow-md transition-shadow">
                                         <div class="flex items-center justify-between">
                                             <div>
@@ -1516,27 +1671,42 @@
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Страница / Прогресс -->
                                     <div class="bg-gradient-to-br from-purple-50 to-violet-50 p-5 rounded-xl border-2 border-purple-300 shadow-sm hover:shadow-md transition-shadow">
                                         <div class="flex items-center justify-between">
-                                            <div>
-                                                <p class="text-gray-600 text-xs font-semibold uppercase tracking-wide mb-2">Страница</p>
-                                                <p class="text-4xl font-bold text-purple-700">{{ parserState.current_page }}<span class="text-xl text-purple-400">/{{ parserState.total_pages }}</span></p>
-                                                <div v-if="parserState.is_running" class="w-full bg-purple-200 rounded-full h-1.5 mt-2">
-                                                    <div class="bg-purple-500 h-1.5 rounded-full transition-all" 
+                                            <div class="flex-1">
+                                                <p class="text-gray-600 text-xs font-semibold uppercase tracking-wide mb-2">Прогресс</p>
+                                                <div v-if="parserState.total_pages > 0" class="mb-2">
+                                                    <span class="text-4xl font-bold text-purple-700">{{ parserState.current_page }}</span>
+                                                    <span class="text-xl text-purple-400"> из {{ parserState.total_pages }}</span>
+                                                </div>
+                                                <div v-else class="mb-2">
+                                                    <span class="text-4xl font-bold text-purple-700">{{ parserState.current_page }}</span>
+                                                    <span class="text-xl text-purple-400"> страниц</span>
+                                                </div>
+                                                <!-- Прогресс бар -->
+                                                <div v-if="parserState.total_pages > 0" class="w-full bg-purple-200 rounded-full h-2">
+                                                    <div class="bg-purple-500 h-2 rounded-full transition-all duration-300" 
                                                          :style="{ width: Math.min((parserState.current_page / parserState.total_pages) * 100, 100) + '%' }"></div>
                                                 </div>
+                                                <p v-if="parserState.total_pages > 0" class="text-xs text-purple-600 mt-1">
+                                                    {{ Math.round((parserState.current_page / parserState.total_pages) * 100) }}% завершено
+                                                </p>
                                             </div>
-                                            <div class="bg-purple-100 p-4 rounded-full">
+                                            <div class="bg-purple-100 p-4 rounded-full flex-shrink-0">
                                                 <i class="fas fa-copy text-3xl text-purple-500"></i>
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Всего запросов -->
                                     <div class="bg-gradient-to-br from-orange-50 to-amber-50 p-5 rounded-xl border-2 border-orange-300 shadow-sm hover:shadow-md transition-shadow">
                                         <div class="flex items-center justify-between">
                                             <div>
                                                 <p class="text-gray-600 text-xs font-semibold uppercase tracking-wide mb-2">Всего запросов</p>
                                                 <p class="text-4xl font-bold text-orange-700">{{ parserState.keywords ? parserState.keywords.length : 0 }}</p>
-                                                <p class="text-xs text-orange-600 mt-1">
+                                                <p class="text-xs text-orange-600 mt-1 truncate max-w-[150px]" :title="parserState.keywords ? parserState.keywords.join(', ') : ''">
                                                     {{ parserState.keywords ? parserState.keywords.join(', ') : 'Нет' }}
                                                 </p>
                                             </div>
@@ -1563,8 +1733,12 @@
                                                     ~{{ Math.floor(parserState.vacancies_collected / parserState.keywords.length) }} вак.
                                                 </span>
                                             </div>
-                                            <div v-if="parserState.is_running && parserState.current_keyword === keyword" class="w-full bg-blue-100 rounded-full h-2">
+                                            <!-- Прогресс бар для каждого запроса -->
+                                            <div v-if="parserState.is_running && parserState.current_keyword === keyword" class="w-full bg-blue-100 rounded-full h-2 mt-2">
                                                 <div class="bg-blue-500 h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                                            </div>
+                                            <div v-else class="w-full bg-gray-100 rounded-full h-2 mt-2">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -1577,36 +1751,39 @@
                                     <i class="fas fa-sliders-h"></i> Настройки парсера
                                 </h3>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                    <div class="group">
+                                    <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-key"></i> Ключевые слова
                                         </label>
-                                        <div class="tooltip-custom tooltip-right" data-tooltip="Поисковые запросы для сбора вакансий. Введите через запятую: Python, Data Scientist, DevOps. Система ищет по каждому запросу отдельно.">
-                                            <input v-model="parserSettings.keywords" type="text"
-                                                   placeholder="Python, LLM, AI"
-                                                   class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">Через запятую или по одному</p>
+                                        <input v-model="parserSettings.keywords" type="text"
+                                               placeholder="Python, LLM, AI"
+                                               class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            Через запятую или по одному
+                                        </p>
                                     </div>
-                                    <div class="group">
+                                    <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-copy"></i> Макс. страниц
                                         </label>
-                                        <div class="tooltip-custom tooltip-right" data-tooltip="Количество страниц для каждого запроса (1 страница = 100 вакансий). 10 страниц = до 1000 вакансий. Рекомендуется 5-10 для быстрого сбора.">
-                                            <input v-model.number="parserSettings.max_pages" type="number" min="1" max="100"
-                                                   class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">1-100 страниц на запрос</p>
+                                        <input v-model.number="parserSettings.max_pages" type="number" min="1" max="100"
+                                               class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            1-100 страниц на запрос
+                                        </p>
                                     </div>
-                                    <div class="group">
+                                    <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="far fa-calendar-alt"></i> Дней назад
                                         </label>
-                                        <div class="tooltip-custom tooltip-right" data-tooltip="Период сбора вакансий. 7 дней = свежие за неделю, 30 дней = все за месяц. Меньше дней = актуальнее данные.">
-                                            <input v-model.number="parserSettings.days_back" type="number" min="1" max="365"
-                                                   class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">1-365 дней</p>
+                                        <input v-model.number="parserSettings.days_back" type="number" min="1" max="365"
+                                               class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            <i class="fas fa-info-circle mr-1"></i>
+                                            1-365 дней
+                                        </p>
                                     </div>
                                 </div>
                                 
@@ -1614,19 +1791,19 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                                     <label class="group flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-100 transition">
                                         <input v-model="parserSettings.incremental" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                                        <div class="tooltip-custom tooltip-right" data-tooltip="Собирать только новые вакансии, пропуская существующие в базе. Ускоряет повторные запуски в 6-10 раз. Идеально для ежедневного обновления.">
+                                        <div>
                                             <span class="font-medium text-gray-800">Инкрементальный режим</span>
                                             <p class="text-xs text-gray-500">Только новые вакансии (быстрее)</p>
                                         </div>
-                                        <i class="fas fa-info-circle text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                        <i class="fas fa-info-circle text-gray-400 ml-auto" title="Пропускает вакансии которые уже есть в базе"></i>
                                     </label>
                                     <label class="group flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-100 transition">
                                         <input v-model="parserSettings.use_cache" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" checked>
-                                        <div class="tooltip-custom tooltip-right" data-tooltip="Кэширует ответы API на 24 часа. Повторные запросы берутся из кэша. Ускоряет работу и снижает нагрузку на HH.ru.">
+                                        <div>
                                             <span class="font-medium text-gray-800">Использовать кэш</span>
                                             <p class="text-xs text-gray-500">Кэшировать ответы API (24 часа)</p>
                                         </div>
-                                        <i class="fas fa-info-circle text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                        <i class="fas fa-info-circle text-gray-400 ml-auto" title="Ускоряет повторные запуски"></i>
                                     </label>
                                 </div>
                             </div>
@@ -1882,6 +2059,15 @@
                         hard_skills_count: null,
                         soft_skills_count: null
                     },
+                    
+                    // Топ навыков
+                    topSkills: {
+                        hard: [],
+                        soft: [],
+                        tools: []
+                    },
+                    activeSkillTab: 'hard',
+                    skillsLoading: false,
 
                     // Вакансии
                     vacanciesList: {
@@ -2345,6 +2531,9 @@
                         // Загружаем KPI метрики
                         await this.loadKpiMetrics();
                         
+                        // Загружаем топ навыков
+                        await this.loadTopSkills();
+                        
                         // Загружаем расширенную аналитику
                         const response = await fetch(`${API_BASE}/analytics/advanced`);
                         const advancedData = await response.json();
@@ -2391,6 +2580,33 @@
                         }
                     } catch (error) {
                         console.error('Ошибка загрузки KPI:', error);
+                    }
+                },
+                
+                async loadTopSkills() {
+                    // Загрузка топ навыков по типам
+                    this.skillsLoading = true;
+                    try {
+                        // Загружаем все три типа параллельно
+                        const [hardRes, softRes, toolsRes] = await Promise.all([
+                            fetch(`${API_BASE}/analytics/top-skills?type=hard&limit=20`),
+                            fetch(`${API_BASE}/analytics/top-skills?type=soft&limit=20`),
+                            fetch(`${API_BASE}/analytics/top-skills?type=tools&limit=20`)
+                        ]);
+                        
+                        const [hard, soft, tools] = await Promise.all([
+                            hardRes.json(),
+                            softRes.json(),
+                            toolsRes.json()
+                        ]);
+                        
+                        this.topSkills.hard = hard.skills || [];
+                        this.topSkills.soft = soft.skills || [];
+                        this.topSkills.tools = tools.skills || [];
+                    } catch (error) {
+                        console.error('Ошибка загрузки навыков:', error);
+                    } finally {
+                        this.skillsLoading = false;
                     }
                 },
                 
@@ -2878,16 +3094,20 @@
                 this.fetchDashboard();
                 this.loadVacancies();
                 this.loadParserStatus();
+                this.loadAnalytics(); // Загружаем аналитику при старте
 
                 // Добавляем Math в глобальную область видимости (для шаблона)
                 window.appMath = Math;
                 window.appWindow = window;
 
-                // Автообновление статуса парсера
+                // Автообновление статуса парсера (каждые 2 секунды)
                 setInterval(() => {
                     this.loadParserStatus();
-                    this.fetchDashboard();
-                }, 5000);
+                    // Обновляем аналитику только если не загружено
+                    if (Object.keys(this.analyticsData.experience || {}).length === 0) {
+                        this.loadAnalytics();
+                    }
+                }, 2000);
             }
         }).mount('#app');
     </script>
