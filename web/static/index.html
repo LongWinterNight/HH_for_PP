@@ -20,12 +20,12 @@
     <style>
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
-        
+
         .slide-enter-active, .slide-leave-active { transition: all 0.3s; }
         .slide-enter-from, .slide-leave-to { transform: translateX(20px); opacity: 0; }
-        
+
         [v-cloak] { display: none; }
-        
+
         .loading-spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #3498db;
@@ -34,10 +34,197 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        /* Мгновенные tooltip с плавной анимацией */
+        .tooltip-custom {
+            position: relative;
+        }
+        
+        .tooltip-custom::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.4;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.15s ease-out;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            min-width: 280px;
+            max-width: 450px;
+            white-space: normal;
+            text-align: left;
+        }
+        
+        .tooltip-custom::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #1e293b;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.15s ease-out;
+        }
+        
+        .tooltip-custom:hover::before,
+        .tooltip-custom:hover::after,
+        .group:hover .tooltip-custom::before,
+        .group:hover .tooltip-custom::after {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(-4px);
+        }
+        
+        .tooltip-custom:hover::after,
+        .group:hover .tooltip-custom::after {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* Tooltip справа для чекбоксов */
+        .tooltip-right::before {
+            left: 100%;
+            top: 0;
+            transform: translateX(12px);
+            bottom: auto;
+            margin-left: 0;
+        }
+        
+        .tooltip-right::after {
+            left: 100%;
+            top: 14px;
+            transform: translateX(-4px);
+            border: 8px solid transparent;
+            border-right-color: #1e293b;
+        }
+        
+        .group:hover .tooltip-right::before,
+        .tooltip-right:hover::before {
+            transform: translateX(8px);
+        }
+        
+        .group:hover .tooltip-right::after,
+        .tooltip-right:hover::after {
+            transform: translateX(-4px);
+        }
+        
+        /* Autocomplete компонент */
+        .autocomplete-container {
+            position: relative;
+        }
+        
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            margin-top: 4px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e5e7eb;
+            max-height: 320px;
+            overflow-y: auto;
+            animation: slideDown 0.15s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .autocomplete-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        
+        .autocomplete-item:hover {
+            background: linear-gradient(90deg, #eff6ff 0%, #ffffff 100%);
+            padding-left: 18px;
+        }
+        
+        .autocomplete-item-highlight {
+            font-weight: 600;
+            color: #1e40af;
+            background: #dbeafe;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+        
+        .autocomplete-count {
+            font-size: 12px;
+            color: #6b7280;
+            margin-left: 8px;
+        }
+        
+        .autocomplete-loading {
+            padding: 20px;
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        .autocomplete-empty {
+            padding: 20px;
+            text-align: center;
+            color: #9ca3af;
+        }
+        
+        .autocomplete-header {
+            padding: 8px 14px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Custom scrollbar */
+        .autocomplete-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .autocomplete-dropdown::-webkit-scrollbar-track {
+            background: #f9fafb;
+            border-radius: 3px;
+        }
+        
+        .autocomplete-dropdown::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+        
+        .autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
         }
     </style>
 </head>
@@ -354,22 +541,108 @@
                         <!-- Фильтры -->
                         <div v-show="showFilters" class="p-6 border-b bg-gray-50">
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                <div>
+                                <!-- Поиск с autocomplete -->
+                                <div class="autocomplete-container">
                                     <label class="block text-xs font-medium text-gray-600 mb-1">
                                         <i class="fas fa-search mr-1"></i>Поиск
                                     </label>
-                                    <input v-model="filters.search" type="text"
+                                    <input v-model="filters.search" 
+                                           @input="onSearchInput"
+                                           @focus="onSearchFocus"
+                                           @blur="hideSearchSuggestions"
+                                           @keydown.down="onSearchKeydownDown"
+                                           @keydown.up="onSearchKeydownUp"
+                                           @keydown.enter="onSearchKeydownEnter"
+                                           @keydown.escape="hideSearchSuggestions"
                                            placeholder="Название вакансии"
                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    
+                                    <!-- Выпадающий список -->
+                                    <div v-if="searchSuggestions.length > 0 && !hideSuggestions" 
+                                         class="autocomplete-dropdown">
+                                        <div class="autocomplete-header">
+                                            <i class="fas fa-briefcase mr-2"></i>Вакансии
+                                        </div>
+                                        <div v-for="(suggestion, index) in searchSuggestions" 
+                                             :key="index"
+                                             @click="selectSearchSuggestion(suggestion)"
+                                             :class="{'bg-blue-50': searchSelectedIndex === index}"
+                                             class="autocomplete-item">
+                                            <div class="flex justify-between items-center">
+                                                <span v-html="highlightMatch(suggestion.label, filters.search)"></span>
+                                                <span class="autocomplete-count">{{ suggestion.count }} вак.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Нет результатов -->
+                                    <div v-else-if="filters.search.length >= 2 && searchSuggestions.length === 0 && !searchLoading" 
+                                         class="autocomplete-dropdown">
+                                        <div class="autocomplete-empty">
+                                            <i class="fas fa-search text-2xl mb-2"></i>
+                                            <p>Ничего не найдено</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Загрузка -->
+                                    <div v-if="searchLoading" class="autocomplete-dropdown">
+                                        <div class="autocomplete-loading">
+                                            <i class="fas fa-spinner fa-spin text-xl"></i>
+                                            <p class="mt-2">Поиск...</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
+                                
+                                <!-- Регион с autocomplete -->
+                                <div class="autocomplete-container">
                                     <label class="block text-xs font-medium text-gray-600 mb-1">
                                         <i class="fas fa-map-marker-alt mr-1"></i>Регион
                                     </label>
-                                    <input v-model="filters.area" type="text"
+                                    <input v-model="filters.area" 
+                                           @input="onAreaInput"
+                                           @focus="onAreaFocus"
+                                           @blur="hideAreaSuggestions"
+                                           @keydown.down="onAreaKeydownDown"
+                                           @keydown.up="onAreaKeydownUp"
+                                           @keydown.enter="onAreaKeydownEnter"
+                                           @keydown.escape="hideAreaSuggestions"
                                            placeholder="Москва, СПб..."
                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    
+                                    <div v-if="areaSuggestions.length > 0 && !hideAreaSuggestions" 
+                                         class="autocomplete-dropdown">
+                                        <div class="autocomplete-header">
+                                            <i class="fas fa-map mr-2"></i>Города
+                                        </div>
+                                        <div v-for="(suggestion, index) in areaSuggestions" 
+                                             :key="index"
+                                             @click="selectAreaSuggestion(suggestion)"
+                                             :class="{'bg-blue-50': areaSelectedIndex === index}"
+                                             class="autocomplete-item">
+                                            <div class="flex justify-between items-center">
+                                                <span v-html="highlightMatch(suggestion.label, filters.area)"></span>
+                                                <span class="autocomplete-count">{{ suggestion.count }} вак.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div v-else-if="filters.area.length >= 2 && areaSuggestions.length === 0 && !areaLoading" 
+                                         class="autocomplete-dropdown">
+                                        <div class="autocomplete-empty">
+                                            <i class="fas fa-map text-2xl mb-2"></i>
+                                            <p>Города не найдены</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div v-if="areaLoading" class="autocomplete-dropdown">
+                                        <div class="autocomplete-loading">
+                                            <i class="fas fa-spinner fa-spin text-xl"></i>
+                                            <p class="mt-2">Поиск...</p>
+                                        </div>
+                                    </div>
                                 </div>
+                                
+                                <!-- Опыт -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">
                                         <i class="fas fa-briefcase mr-1"></i>Опыт
@@ -383,13 +656,54 @@
                                         <option value="Нет опыта">Без опыта</option>
                                     </select>
                                 </div>
-                                <div>
+                                
+                                <!-- Навык с autocomplete -->
+                                <div class="autocomplete-container">
                                     <label class="block text-xs font-medium text-gray-600 mb-1">
                                         <i class="fas fa-tags mr-1"></i>Навык
                                     </label>
-                                    <input v-model="filters.skill" type="text"
+                                    <input v-model="filters.skill" 
+                                           @input="onSkillInput"
+                                           @focus="onSkillFocus"
+                                           @blur="hideSkillSuggestions"
+                                           @keydown.down="onSkillKeydownDown"
+                                           @keydown.up="onSkillKeydownUp"
+                                           @keydown.enter="onSkillKeydownEnter"
+                                           @keydown.escape="hideSkillSuggestions"
                                            placeholder="Python, LLM..."
                                            class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    
+                                    <div v-if="skillSuggestions.length > 0 && !hideSkillSuggestions" 
+                                         class="autocomplete-dropdown">
+                                        <div class="autocomplete-header">
+                                            <i class="fas fa-tools mr-2"></i>Навыки
+                                        </div>
+                                        <div v-for="(suggestion, index) in skillSuggestions" 
+                                             :key="index"
+                                             @click="selectSkillSuggestion(suggestion)"
+                                             :class="{'bg-blue-50': skillSelectedIndex === index}"
+                                             class="autocomplete-item">
+                                            <div class="flex justify-between items-center">
+                                                <span v-html="highlightMatch(suggestion.label, filters.skill)"></span>
+                                                <span class="autocomplete-count">{{ suggestion.count }} упом.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div v-else-if="filters.skill.length >= 2 && skillSuggestions.length === 0 && !skillLoading" 
+                                         class="autocomplete-dropdown">
+                                        <div class="autocomplete-empty">
+                                            <i class="fas fa-tags text-2xl mb-2"></i>
+                                            <p>Навыки не найдены</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div v-if="skillLoading" class="autocomplete-dropdown">
+                                        <div class="autocomplete-loading">
+                                            <i class="fas fa-spinner fa-spin text-xl"></i>
+                                            <p class="mt-2">Поиск...</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="mt-4 flex items-center space-x-3">
@@ -1048,48 +1362,56 @@
                                     <i class="fas fa-sliders-h"></i> Настройки парсера
                                 </h3>
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                    <div>
+                                    <div class="group">
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-key"></i> Ключевые слова
                                         </label>
-                                        <input v-model="parserSettings.keywords" type="text"
-                                               placeholder="Python, LLM, AI"
-                                               class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        <div class="tooltip-custom tooltip-right" data-tooltip="Поисковые запросы для сбора вакансий. Введите через запятую: Python, Data Scientist, DevOps. Система ищет по каждому запросу отдельно.">
+                                            <input v-model="parserSettings.keywords" type="text"
+                                                   placeholder="Python, LLM, AI"
+                                                   class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        </div>
                                         <p class="text-xs text-gray-500 mt-1">Через запятую или по одному</p>
                                     </div>
-                                    <div>
+                                    <div class="group">
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="fas fa-copy"></i> Макс. страниц
                                         </label>
-                                        <input v-model.number="parserSettings.max_pages" type="number" min="1" max="100"
-                                               class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        <div class="tooltip-custom tooltip-right" data-tooltip="Количество страниц для каждого запроса (1 страница = 100 вакансий). 10 страниц = до 1000 вакансий. Рекомендуется 5-10 для быстрого сбора.">
+                                            <input v-model.number="parserSettings.max_pages" type="number" min="1" max="100"
+                                                   class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        </div>
                                         <p class="text-xs text-gray-500 mt-1">1-100 страниц на запрос</p>
                                     </div>
-                                    <div>
+                                    <div class="group">
                                         <label class="block text-sm font-medium text-gray-700 mb-2">
                                             <i class="far fa-calendar-alt"></i> Дней назад
                                         </label>
-                                        <input v-model.number="parserSettings.days_back" type="number" min="1" max="365"
-                                               class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        <div class="tooltip-custom tooltip-right" data-tooltip="Период сбора вакансий. 7 дней = свежие за неделю, 30 дней = все за месяц. Меньше дней = актуальнее данные.">
+                                            <input v-model.number="parserSettings.days_back" type="number" min="1" max="365"
+                                                   class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                                        </div>
                                         <p class="text-xs text-gray-500 mt-1">1-365 дней</p>
                                     </div>
                                 </div>
                                 
                                 <!-- Дополнительные опции -->
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
-                                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-100 transition">
+                                    <label class="group flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-100 transition">
                                         <input v-model="parserSettings.incremental" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                                        <div>
+                                        <div class="tooltip-custom tooltip-right" data-tooltip="Собирать только новые вакансии, пропуская существующие в базе. Ускоряет повторные запуски в 6-10 раз. Идеально для ежедневного обновления.">
                                             <span class="font-medium text-gray-800">Инкрементальный режим</span>
                                             <p class="text-xs text-gray-500">Только новые вакансии (быстрее)</p>
                                         </div>
+                                        <i class="fas fa-info-circle text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                     </label>
-                                    <label class="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-100 transition">
+                                    <label class="group flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-100 transition">
                                         <input v-model="parserSettings.use_cache" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" checked>
-                                        <div>
+                                        <div class="tooltip-custom tooltip-right" data-tooltip="Кэширует ответы API на 24 часа. Повторные запросы берутся из кэша. Ускоряет работу и снижает нагрузку на HH.ru.">
                                             <span class="font-medium text-gray-800">Использовать кэш</span>
                                             <p class="text-xs text-gray-500">Кэшировать ответы API (24 часа)</p>
                                         </div>
+                                        <i class="fas fa-info-circle text-gray-400 ml-auto opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                     </label>
                                 </div>
                             </div>
@@ -1349,6 +1671,24 @@
                         skill: '',
                         salary_only: false
                     },
+                    
+                    // Autocomplete
+                    searchSuggestions: [],
+                    areaSuggestions: [],
+                    skillSuggestions: [],
+                    searchLoading: false,
+                    areaLoading: false,
+                    skillLoading: false,
+                    hideSuggestions: true,
+                    hideAreaSuggestions: true,
+                    hideSkillSuggestions: true,
+                    searchSelectedIndex: -1,
+                    areaSelectedIndex: -1,
+                    skillSelectedIndex: -1,
+                    searchDebounce: null,
+                    areaDebounce: null,
+                    skillDebounce: null,
+                    
                     showFilters: true,
                     pagination: {
                         page: 1,
@@ -1509,6 +1849,222 @@
             },
             
             methods: {
+                // ==================== AUTO COMPLETE ====================
+                
+                // Поиск вакансий
+                onSearchInput() {
+                    clearTimeout(this.searchDebounce);
+                    this.searchDebounce = setTimeout(() => {
+                        if (this.filters.search.length >= 2) {
+                            this.fetchSearchSuggestions();
+                        } else {
+                            this.searchSuggestions = [];
+                        }
+                    }, 300);
+                },
+                
+                async fetchSearchSuggestions() {
+                    this.searchLoading = true;
+                    try {
+                        const response = await fetch(
+                            `${API_BASE}/autocomplete/vacancies?q=${encodeURIComponent(this.filters.search)}`
+                        );
+                        const data = await response.json();
+                        this.searchSuggestions = data.suggestions || [];
+                    } catch (error) {
+                        console.error('Ошибка поиска вакансий:', error);
+                    } finally {
+                        this.searchLoading = false;
+                    }
+                },
+                
+                onSearchFocus() {
+                    this.hideSuggestions = false;
+                    if (this.filters.search.length >= 2 && this.searchSuggestions.length === 0) {
+                        this.fetchSearchSuggestions();
+                    }
+                },
+                
+                hideSearchSuggestions() {
+                    setTimeout(() => {
+                        this.hideSuggestions = true;
+                        this.searchSelectedIndex = -1;
+                    }, 200);
+                },
+                
+                selectSearchSuggestion(suggestion) {
+                    this.filters.search = suggestion.value;
+                    this.searchSuggestions = [];
+                    this.hideSuggestions = true;
+                },
+                
+                onSearchKeydownDown(e) {
+                    e.preventDefault();
+                    if (this.searchSelectedIndex < this.searchSuggestions.length - 1) {
+                        this.searchSelectedIndex++;
+                    }
+                },
+                
+                onSearchKeydownUp(e) {
+                    e.preventDefault();
+                    if (this.searchSelectedIndex > 0) {
+                        this.searchSelectedIndex--;
+                    }
+                },
+                
+                onSearchKeydownEnter() {
+                    if (this.searchSelectedIndex >= 0 && this.searchSuggestions[this.searchSelectedIndex]) {
+                        this.selectSearchSuggestion(this.searchSuggestions[this.searchSelectedIndex]);
+                    }
+                },
+                
+                // Регион
+                onAreaInput() {
+                    clearTimeout(this.areaDebounce);
+                    this.areaDebounce = setTimeout(() => {
+                        if (this.filters.area.length >= 2) {
+                            this.fetchAreaSuggestions();
+                        } else {
+                            this.areaSuggestions = [];
+                        }
+                    }, 300);
+                },
+                
+                async fetchAreaSuggestions() {
+                    this.areaLoading = true;
+                    try {
+                        const response = await fetch(
+                            `${API_BASE}/autocomplete/areas?q=${encodeURIComponent(this.filters.area)}`
+                        );
+                        const data = await response.json();
+                        this.areaSuggestions = data.suggestions || [];
+                    } catch (error) {
+                        console.error('Ошибка поиска регионов:', error);
+                    } finally {
+                        this.areaLoading = false;
+                    }
+                },
+                
+                onAreaFocus() {
+                    this.hideAreaSuggestions = false;
+                    if (this.filters.area.length >= 2 && this.areaSuggestions.length === 0) {
+                        this.fetchAreaSuggestions();
+                    }
+                },
+                
+                hideAreaSuggestions() {
+                    setTimeout(() => {
+                        this.hideAreaSuggestions = true;
+                        this.areaSelectedIndex = -1;
+                    }, 200);
+                },
+                
+                selectAreaSuggestion(suggestion) {
+                    this.filters.area = suggestion.value;
+                    this.areaSuggestions = [];
+                    this.hideAreaSuggestions = true;
+                },
+                
+                onAreaKeydownDown(e) {
+                    e.preventDefault();
+                    if (this.areaSelectedIndex < this.areaSuggestions.length - 1) {
+                        this.areaSelectedIndex++;
+                    }
+                },
+                
+                onAreaKeydownUp(e) {
+                    e.preventDefault();
+                    if (this.areaSelectedIndex > 0) {
+                        this.areaSelectedIndex--;
+                    }
+                },
+                
+                onAreaKeydownEnter() {
+                    if (this.areaSelectedIndex >= 0 && this.areaSuggestions[this.areaSelectedIndex]) {
+                        this.selectAreaSuggestion(this.areaSuggestions[this.areaSelectedIndex]);
+                    }
+                },
+                
+                // Навык
+                onSkillInput() {
+                    clearTimeout(this.skillDebounce);
+                    this.skillDebounce = setTimeout(() => {
+                        if (this.filters.skill.length >= 2) {
+                            this.fetchSkillSuggestions();
+                        } else {
+                            this.skillSuggestions = [];
+                        }
+                    }, 300);
+                },
+                
+                async fetchSkillSuggestions() {
+                    this.skillLoading = true;
+                    try {
+                        const response = await fetch(
+                            `${API_BASE}/autocomplete/skills?q=${encodeURIComponent(this.filters.skill)}`
+                        );
+                        const data = await response.json();
+                        this.skillSuggestions = data.suggestions || [];
+                    } catch (error) {
+                        console.error('Ошибка поиска навыков:', error);
+                    } finally {
+                        this.skillLoading = false;
+                    }
+                },
+                
+                onSkillFocus() {
+                    this.hideSkillSuggestions = false;
+                    if (this.filters.skill.length >= 2 && this.skillSuggestions.length === 0) {
+                        this.fetchSkillSuggestions();
+                    }
+                },
+                
+                hideSkillSuggestions() {
+                    setTimeout(() => {
+                        this.hideSkillSuggestions = true;
+                        this.skillSelectedIndex = -1;
+                    }, 200);
+                },
+                
+                selectSkillSuggestion(suggestion) {
+                    this.filters.skill = suggestion.value;
+                    this.skillSuggestions = [];
+                    this.hideSkillSuggestions = true;
+                },
+                
+                onSkillKeydownDown(e) {
+                    e.preventDefault();
+                    if (this.skillSelectedIndex < this.skillSuggestions.length - 1) {
+                        this.skillSelectedIndex++;
+                    }
+                },
+                
+                onSkillKeydownUp(e) {
+                    e.preventDefault();
+                    if (this.skillSelectedIndex > 0) {
+                        this.skillSelectedIndex--;
+                    }
+                },
+                
+                onSkillKeydownEnter() {
+                    if (this.skillSelectedIndex >= 0 && this.skillSuggestions[this.skillSelectedIndex]) {
+                        this.selectSkillSuggestion(this.skillSuggestions[this.skillSelectedIndex]);
+                    }
+                },
+                
+                // Подсветка совпадений
+                highlightMatch(text, query) {
+                    if (!query) return text;
+                    const regex = new RegExp(`(${this.escapeRegExp(query)})`, 'gi');
+                    return text.replace(regex, '<span class="autocomplete-item-highlight">$1</span>');
+                },
+                
+                escapeRegExp(string) {
+                    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                },
+                
+                // ==================== СУЩЕСТВУЮЩИЕ МЕТОДЫ ====================
+                
                 // API вызовы
                 async fetchDashboard() {
                     try {
