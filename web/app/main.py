@@ -577,7 +577,18 @@ def start_parser(
                         return result
                     collector.client.search_vacancies = search_with_progress
 
-            result = collector.collect_all(keywords=keywords, save_raw=True, show_progress=False)
+            # Запускаем сбор с правильными параметрами
+            if hasattr(collector, 'collect_all'):
+                # Проверяем поддерживает ли collector параметр show_progress
+                import inspect
+                sig = inspect.signature(collector.collect_all)
+                if 'show_progress' in sig.parameters:
+                    result = collector.collect_all(keywords=keywords, save_raw=True, show_progress=False)
+                else:
+                    result = collector.collect_all(keywords=keywords, save_raw=True)
+            else:
+                raise AttributeError("Collector doesn't have collect_all method")
+            
             parser_state["progress"] = 100
             parser_state["status"] = "completed"
             parser_state["completed_at"] = datetime.now().isoformat()
@@ -739,10 +750,177 @@ def get_profession_detail(profession_key: str):
     
     return profession
 
-@app.get("/api/professions/domains")
-def get_domains():
-    """Получить список доменов и сфер."""
-    catalog = _load_professions_catalog()
+@app.get("/api/autocomplete/vacancies")
+def autocomplete_vacancies(q: str = Query(..., min_length=2)):
+    """
+    Автодополнение названий вакансий.
+    
+    Args:
+        q: Поисковый запрос (минимум 2 символа)
+    
+    Returns:
+        Список подходящих названий вакансий
+    """
+    from src.storage import VacancyStorage
+    import pandas as pd
+    
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        if df.empty:
+            return {"suggestions": []}
+        
+        # Фильтрация по запросу (case-insensitive)
+        mask = df['vacancy_name'].str.contains(q, case=False, na=False)
+        matches = df[mask]
+        
+        # Уникальные названия + сортировка по частоте + топ-10
+        unique = matches['vacancy_name'].value_counts().head(10).index.tolist()
+        
+        return {
+            "suggestions": [
+                {"label": name, "value": name, "count": int(count)} 
+                for name, count in zip(unique, matches['vacancy_name'].value_counts().head(10).values)
+            ],
+            "total": len(unique)
+        }
+    finally:
+        storage.close()
+
+@app.get("/api/autocomplete/areas")
+def autocomplete_areas(q: str = Query(..., min_length=2)):
+    """
+    Автодополнение регионов.
+    
+    Args:
+        q: Поисковый запрос (минимум 2 символа)
+    
+    Returns:
+        Список подходящих регионов
+    """
+    from src.storage import VacancyStorage
+    
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        if df.empty:
+            return {"suggestions": []}
+        
+        # Фильтрация
+        mask = df['area'].str.contains(q, case=False, na=False)
+        matches = df[mask]
+        
+        # Уникальные регионы + сортировка по частоте
+        unique = matches['area'].value_counts().head(10).index.tolist()
+        
+        return {
+            "suggestions": [
+                {"label": area, "value": area, "count": int(count)}
+                for area, count in zip(unique, matches['area'].value_counts().head(10).values)
+            ],
+            "total": len(unique)
+        }
+    finally:
+        storage.close()
+
+@app.get("/api/autocomplete/skills")
+def autocomplete_skills(q: str = Query(..., min_length=2)):
+    """
+    Автодополнение навыков (hard/soft skills, tools).
+    
+    Args:
+        q: Поисковый запрос (минимум 2 символа)
+    
+    Returns:
+        Список подходящих навыков
+    """
+    from src.storage import VacancyStorage
+    from collections import Counter
+    
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        if df.empty:
+            return {"suggestions": []}
+        
+        # Собираем все навыки
+        all_skills = []
+        
+        for col in ['hard_skills', 'soft_skills', 'tools']:
+            if col in df.columns:
+                for skills_str in df[col].dropna():
+                    if isinstance(skills_str, str):
+                        skills = [s.strip() for s in skills_str.split(',')]
+                        all_skills.extend([s for s in skills if s])
+        
+        # Фильтруем по запросу
+        q_lower = q.lower()
+        matches = [s for s in all_skills if q_lower in s.lower()]
+        
+        # Подсчёт частоты + топ-15
+        counter = Counter(matches)
+        top_skills = counter.most_common(15)
+        
+        return {
+            "suggestions": [
+                {"label": skill, "value": skill, "count": count}
+                for skill, count in top_skills
+            ],
+            "total": len(counter)
+        }
+    finally:
+        storage.close()
+
+# Кэш для autocomplete (в памяти)
+_autocomplete_cache = {}
+_cache_ttl = 300  # 5 минут
+
+@app.get("/api/autocomplete/cached")
+def autocomplete_cached(
+    type: str = Query(..., regex="^(vacancies|areas|skills)$"),
+    q: str = Query(..., min_length=2)
+):
+    """
+    Универсальный endpoint с кэшированием.
+    
+    Args:
+        type: Тип autocomplete (vacancies|areas|skills)
+        q: Поисковый запрос
+    
+    Returns:
+        Кэшированный результат или новый запрос
+    """
+    import time
+    from datetime import datetime
+    
+    cache_key = f"{type}:{q}"
+    
+    # Проверка кэша
+    if cache_key in _autocomplete_cache:
+        cached_data, cached_time = _autocomplete_cache[cache_key]
+        if time.time() - cached_time < _cache_ttl:
+            return {**cached_data, "cached": True}
+    
+    # Новый запрос
+    if type == "vacancies":
+        result = autocomplete_vacancies(q)
+    elif type == "areas":
+        result = autocomplete_areas(q)
+    else:
+        result = autocomplete_skills(q)
+    
+    # Сохранение в кэш
+    _autocomplete_cache[cache_key] = (result, time.time())
+    
+    # Очистка старого кэша (раз в 100 запросов)
+    if len(_autocomplete_cache) > 100:
+        now = time.time()
+        _autocomplete_cache = {
+            k: v for k, v in _autocomplete_cache.items()
+            if now - v[1] < _cache_ttl
+        }
+    
+    return {**result, "cached": False}
     
     # Считаем количество профессий по доменам
     domain_counts = defaultdict(int)
