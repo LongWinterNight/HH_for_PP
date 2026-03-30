@@ -1376,21 +1376,21 @@
                                         class="px-5 py-2.5 text-sm font-medium rounded-lg transition flex items-center">
                                     <i class="fas fa-code mr-2"></i>
                                     Hard Skills
-                                    <span v-if="topSkills.hard.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.hard.length }}</span>
+                                    <span v-if="topSkills.hard && topSkills.hard.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.hard.length }}</span>
                                 </button>
                                 <button @click="activeSkillTab = 'soft'"
                                         :class="activeSkillTab === 'soft' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                                         class="px-5 py-2.5 text-sm font-medium rounded-lg transition flex items-center">
                                     <i class="fas fa-users mr-2"></i>
                                     Soft Skills
-                                    <span v-if="topSkills.soft.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.soft.length }}</span>
+                                    <span v-if="topSkills.soft && topSkills.soft.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.soft.length }}</span>
                                 </button>
                                 <button @click="activeSkillTab = 'tools'"
                                         :class="activeSkillTab === 'tools' ? 'bg-orange-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                                         class="px-5 py-2.5 text-sm font-medium rounded-lg transition flex items-center">
                                     <i class="fas fa-tools mr-2"></i>
                                     Tools
-                                    <span v-if="topSkills.tools.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.tools.length }}</span>
+                                    <span v-if="topSkills.tools && topSkills.tools.length > 0" class="ml-2 px-2 py-0.5 bg-white/20 text-white text-xs rounded-full">{{ topSkills.tools.length }}</span>
                                 </button>
                             </div>
                         </div>
@@ -1404,7 +1404,7 @@
                             </div>
                             
                             <!-- Hard Skills -->
-                            <div v-else-if="activeSkillTab === 'hard' && topSkills.hard.length > 0" class="space-y-2">
+                            <div v-else-if="activeSkillTab === 'hard' && topSkills.hard && topSkills.hard.length > 0" class="space-y-2">
                                 <div v-for="(skill, index) in topSkills.hard" :key="index" 
                                      class="flex items-center group hover:bg-gray-50 rounded-lg transition-colors">
                                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
@@ -1427,7 +1427,7 @@
                             </div>
                             
                             <!-- Soft Skills -->
-                            <div v-else-if="activeSkillTab === 'soft' && topSkills.soft.length > 0" class="space-y-2">
+                            <div v-else-if="activeSkillTab === 'soft' && topSkills.soft && topSkills.soft.length > 0" class="space-y-2">
                                 <div v-for="(skill, index) in topSkills.soft" :key="index" 
                                      class="flex items-center group hover:bg-gray-50 rounded-lg transition-colors">
                                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
@@ -1450,7 +1450,7 @@
                             </div>
                             
                             <!-- Tools -->
-                            <div v-else-if="activeSkillTab === 'tools' && topSkills.tools.length > 0" class="space-y-2">
+                            <div v-else-if="activeSkillTab === 'tools' && topSkills.tools && topSkills.tools.length > 0" class="space-y-2">
                                 <div v-for="(skill, index) in topSkills.tools" :key="index" 
                                      class="flex items-center group hover:bg-gray-50 rounded-lg transition-colors">
                                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center font-bold text-sm mr-3 flex-shrink-0">
@@ -2497,11 +2497,11 @@
                         const params = new URLSearchParams({
                             page: this.pagination.page,
                             per_page: this.pagination.per_page,
-                            search: this.filters.search,
-                            area: this.filters.area,
-                            experience: this.filters.experience,
-                            skill: this.filters.skill,
-                            salary_only: this.filters.salary_only
+                            search: this.filters.search || '',
+                            area: this.filters.area || '',
+                            experience: this.filters.experience || '',
+                            skill: this.filters.skill || '',
+                            salary_only: this.filters.salary_only || false
                         });
 
                         const response = await fetch(`${API_BASE}/vacancies?${params}`);
@@ -2721,7 +2721,7 @@
                 },
                 
                 resetFilters() {
-                    this.filters = { search: '', area: '', experience: '', skill: '' };
+                    this.filters = { search: '', area: '', experience: '', skill: '', salary_only: false };
                     this.pagination.page = 1;
                     this.loadVacancies();
                 },
