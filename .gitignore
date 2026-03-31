@@ -34,12 +34,16 @@ ENV/
 *~
 
 # Data files (игнорируем большие файлы данных)
-data/raw/*.json
-data/processed/*.csv
-data/processed/*.parquet
+# data/raw/*.json
+# data/processed/*.csv
+# data/processed/*.parquet
 data/reports/*.xlsx
-data/*.db
+# data/*.db  # Разкомментировать для продакшена
 logs/*.log
+
+# Demo mode - коммитим базу для демонстрации
+!data/hh_analytics.db
+!data/professions_catalog.json
 
 # Environment variables (.env содержит секреты)
 .env

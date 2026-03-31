@@ -1,116 +1,78 @@
-# HH.ru Analytics — ETL система для анализа вакансий
+# 🚀 HH.ru Analytics — Система анализа вакансий
 
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com)
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green.svg)](https://vuejs.org)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Профессиональная ETL-система для сбора, обработки и анализа вакансий с HH.ru. Система автоматически извлекает навыки (Hard Skills, Soft Skills, Tools) из описаний вакансий, формирует аналитические отчёты в Excel и сохраняет данные в SQLite базу.
+**HH.ru Analytics** — профессиональная ETL-система для сбора, обработки и анализа вакансий с HH.ru с автоматическим извлечением навыков (Hard Skills, Soft Skills, Tools) и формированием аналитических отчётов.
 
 ---
 
-## 📑 Оглавление
+## 📋 Оглавление
 
 - [Возможности](#-возможности)
-- [Быстрый старт](#-быстрый-старт)
+- [Требования](#-требования)
 - [Установка](#-установка)
-- [Использование](#-использование)
-- [Оптимизированный парсинг](#-оптимизированный-парсинг)
-- [Веб-интерфейс](#-веб-интерфейс)
-- [CLI интерфейс](#-cli-интерфейс)
-- [Архитектура](#-архитектура)
-- [Конфигурация](#-конфигурация)
+- [Запуск](#-запуск)
+- [API Документация](#-api-документация)
+- [Демонстрация](#-демонстрация)
 - [Структура проекта](#-структура-проекта)
-- [Аналитика и отчёты](#-аналитика-и-отчёты)
-- [Устранение неполадок](#-устранение-неполадок)
-- [FAQ](#-faq)
+- [Troubleshooting](#-troubleshooting)
 
 ---
 
 ## ✨ Возможности
 
-### Сбор данных (Extract)
-- ✅ Поиск вакансий через официальное API HH.ru
-- ✅ Поддержка множественных поисковых запросов
-- ✅ Автоматическая пагинация (до 400 страниц)
-- ✅ Фильтрация по дате публикации
-- ✅ Удаление дубликатов вакансий
-- ✅ Rate limiting (1 запрос/сек)
-- ✅ **Инкрементальный режим (только новые вакансии)**
-- ✅ **Кэширование API ответов**
+### 📊 Аналитика в реальном времени
+- **8 KPI метрик** с трендами (Средняя ЗП, Медиана, Вакансий, Навыков, Компаний, Регионов, Hard Skills, Soft Skills)
+- **Топ-20 навыков** по категориям (Hard Skills, Soft Skills, Tools)
+- **Фильтры аналитики**: период, домен, регион, опыт, зарплата
 
-### Обработка данных (Transform)
-- ✅ Извлечение навыков из описаний вакансий
-- ✅ Классификация: Hard Skills, Soft Skills, Tools
-- ✅ Лемматизация текста (pymorphy3)
-- ✅ Извлечение зарплаты и работодателя
-- ✅ Нормализация данных
-- ✅ **Векторизованный поиск навыков**
+### 🔍 Поиск и фильтрация
+- Автодополнение вакансий, регионов и навыков
+- Расширенные фильтры (опыт, зарплата, навыки)
+- Пагинация результатов
 
-### Загрузка и хранение (Load)
-- ✅ Сохранение в JSON (сырые данные)
-- ✅ Сохранение в CSV и Parquet (обработанные)
-- ✅ SQLite база данных
-- ✅ Upsert логика (без дубликатов)
+### 📥 Экспорт данных
+- **PDF** — отчёты с KPI и топ навыков
+- **Excel** — 5 листов (KPI, Hard, Soft, Tools, Данные)
+- **CSV** — сырые данные для импорта
 
-### Аналитика и отчёты (Analyze)
-- ✅ Консольная сводка по навыкам
-- ✅ Excel-отчёты с графиками
-- ✅ Статистика зарплат
-- ✅ Распределение по регионам и опыту
-- ✅ Расширенная аналитика с группировками
-- ✅ Детализация "вакансия-навык"
-- ✅ **Веб-интерфейс для управления системой**
+### 🤖 Парсер вакансий
+- Оптимизированный сбор данных с API HH.ru
+- Кэширование запросов
+- Инкрементальное обновление
+- Прогресс в реальном времени
 
 ---
 
-## 🚀 Быстрый старт
+## 🛠 Требования
 
-### 1. Установка зависимостей
+| Компонент | Версия | Обязательно |
+|-----------|--------|-------------|
+| Python | 3.10+ | ✅ Да |
+| pip | 23.0+ | ✅ Да |
+| Git | 2.30+ | ✅ Да |
+| Node.js | 18+ | ❌ Нет (Vue через CDN) |
 
-```bash
-cd F:\AI_projects\hh_analytics
-pip install -r requirements.txt
-```
-
-### 2. Настройка окружения
-
-Создайте `.env` в корне проекта:
-
-```bash
-HH_USER_EMAIL=ваш_email@example.com
-API_REQUEST_DELAY=1.0
-MAX_PAGES=10
-DAYS_BACK=30
-```
-
-### 3. Тестовый запуск
-
-```bash
-# Быстрый тест (2 страницы, 7 дней)
-python optimized_parser.py --max-pages 2 --days-back 7
-
-# Полный пайплайн
-python main.py
-```
-
-### 4. Запуск веб-интерфейса
-
-```bash
-python web/run.py
-```
-
-Откройте: http://localhost:8000/static/index.html
+**Операционные системы:**
+- ✅ Windows 10/11
+- ✅ Linux (Ubuntu 20.04+, Debian 11+)
+- ✅ macOS 11+
 
 ---
 
-## ⚙️ Установка
+## 📦 Установка
 
-### Шаг 1: Перейти в директорию проекта
+### Шаг 1: Клонирование репозитория
 
 ```bash
-cd F:\AI_projects\hh_analytics
+git clone https://github.com/LongWinterNight/HH_for_PP.git
+cd HH_for_PP
 ```
 
-### Шаг 2: Создать виртуальное окружение
+### Шаг 2: Создание виртуального окружения
 
 **Windows:**
 ```bash
@@ -118,336 +80,214 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-**macOS/Linux:**
+**Linux/macOS:**
 ```bash
 python3 -m venv venv
-source tenv/bin/activate
+source venv/bin/activate
 ```
 
-### Шаг 3: Установить зависимости
+### Шаг 3: Установка зависимостей
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Шаг 4: Настроить переменные окружения (.env)
+### Шаг 4: Настройка переменных окружения
 
 ```bash
-# HH.ru API Configuration
-HH_USER_EMAIL=ваш_email@example.com
-
-# Rate Limiting
-API_REQUEST_DELAY=1.0
-
-# Лимиты сбора
-MAX_PAGES=10
-DAYS_BACK=30
+# Скопируйте пример файла конфигурации
+cp hh_analytics/.env.example hh_analytics/.env
 ```
 
-> ⚠️ **Важно:** Укажите реальный email в `HH_USER_EMAIL` для соблюдения правил API HH.ru.
+**Отредактируйте `hh_analytics/.env`:**
+```env
+# HH.ru API токен (получить на https://dev.hh.ru/)
+HH_API_TOKEN=your_token_here
+
+# База данных
+DB_PATH=data/hh_analytics.db
+
+# Логирование
+LOG_LEVEL=INFO
+LOG_FILE=logs/hh_analytics.log
+```
+
+> ⚠️ **Важно:** Для работы парсера необходим API токен HH.ru. Без токена будут доступны только функции анализа загруженных данных.
 
 ---
 
-## 📖 Использование
+## ▶️ Запуск
 
-### Режимы работы main.py
+### Быстрый старт (все компоненты)
 
-| Команда | Описание |
-|---------|----------|
-| `python main.py` | Полный пайплайн (4 этапа) |
-| `python main.py --collect` | Только сбор вакансий |
-| `python main.py --process` | Только обработка |
-| `python main.py --load` | Только загрузка в БД |
-| `python main.py --analyze` | Только анализ и отчёты |
-| `python main.py --collect --analyze` | Сбор и анализ |
-
-### Параметры командной строки
-
+**Windows:**
 ```bash
-python main.py [OPTIONS]
-
-Режимы:
-  --collect           Только сбор (Extract)
-  --process           Только обработка (Transform)
-  --load              Только загрузка (Load)
-  --analyze           Только анализ (Analyze)
-
-Параметры сбора:
-  --keywords KEYWORDS ...   Поисковые запросы
-  --max-pages N             Макс. страниц
-  --days-back N             За сколько дней собирать
+cd hh_analytics
+python web/app/main.py
 ```
 
-### Примеры
+**Linux/macOS:**
+```bash
+cd hh_analytics
+python3 web/app/main.py
+```
+
+**Откройте в браузере:** http://localhost:8000
+
+### Раздельный запуск
+
+#### 1. Запуск парсера (сбор данных)
 
 ```bash
-# Быстрый сбор по запросам
-python main.py --collect --keywords "Python" "Backend" --max-pages 3
+cd hh_analytics
+python optimized_parser.py
+```
 
-# Сбор и анализ за неделю
-python main.py --collect --analyze --days-back 7 --max-pages 5
+#### 2. Запуск веб-приложения
 
-# Полный пайплайн с параметрами
-python main.py --keywords "ML" "DL" "NLP" --max-pages 10 --days-back 30
+```bash
+cd hh_analytics
+python web/app/main.py
 ```
 
 ---
 
-## ⚡ Оптимизированный парсинг
+## 📡 API Документация
 
-### 🎯 Сравнение версий
+После запуска сервера доступны следующие endpoints:
 
-| Параметр | Оригинальный | Оптимизированный |
-|----------|--------------|------------------|
-| Время сбора | 50-100 мин | **5-15 мин** |
-| Кэширование | ❌ | ✅ |
-| Инкрементальный режим | ❌ | ✅ |
-| Прогресс-бар | ❌ | ✅ |
-| Детали вакансий | Все страницы | Только 2 первые |
+### Основные endpoints
 
-### 🚀 Команды оптимизированного парсера
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/` | GET | Главная страница |
+| `/api/health` | GET | Проверка статуса сервера |
+| `/api/vacancies` | GET | Список вакансий с фильтрами |
+| `/api/dashboard` | GET | Данные дашборда |
 
-#### Инкрементальный режим (рекомендуется)
-```bash
-python optimized_parser.py --incremental
+### Аналитика
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/api/analytics/kpi` | GET | KPI метрики с трендами |
+| `/api/analytics/top-skills` | GET | Топ навыков по типу |
+| `/api/analytics/distribution` | GET | Распределение данных |
+
+### Параметры фильтров для аналитики:
+
 ```
-- ✅ Собирает только новые вакансии
-- ✅ Пропускает уже существующие в базе
-- ⏱️ **Время: 5-15 минут**
-
-#### Быстрый сбор (тестирование)
-```bash
-python optimized_parser.py --max-pages 3 --days-back 7
-```
-- ✅ 3 страницы на запрос
-- ✅ За последние 7 дней
-- ⏱️ **Время: 15 минут**
-
-#### По конкретным навыкам
-```bash
-python optimized_parser.py --keywords "Python" "LLM" "Data Scientist" --max-pages 5
-```
-- ✅ Фокус на конкретных технологиях
-- ⏱️ **Время: 5 минут**
-
-#### Статистика кэша
-```bash
-python optimized_parser.py --cache-stats
+GET /api/analytics/kpi?period=month&domain=IT&regions=Москва&experience=1-3 года&salary_only=true
 ```
 
-#### Очистка кэша
-```bash
-python optimized_parser.py --clear-cache
-```
+| Параметр | Значения | Описание |
+|----------|----------|----------|
+| `period` | today, week, month, quarter, year, all_time | Период фильтрации |
+| `domain` | IT, Строительство, Продажи... | Домен профессии |
+| `regions` | Москва, СПб, Казань... | Регионы через запятую |
+| `experience` | Без опыта, 1-3 года, 3-6 лет, Более 6 лет | Опыт работы |
+| `salary_only` | true, false | Только вакансии с зарплатой |
 
-### 📊 Рекомендации по использованию
+### Экспорт
 
-| Задача | Команда | Время |
-|--------|---------|-------|
-| Ежедневное обновление | `--incremental --days-back 1 --max-pages 5` | ~3-5 мин |
-| Еженедельное обновление | `--incremental --days-back 7` | ~10-15 мин |
-| Полный сбор | `--max-pages 10 --days-back 30` | ~50-100 мин |
-| Тестирование | `--keywords "Python" --max-pages 2` | ~1-2 мин |
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/api/export/analytics` | POST | Экспорт аналитики (PDF/Excel/CSV) |
+| `/api/export/vacancies` | GET | Экспорт вакансий (CSV/Excel) |
+| `/api/reports/list` | GET | Список отчётов |
+| `/api/reports/download/{filename}` | GET | Скачивание отчёта |
+
+### Парсер
+
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/api/parser/status` | GET | Статус парсера |
+| `/api/parser/start` | POST | Запуск парсера |
+| `/api/parser/stop` | GET | Остановка парсера |
+| `/api/parser/cache/stats` | GET | Статистика кэша |
+| `/api/parser/cache/clear` | POST | Очистка кэша |
+
+### Swagger UI
+
+Полная документация доступна по адресу: http://localhost:8000/docs
 
 ---
 
-## 🌐 Веб-интерфейс
+## 🎯 Демонстрация
 
-### Быстрый запуск
+### Чек-лист для презентации
 
-```bash
-# Запуск веб-приложения
-python web/run.py
-
-# Или через uvicorn
-uvicorn web.app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-**Откройте в браузере:** http://localhost:8000/static/index.html
-
-**API документация:** http://localhost:8000/docs
-
-### Возможности веб-интерфейса
-
-| Раздел | Описание |
-|--------|----------|
-| **Дашборд** | Сводная статистика, топ навыков, недавние вакансии |
-| **Вакансии** | Поиск, фильтрация, пагинация, экспорт |
-| **Аналитика** | Группировки технологий, Hard/Soft Skills, графики |
-| **Парсер** | Запуск/остановка сбора, мониторинг прогресса |
-| **Отчёты** | Список, скачивание, генерация новых отчётов |
-
-### API Endpoints
-
-#### Вакансии
-- `GET /api/vacancies` — список с фильтрами
-- `GET /api/dashboard` — данные для дашборда
-
-#### Аналитика
-- `GET /api/analytics/summary` — сводка
-- `GET /api/analytics/advanced` — расширенная
-- `GET /api/analytics/distribution` — распределение
-
-#### Парсер
-- `GET /api/parser/status` — статус
-- `POST /api/parser/start` — запуск
-- `POST /api/parser/stop` — остановка
-- `GET /api/parser/cache/stats` — статистика кэша
-- `POST /api/parser/cache/clear` — очистка кэша
-
-#### Отчёты
-- `GET /api/reports/list` — список
-- `GET /api/reports/download/{filename}` — скачивание
-- `POST /api/reports/generate` — генерация
-- `GET /api/export/vacancies` — экспорт
-
-### Примеры API запросов
+#### 1. Подготовка (5 минут до начала)
 
 ```bash
-# Получить вакансии с фильтром
-curl "http://localhost:8000/api/vacancies?area=Москва&skill=Python&page=1&per_page=20"
+# 1. Активировать виртуальное окружение
+venv\Scripts\activate  # Windows
+source venv/bin/activate  # Linux/macOS
 
-# Запустить парсер (инкрементальный режим)
-curl -X POST "http://localhost:8000/api/parser/start?incremental=true"
+# 2. Запустить сервер
+python web/app/main.py
 
-# Получить аналитику
-curl "http://localhost:8000/api/analytics/advanced"
-
-# Статистика кэша
-curl "http://localhost:8000/api/parser/cache/stats"
+# 3. Проверить работоспособность
+# Открыть http://localhost:8000
 ```
 
----
+#### 2. Структура демонстрации (10-15 минут)
 
-## 🖥 CLI интерфейс
+**Введение (2 мин)**
+- Показать главную страницу
+- Кратко о возможностях системы
 
-### Запуск
+**Дашборд (3 мин)**
+- KPI карточки с трендами
+- Топ навыков (переключение вкладок)
+- Недавние вакансии
 
-```bash
-# Интерактивный режим
-python -m src.db_cli
+**Аналитика (5 мин)**
+- Применить фильтры:
+  - Период: "За месяц"
+  - Опыт: "1-3 года"
+  - Только с зарплатой: ✅
+- Показать изменения в KPI
+- Экспорт в PDF
 
-# Однострочные команды
-python -m src.db_cli --stats
-python -m src.db_cli --skill LLM --limit 10
-python -m src.db_cli --list --area Москва
-python -m src.db_cli --advanced
-python -m src.db_cli --export my_data.xlsx
-```
+**Парсер (3 мин)**
+- Запустить парсер с ключевым словом "Python"
+- Показать прогресс в реальном времени
+- Остановить парсер
 
-### Команды интерактивного режима
+**Поиск вакансий (2 мин)**
+- Автодополнение вакансий
+- Фильтры по навыкам
+- Просмотр деталей вакансии
 
-| Команда | Описание |
-|---------|----------|
-| `list [limit]` | Список вакансий (по умолчанию 20) |
-| `search <skill> [limit]` | Поиск по навыку |
-| `stats` | Статистика по базе |
-| `advanced` | Расширенная аналитика |
-| `export [path]` | Экспорт в Excel |
-| `filter --area <region>` | Фильтр по региону |
-| `filter --exp <experience>` | Фильтр по опыту |
-| `help` | Справка |
-| `quit` / `exit` | Выход |
-
----
-
-## 🏗 Архитектура
-
-Система построена по принципу **ETL (Extract-Transform-Load)**:
+#### 3. Сценарий демонстрации
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Extract   │────▶│  Transform   │────▶│    Load     │────▶│   Analyze   │
-│  (Сбор)     │     │ (Обработка)  │     │ (Загрузка)  │     │  (Анализ)   │
-└─────────────┘     └──────────────┘     └─────────────┘     └─────────────┘
-       │                    │                    │                    │
-       ▼                    ▼                    ▼                    ▼
-  HH.ru API           Навыки извлечены      SQLite БД            Excel-отчёт
-  JSON файлы          CSV/Parquet          Хранилище            Консольная
-                                                                  сводка
-```
+1. Главная → Дашборд
+   ├─ Показать 8 KPI метрик
+   ├─ Топ-20 Hard Skills
+   └─ Топ-20 Soft Skills
 
-### Компоненты системы
+2. Аналитика
+   ├─ Применить фильтр "За месяц"
+   ├─ Применить фильтр "Только с зарплатой"
+   ├─ Показать изменения
+   └─ Экспорт в Excel
 
-| Модуль | Описание |
-|--------|----------|
-| `api_client.py` | Клиент для работы с HH.ru API |
-| `collector.py` | Сборщик вакансий (Extract) |
-| `processor.py` | Процессор для обработки (Transform) |
-| `storage.py` | Хранилище SQLite (Load) |
-| `analyzer.py` | Анализатор и генератор отчётов (Analyze) |
-| `advanced_analyzer.py` | Расширенная аналитика с группировками |
-| `db_cli.py` | CLI интерфейс для работы с БД |
-| `config.py` | Конфигурация и настройки |
-| `utils.py` | Вспомогательные утилиты |
-| `optimized_parser.py` | Оптимизированный парсер с кэшем |
+3. Вакансии
+   ├─ Поиск "Python developer"
+   ├─ Фильтр по опыту "1-3 года"
+   ├─ Открыть детальную информацию
+   └─ Показать навыки
 
----
+4. Парсер
+   ├─ Ввести "Data Scientist"
+   ├─ Запустить
+   ├─ Показать прогресс
+   └─ Остановить
 
-## ⚙️ Конфигурация
-
-### Переменные окружения (.env)
-
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `HH_USER_EMAIL` | Email для User-Agent | `""` |
-| `API_REQUEST_DELAY` | Задержка между запросами (сек) | `1.0` |
-| `MAX_PAGES` | Макс. страниц для сбора | `10` |
-| `DAYS_BACK` | За сколько дней собирать | `30` |
-| `DATA_DIR` | Основная директория | `data` |
-| `RAW_DATA_DIR` | Сырые данные | `data/raw` |
-| `PROCESSED_DATA_DIR` | Обработанные данные | `data/processed` |
-| `REPORTS_DIR` | Отчёты | `data/reports` |
-| `DB_PATH` | SQLite база данных | `data/hh_vacancies.db` |
-| `LOG_LEVEL` | Уровень логов | `INFO` |
-
-### Параметры config.yaml
-
-#### Поисковые запросы
-```yaml
-search_queries:
-  - "Python developer"
-  - "Data Scientist"
-  - "Machine Learning engineer"
-
-hard_skills:
-  - "python"
-  - "java"
-  - "sql"
-  - "pytorch"
-  - "tensorflow"
-
-soft_skills:
-  - "communication"
-  - "teamwork"
-  - "leadership"
-
-tools:
-  - "docker"
-  - "git"
-  - "jupyter"
-```
-
-#### Обработка
-```yaml
-processing:
-  min_skill_length: 2
-  max_skills_per_vacancy: 50
-  confidence_threshold: 0.7
-  use_fuzzy_search: true
-  find_synonyms: true
-```
-
-#### Отчётность
-```yaml
-reporting:
-  top_n_skills: 50
-  min_skill_frequency: 1
-  export_formats:
-    - xlsx
-    - csv
-  group_by_category: true
-  show_trends: true
+5. Отчёты
+   ├─ Показать сгенерированные отчёты
+   └─ Скачать последний отчёт
 ```
 
 ---
@@ -455,293 +295,133 @@ reporting:
 ## 📁 Структура проекта
 
 ```
-hh_analytics/
-├── main.py                 # Точка входа (ETL пайплайн)
-├── optimized_parser.py     # Оптимизированный парсер
-├── requirements.txt        # Зависимости Python
-├── config.yaml            # Конфигурация (словари навыков)
-├── .env                   # Переменные окружения
-├── .gitignore            # Git ignore
-├── README.md             # Документация
-│
-├── src/                  # Исходный код
-│   ├── __init__.py
-│   ├── api_client.py     # HH.ru API клиент
-│   ├── collector.py      # Сбор вакансий (Extract)
-│   ├── processor.py      # Обработка (Transform)
-│   ├── storage.py        # SQLite хранилище (Load)
-│   ├── analyzer.py       # Анализ и отчёты (Analyze)
-│   ├── advanced_analyzer.py  # Расширенная аналитика
-│   ├── db_cli.py         # CLI интерфейс для БД
-│   ├── config.py         # Конфигурация
-│   └── utils.py          # Утилиты
-│
-├── web/                  # Веб-приложение
-│   ├── app/
+HH_for_PP/
+├── hh_analytics/                 # Основной проект
+│   ├── .env                      # Переменные окружения
+│   ├── .env.example              # Пример конфигурации
+│   ├── .gitignore                # Игнорируемые файлы
+│   ├── requirements.txt          # Python зависимости
+│   ├── config.yaml               # Конфигурация парсера
+│   │
+│   ├── src/                      # Исходный код
 │   │   ├── __init__.py
-│   │   └── main.py       # FastAPI бэкенд
-│   ├── static/
-│   │   └── index.html    # Веб-интерфейс (Vue.js 3)
-│   └── run.py            # Скрипт запуска
+│   │   ├── config.py             # Загрузка конфигурации
+│   │   ├── collector.py          # Парсер HH.ru
+│   │   ├── analyzer.py           # Анализ данных
+│   │   ├── advanced_analyzer.py  # Расширенная аналитика
+│   │   ├── storage.py            # Работа с БД
+│   │   └── utils.py              # Утилиты
+│   │
+│   ├── web/                      # Веб-приложение
+│   │   ├── app/
+│   │   │   ├── main.py           # FastAPI сервер
+│   │   │   └── __init__.py
+│   │   └── static/
+│   │       ├── index.html        # Vue.js приложение
+│   │       └── favicon.ico
+│   │
+│   ├── data/                     # Данные
+│   │   ├── hh_analytics.db       # SQLite база данных
+│   │   └── professions_catalog.json
+│   │
+│   ├── logs/                     # Логи
+│   │   └── hh_analytics.log
+│   │
+│   └── reports/                  # Сгенерированные отчёты
+│       └── *.xlsx, *.pdf
 │
-├── data/                 # Данные
-│   ├── raw/             # Сырые JSON
-│   ├── processed/       # CSV и Parquet
-│   ├── reports/         # Excel и CSV отчёты
-│   └── hh_vacancies.db  # SQLite база
+├── optimized_parser.py           # Оптимизированный парсер
+├── check_functionality.py        # Проверка функциональности
+├── fill_all_domains.py           # Заполнение доменов
 │
-└── logs/                # Логи
-    └── hh_analytics.log
+├── README.md                     # Эта документация
+├── LICENSE                       # Лицензия
+└── .gitignore                    # Git игнор
 ```
 
 ---
 
-## 🔄 ETL Пайплайн
+## 🔧 Troubleshooting
 
-### Этап 1: Extract (Сбор)
-
-**Процесс:**
-1. Подключение к HH.ru API
-2. Поиск по ключевым словам
-3. Пагинация результатов
-4. Фильтрация по дате
-5. Удаление дубликатов
-6. Сохранение в JSON
-
-**Выход:**
-- `data/raw/vacancies_<query>_<timestamp>.json`
-- `data/raw/all_vacancies_<timestamp>.json`
-
-```bash
-python main.py --collect --max-pages 5
-```
-
-### Этап 2: Transform (Обработка)
-
-**Процесс:**
-1. Загрузка JSON
-2. Извлечение навыков
-3. Классификация по категориям
-4. Лемматизация
-5. Извлечение зарплаты
-6. Сохранение в CSV/Parquet
-
-**Выход:**
-- `data/processed/vacancies_processed.csv`
-- `data/processed/vacancies_processed.parquet`
-
-```bash
-python main.py --process
-```
-
-### Этап 3: Load (Загрузка)
-
-**Процесс:**
-1. Чтение CSV
-2. Создание таблицы SQLite
-3. Массовая вставка
-4. Индексация
-
-**Выход:**
-- `data/hh_vacancies.db`
-
-```bash
-python main.py --load
-```
-
-### Этап 4: Analyze (Анализ)
-
-**Процесс:**
-1. Подсчёт частоты навыков
-2. Статистика зарплат
-3. Распределение по опыту/регионам
-4. Генерация Excel-отчёта
-5. Консольная сводка
-6. Расширенная аналитика с группировками
-
-**Выход:**
-- `data/reports/hh_analytics_report_<timestamp>.xlsx`
-- `data/reports/hh_advanced_analytics_<timestamp>.xlsx`
-- `data/reports/hh_skills_stats_<timestamp>.csv`
-
-```bash
-python main.py --analyze
-```
-
----
-
-## 📊 Аналитика и отчёты
-
-### Стандартный отчёт (hh_analytics_report_*.xlsx)
-
-| Лист | Описание |
-|------|----------|
-| **Summary** | Сводная статистика |
-| **Hard Skills** | Топ профессиональных навыков |
-| **Soft Skills** | Топ гибких навыков |
-| **Tools** | Топ инструментов |
-| **Salaries** | Анализ зарплат |
-| **Experience** | Распределение по опыту |
-| **Areas** | Распределение по регионам |
-
-### Детальный отчёт (hh_advanced_analytics_*.xlsx)
-
-| Лист | Описание |
-|------|----------|
-| **Summary** | Сводка по всем категориям |
-| **Technology Groups** | 20+ групп технологий |
-| **Hard Skills Groups** | 12+ групп hard skills |
-| **Soft Skills Groups** | 8+ групп soft skills |
-| **Vacancy-Skill Map** | Карта связей вакансия-навык |
-| **Advanced Categories** | Расширенные категории |
-
-### Консольная сводка
-
-```
-============================================================
-📊 HH.ru Analytics — Сводка
-============================================================
-
-📈 Всего вакансий: 500
-📋 Среднее навыков на вакансию: 12.45
-
-🛠 Топ-10 Hard Skills:
-   1. python: 245
-   2. sql: 198
-   3. django: 156
-
-🔧 Топ-10 Tools:
-   1. docker: 187
-   2. git: 165
-   3. linux: 134
-
-💰 Зарплаты (RUB):
-   Средняя: 150 000
-   Медиана: 130 000
-
-============================================================
-```
-
----
-
-## 🛠 Устранение неполадок
-
-### Parquet: `Unable to find a usable engine`
+### Ошибка: `ModuleNotFoundError: No module named 'fastapi'`
 
 **Решение:**
 ```bash
-pip install pyarrow>=14.0.0
+pip install -r requirements.txt
 ```
 
-### Ошибка конфигурации
-
-**Решение:** Проверьте `config.yaml` и `.env`.
-
-### `HH_USER_EMAIL not set`
-
-**Решение:** Добавьте в `.env`:
-```
-HH_USER_EMAIL=ваш_email@example.com
-```
-
-### `ModuleNotFoundError: No module named 'src'`
-
-**Решение:** Запускайте через `python -m`:
-```bash
-python -m src.collector
-```
-
-### Rate Limit API
+### Ошибка: `PermissionError: [Errno 13] Permission denied: 'data/hh_analytics.db'`
 
 **Решение:**
-1. Увеличьте `API_REQUEST_DELAY` в `.env`
-2. Уменьшите `MAX_PAGES`
-3. Делайте перерывы
+```bash
+# Windows: Запустить от имени администратора
+# Linux/macOS:
+chmod 755 data/
+chmod 644 data/hh_analytics.db
+```
 
-### Медленный сбор
+### Ошибка: `Address already in use: port 8000`
 
 **Решение:**
-1. Используйте `optimized_parser.py`
-2. Включите инкрементальный режим
-3. Уменьшите `MAX_PAGES` (до 5)
-4. Уменьшите `DAYS_BACK` (до 7)
-
-### Пустой DataFrame
-
-**Решение:** Сначала запустите сбор:
 ```bash
-python main.py --collect
+# Windows
+netstat -ano | findstr :8000
+taskkill /F /PID <PID>
+
+# Linux/macOS
+lsof -i :8000
+kill -9 <PID>
 ```
+
+### Ошибка: `HH API token is required`
+
+**Решение:**
+1. Получить токен на https://dev.hh.ru/
+2. Добавить в `.env`:
+   ```env
+   HH_API_TOKEN=your_token_here
+   ```
+
+### Ошибка: `reportlab not found`
+
+**Решение:**
+```bash
+pip install reportlab xlsxwriter
+```
+
+### Данные не отображаются
+
+**Решение:**
+1. Проверить наличие данных в БД:
+   ```bash
+   python check_functionality.py
+   ```
+2. Запустить парсер для сбора данных
 
 ---
 
-## ❓ FAQ
+## 📞 Контакты
 
-### Q: Сколько вакансий можно собрать?
-
-**A:**
-- `MAX_PAGES=10` → ~1000 на запрос
-- При 10 запросах → ~10 000
-- Время: ~3-5 мин на 1000 (оптимизированный)
-
-### Q: Как часто запускать сбор?
-
-**A:**
-- Не чаще 1 раза в час
-- Задержка 1-2 сек между запросами
-
-### Q: Можно ли PostgreSQL вместо SQLite?
-
-**A:** Да, измените в `storage.py`:
-```python
-self.engine = create_engine(
-    "postgresql://user:password@localhost/dbname"
-)
-```
-
-### Q: Как добавить новые навыки?
-
-**A:** В `config.yaml`:
-```yaml
-hard_skills:
-  - "новый навык"
-```
-
-### Q: Где логи?
-
-**A:** `logs/hh_analytics.log` и консоль.
-
-### Q: Как экспортировать в Excel?
-
-**A:** Автоматически при `--analyze`:
-```bash
-python main.py --analyze
-```
-
-### Q: Как остановить сбор досрочно?
-
-**A:** Нажмите `Ctrl+C`. Данные сохранятся.
-
-### Q: Слетит ли база при запуске парсера?
-
-**A:** **НЕТ!** Существующие вакансии не удаляются, новые добавляются, дубликаты автоматически отфильтровываются.
+**Разработчик:** Safan Ch  
+**Email:** safanch2705@gmail.com  
+**GitHub:** https://github.com/LongWinterNight/HH_for_PP
 
 ---
 
-## 📝 Лицензия
+## 📄 Лицензия
 
-MIT License.
+MIT License — см. файл [LICENSE](LICENSE)
 
-## 👥 Контакты
-
-По вопросам: [ваш email]
+---
 
 ## 🙏 Благодарности
 
-- [HH.ru API](https://github.com/hhru/api)
-- [pymorphy3](https://pymorphy3.readthedocs.io/)
-- [pandas](https://pandas.pydata.org/)
+- [HH.ru API](https://dev.hh.ru/) — источник данных
+- [FastAPI](https://fastapi.tiangolo.com/) — веб-фреймворк
+- [Vue.js](https://vuejs.org/) — frontend фреймворк
+- [Chart.js](https://www.chartjs.org/) — визуализация данных
 
 ---
 
-**Удачи в анализе рынка труда! 🚀**
+**Версия:** 1.1.0  
+**Дата обновления:** 31 марта 2026 г.

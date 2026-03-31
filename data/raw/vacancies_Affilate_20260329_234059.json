@@ -1,0 +1,1008 @@
+[
+  {
+    "id": "131483932",
+    "premium": false,
+    "name": "Affilate Manager Sales (Менеджер по продажам/трафику в БЕТТИНГ) Betting",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": {
+      "from": 200000,
+      "to": null,
+      "currency": "RUR",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 200000,
+      "to": null,
+      "currency": "RUR",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": "2 линия",
+      "building": "метро Горьковская",
+      "lat": 59.956147,
+      "lng": 30.318833,
+      "description": null,
+      "raw": "Санкт-Петербург, 2 линия, метро Горьковская",
+      "metro": {
+        "station_name": "Горьковская",
+        "line_name": "Московско-Петроградская",
+        "station_id": "15.216",
+        "line_id": "15",
+        "lat": 59.956112,
+        "lng": 30.31889
+      },
+      "metro_stations": [
+        {
+          "station_name": "Горьковская",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.216",
+          "line_id": "15",
+          "lat": 59.956112,
+          "lng": 30.31889
+        },
+        {
+          "station_name": "Петроградская",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.215",
+          "line_id": "15",
+          "lat": 59.966389,
+          "lng": 30.311293
+        },
+        {
+          "station_name": "Чкаловская",
+          "line_name": "Фрунзенско-Приморская",
+          "station_id": "18.248",
+          "line_id": "18",
+          "lat": 59.961033,
+          "lng": 30.292006
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T20:06:09+0300",
+    "created_at": "2026-03-23T20:06:09+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131483932",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131483932?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131483932",
+    "relations": [],
+    "employer": {
+      "id": "10677170",
+      "name": "Давыдов Александр Борисович",
+      "url": "https://api.hh.ru/employers/10677170",
+      "alternate_url": "https://hh.ru/employer/10677170",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6480824.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6480825.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6480826.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10677170",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Цифры, конверсии, воронки.",
+      "responsibility": "Интересуют вопросы: - стоимость привлечения клиента на платформу."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [
+      {
+        "id": "from_four_to_six_hours_in_a_day",
+        "name": "Можно сменами по 4-6 часов в день"
+      }
+    ],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_6",
+        "name": "6 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "71",
+        "name": "Менеджер по работе с партнерами"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>Привет! С инвестором запускаем проект в нише беттинга (футбол).</p> <p>Ищем человека, кто возглавит направление. Первым этапом необходимо сделать расчет окупаемости проекта.</p> <p>Интересуют вопросы:</p> <p>- стоимость привлечения клиента на платформу</p> <p>- с каким источником трафика вы работали?</p> <p>Цифры, конверсии, воронки.</p> <p>Создаем инвест.план и начинаем работу! Оклад и процент обсуждаемы от ваших пожеланий.</p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Интернет-реклама"
+      },
+      {
+        "name": "Digital Marketing"
+      },
+      {
+        "name": "Разработка маркетинговой стратегии"
+      },
+      {
+        "name": "Работа с большим объемом информации"
+      },
+      {
+        "name": "Развитие бренда"
+      },
+      {
+        "name": "Анализ трафика"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-23T20:06:09+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131635528",
+    "premium": false,
+    "name": "Affilate Manager",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Красноярск",
+      "street": null,
+      "building": null,
+      "lat": 56.01054,
+      "lng": 92.85258,
+      "description": null,
+      "raw": "Красноярск",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T10:35:04+0300",
+    "created_at": "2026-03-29T10:35:04+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131635528",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131635528?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131635528",
+    "relations": [],
+    "employer": {
+      "id": "11908742",
+      "name": "ЦПР",
+      "url": "https://api.hh.ru/employers/11908742",
+      "alternate_url": "https://hh.ru/employer/11908742",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=11908742",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы Affiliate Manager от 2 лет. Опыт работы с рынками США и Европы. Практический опыт в высококонкурентных performance-вертикалях...",
+      "responsibility": "Активный поиск и привлечение вебмастеров и арбитражных команд в партнерскую программу. Развитие и поддержание долгосрочных отношений с партнерами. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "71",
+        "name": "Менеджер по работе с партнерами"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>Spy&amp;See — амбициозный IT-стартап в сфере социальных сетей и стриминга. Мы создаём платформу для монетизации контента, глубоко понимаем ключевые боли рынка и разрабатываем точечные, но максимально эффективные решения для их закрытия.</p> <p>Наша цель — переосмыслить подход к взаимодействию создателей контента и их аудитории, предлагая инструменты, которые реально увеличивают доход и упрощают работу с трафиком.</p> <p>Сейчас мы активно масштабируемся на рынках США и Европы и ищем Affiliate Manager, который поможет нам выстроить сильную партнерскую сеть и драйвить рост проекта.</p> <p><strong>Обязанности:</strong></p> <ul> <li>​​​Активный поиск и привлечение вебмастеров и арбитражных команд в партнерскую программу;</li> <li>Развитие и поддержание долгосрочных отношений с партнерами;</li> <li>Онбординг новых партнеров: помощь в выборе офферов, подготовка рекламных материалов, консультации по запуску и оптимизации трафика;</li> <li>Анализ статистики и ключевых метрик, выявление эффективных и неэффективных каналов;</li> <li>Оптимизация показателей (CR, ROI, EPC и др.) совместно с партнерами;</li> <li>Мониторинг рынка, анализ конкурентов и трендов в affiliate-сфере;</li> <li>Участие в разработке стратегий масштабирования партнерской сети.</li> </ul> <p><strong>Требования:</strong></p> <ul> <li>Опыт работы Affiliate Manager от 2 лет;</li> <li>Опыт работы с рынками США и Европы;</li> <li>Практический опыт в высококонкурентных performance-вертикалях (например, dating, entertainment или смежные направления);</li> <li>Наличие успешных кейсов по привлечению и масштабированию партнеров;</li> <li>Уверенные навыки аналитики и работы с метриками.</li> <li>Грамотный английский язык (письменный и устный).</li> </ul> <p><strong>Будет плюсом:</strong></p> <ul> <li>Наличие собственной базы вебмастеров / контактов;</li> <li>Опыт работы с CPA/CPL/RevShare моделями;</li> <li>Понимание арбитражных источников (Facebook, Google, TikTok, native, push и др.).</li> </ul> <p><strong>Условия</strong>:</p> <ul> <li>Полная занятость, удаленный формат;</li> <li>Конкурентная заработная плата (фикс + бонусы от результатов);</li> <li>Работа с международными рынками и масштабными бюджетами;</li> <li>Профессиональная команда и быстрые процессы принятия решений.</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Английский язык"
+      },
+      {
+        "name": "Анализ трафика"
+      },
+      {
+        "name": "Social Media Marketing"
+      },
+      {
+        "name": "Аналитика"
+      },
+      {
+        "name": "Партнерский маркетинг"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-29T10:35:04+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "eng",
+        "name": "Английский",
+        "level": {
+          "id": "c1",
+          "name": "C1 — Продвинутый"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131622581",
+    "premium": false,
+    "name": "Affilate Manager (Менеджер по партнерским программам)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "13",
+      "name": "Армения",
+      "url": "https://api.hh.ru/areas/13"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T16:50:48+0300",
+    "created_at": "2026-03-27T16:50:48+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131622581",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131622581?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131622581",
+    "relations": [],
+    "employer": {
+      "id": "10254623",
+      "name": "WinTech",
+      "url": "https://api.hh.ru/employers/10254623",
+      "alternate_url": "https://hh.ru/employer/10254623",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6239917.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6239918.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6239919.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10254623",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Высшее образование в области маркетинга, делового администрирования или смежных областях (будет плюсом). Подтвержденный опыт работы в сфере управления партнерскими программами...",
+      "responsibility": "Управление отношениями с существующими партнерами и привлечение новых. Разработка и реализация маркетинговых кампаний для максимизации ROI. Анализ показателей эффективности и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "71",
+        "name": "Менеджер по работе с партнерами"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>WinTech</strong> в поиске менеджера по партнерским программам, который присоединится к нашей динамичной команде. В качестве менеджера по партнерским программам (affiliate manager) вы будете играть решающую роль в развитии и управлении отношениями с нашими партнерами для обеспечения привлечения новых клиентов и развития компании</p> <p><strong>Обязанности:</strong></p> <ul> <li>Управление отношениями с существующими партнерами и привлечение новых</li> <li>Разработка и реализация маркетинговых кампаний для максимизации ROI</li> <li>Анализ показателей эффективности и оптимизация стратегий для результата</li> <li>Ведение переговоров по контрактам и контроль за их управлением</li> <li>Оставаться в курсе отраслевых тенденций и деятельности конкурентов</li> </ul> <p><strong>Требования:</strong></p> <ul> <li>Высшее образование в области маркетинга, делового администрирования или смежных областях (будет плюсом)</li> <li>Подтвержденный опыт работы в сфере управления партнерскими программами (affiliate)</li> <li>Сильные коммуникативные и аналитические навыки</li> <li>Владение платформами отслеживания партнерских программ</li> <li>Английский В1+</li> </ul> <p><strong>Что мы можем предложить:</strong></p> <ul> <li>Возможность работать из любой точки мира</li> <li>График работы: 5-дневная рабочая неделя, гибкое начало рабочего дня</li> <li>Оплата: фиксированная зарплата с ежемесячными бонусами</li> <li>Рост: у каждого есть возможность быстрого карьерного роста при поддержке компании (обучающие курсы и менторские программы)</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-27T16:50:48+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "eng",
+        "name": "Английский",
+        "level": {
+          "id": "b2",
+          "name": "B2 — Средне-продвинутый"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131311933",
+    "premium": false,
+    "name": "Начинающий специалист (подготовка рекламных аккаунтов)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": 40000,
+      "to": 65000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 40000,
+      "to": 65000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-17T16:09:18+0300",
+    "created_at": "2026-03-17T16:09:18+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131311933",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131311933?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131311933",
+    "relations": [],
+    "employer": {
+      "id": "4692142",
+      "name": "Family Team",
+      "url": "https://api.hh.ru/employers/4692142",
+      "alternate_url": "https://hh.ru/employer/4692142",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6561412.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6561413.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6561414.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4692142",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Усидчивость. ️ Наличие компьютера/ноутбука с доступом в интернет. ️ Готовность обучаться у лучших мастеров своего дела.",
+      "responsibility": "Создание аккаунтов Google. Работа со специфичным ПО. Ведение отчетности."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "121",
+        "name": "Специалист технической поддержки"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Давно хочешь освоить удаленную работу, но не знаешь, с чего начать?</strong></p> <p><strong>Family Team</strong> – это динамично растущая компания в мире affilate маркетинга, которая предоставляет возможность начинающим специалистам проявить себя и начать свой путь в Digital сфере!</p> <p>За 9 лет на рынке мы собрали самых крутых специалистов со всего мира. И сейчас, когда мы растем с невероятной скоростью, <strong>мы ищем тебя – Специалиста по подготовке рекламных аккаунтов Google</strong>, чтобы усилить нашу команду!</p> <p><br /><strong>Чем предстоит заниматься?</strong></p> <ul> <li>Создание аккаунтов Google;</li> <li>Работа со специфичным ПО;</li> <li>Ведение отчетности.</li> </ul> <p><strong>Что мы предлагаем?</strong></p> <ul> <li>Полное обучение в формате наставничества;</li> <li>Удалённая работа и никакого дресс-кода;</li> <li>График работы 5/2 с 9:00 до 18:00 по МСК;</li> <li>Оплачиваемые отпуска и больничные;</li> <li>Молодой и дружный коллектив;</li> <li>Ежегодные бонусы и куча приятных плюшек.</li> </ul> <p> </p> <p><strong>Чего мы ожидаем от тебя?</strong></p> <p><br />❣️ Усидчивость;<br />❣️ Наличие компьютера/ноутбука с доступом в интернет;<br />❣️ Готовность обучаться у лучших мастеров своего дела.</p> <p> </p> <p><strong><em>Жми &quot;откликнуться&quot; и становись частью нашей команды!</em></strong></p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Усидчивость"
+      },
+      {
+        "name": "Пользователь ПК"
+      },
+      {
+        "name": "Точность и внимательность к деталям"
+      },
+      {
+        "name": "Работа с большим объемом информации"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": true,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-17T16:09:18+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131025819",
+    "premium": false,
+    "name": "Рекрутер (digital)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-06T11:31:21+0300",
+    "created_at": "2026-03-06T11:31:21+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131025819",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131025819?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131025819",
+    "relations": [],
+    "employer": {
+      "id": "11941535",
+      "name": "SEQUOIA PROJECTS LTD",
+      "url": "https://api.hh.ru/employers/11941535",
+      "alternate_url": "https://hh.ru/employer/11941535",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=11941535",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы в Рекрутинге от 3 лет. Навыки активного поиска (sourcing) и владение современными методиками привлечения кандидатов. Опыт успешного закрытия...",
+      "responsibility": "Активный поиск и привлечение кандидатов, в том числе на редкие и узкоспециализированные позиции: <highlighttext>affilate</highlighttext>-маркетологи, медиабаеры и пр. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "118",
+        "name": "Специалист по подбору персонала"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>Мы - компания, специализирующаяся на affiliate-маркетинге и комплексном продвижении в digital-среде. Наша команда объединяет экспертов с опытом в аналитике, маркетинге и технологиях.<br />Наша компания успешно существует на рынке уже 10 лет.<br />Мы ищем в свою команду креативного и ответственного <strong>Рекрутера</strong> с классными идеями по побору<strong>.</strong></p> <p><strong>Обязанности:</strong></p> <ul> <li> <p>Полный цикл подбора digital-специалистов — от анализа потребностей руководителей до выхода кандидата.</p> </li> <li> <p>Активный поиск и привлечение кандидатов, в том числе на редкие и узкоспециализированные позиции: affilate-маркетологи, медиабаеры и пр.</p> </li> <li> <p>Работа с широким спектром источников поиска: LinkedIn, HeadHunter, GitHub, профессиональные Telegram-сообщества.</p> </li> <li> <p>Проведение интервью, комплексная оценка кандидатов (hard skills, soft skills, мотивация и соответствие корпоративной культуре).</p> </li> <li> <p>Организация и контроль всех этапов собеседований, подготовка кандидатов ко встречам с командой.</p> </li> <li> <p>Ведение и систематическое пополнение базы кандидатов.</p> </li> <li> <p>Участие в разработке и оптимизации рекрутинговых процессов в компании.</p> </li> <li> <p>Ведение отчетности и аналитики по процессу подбора.</p> </li> </ul> <p><strong>Требования:</strong></p> <ul> <li> <p>Опыт работы в Рекрутинге от 3 лет.</p> </li> <li> <p>Навыки активного поиска (sourcing) и владение современными методиками привлечения кандидатов.</p> </li> <li> <p>Опыт успешного закрытия сложных и нестандартных вакансий.</p> </li> <li> <p>Умение эффективно презентовать компанию и вакансию, работать с возражениями на всех этапах подбора.</p> </li> <li> <p>Высокие коммуникативные навыки и нацеленность на результат</p> </li> </ul> <p><strong>Будет плюсом:</strong></p> <ul> <li> <p>Опыт подбора для международных рынков.</p> </li> <li> <p>Знание английского языка на уровне Upper Intermediate (B2) и выше.</p> </li> </ul> <p><strong>Мы предлагаем:</strong></p> <ul> <li> <p>Работу в международной компании.</p> </li> <li> <p>Возможность получать зарплату в $</p> </li> <li> <p>Гибкий график начала рабочего дня и возможность работать удаленно.</p> </li> <li> <p>Программу заботы о ментальном благополучии: конфиденциальные консультации с психологом за счет компании.</p> </li> <li> <p>Конкурентный уровень дохода (обсуждается по итогам собеседования).</p> </li> <li> <p>Возможность профессионального роста и развития в динамичной компании.</p> </li> </ul> <p>Мы не просто закрываем вакансии — мы строим команду мечты. Присоединяйся!</p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Подбор персонала"
+      },
+      {
+        "name": "Рекрутмент"
+      },
+      {
+        "name": "Поиск персонала в открытых источниках"
+      },
+      {
+        "name": "Оценка кандидатов"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-06T11:31:21+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "eng",
+        "name": "Английский",
+        "level": {
+          "id": "b2",
+          "name": "B2 — Средне-продвинутый"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131458659",
+    "premium": false,
+    "name": "User Acquisition Lead",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": "улица Профессора Попова",
+      "building": "23",
+      "lat": 59.971231,
+      "lng": 30.313676,
+      "description": null,
+      "raw": "Санкт-Петербург, улица Профессора Попова, 23",
+      "metro": {
+        "station_name": "Петроградская",
+        "line_name": "Московско-Петроградская",
+        "station_id": "15.215",
+        "line_id": "15",
+        "lat": 59.966389,
+        "lng": 30.311293
+      },
+      "metro_stations": [
+        {
+          "station_name": "Петроградская",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.215",
+          "line_id": "15",
+          "lat": 59.966389,
+          "lng": 30.311293
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T11:11:51+0300",
+    "created_at": "2026-03-23T11:11:51+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131458659",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131458659?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131458659",
+    "relations": [],
+    "employer": {
+      "id": "1519234",
+      "name": "Вайт Код",
+      "url": "https://api.hh.ru/employers/1519234",
+      "alternate_url": "https://hh.ru/employer/1519234",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/7081665.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/7081666.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/7081667.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=1519234",
+      "country_id": 1,
+      "accredited_it_employer": true,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы с каналами трафика: GA (включая UAC), Twitter ADS, Meta ADS, TikTok ADS, ретаргет, influence маркетинг, <highlighttext>affilate</highlighttext>, SEO / GEO...",
+      "responsibility": "Разрабатывать global performance strategy. Масштабировать acquisition с учетом CAC, retention и ROMI. Управлять бюджетами и их перераспределением между geo. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      },
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "68",
+        "name": "Менеджер по маркетингу, интернет-маркетолог"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>Мы — <strong>White Code</strong>, IT-компания с официальной аккредитацией и международной аудиторией. Уже более 50 миллионов человек по всему миру пользуются нашими продуктами: приложениями, браузерами, VPN-сервисами и расширениями.</p> <p>Хотите создавать полезные IT-продукты и работать в сильной команде? Тогда ждем ваше резюме.</p> <p><strong>Кого мы ищем?</strong></p> <p><strong>User Acquisition Lead, </strong>который умеет масштабировать платный трафик, управлять бюджетами, считать юнит-экономику, работать с LTV / CAC / Churn и строить growth-модель.</p> <p><strong>Формат работы: офис </strong>(7 мин. от м. Петроградская) <strong>на время испытательного срока</strong>, далее гибридный формат работы.</p> <p><strong>Чем предстоит заниматься:</strong></p> <ul> <li>Разрабатывать global performance strategy;</li> <li>Масштабировать acquisition с учетом CAC, retention и ROMI;</li> <li>Управлять бюджетами и их перераспределением между geo;</li> <li>Формировать гипотезы роста (креативы, офферы, лидмагниты, конверторы);</li> <li>Реализовывать прозрачную отчетность для C-level.</li> </ul> <p><strong>Что нужно для успешной работы:</strong></p> <ul> <li>Опыт формирования digital стратегии маркетинга;</li> <li>Опыт ответственности за рекламный бюджет, CAC, ROMI, LTV</li> <li>Опыт управления CAC, LTV, Churn;</li> <li>Опыт управления циклом конверсий (Install/Visit → Signup → Trial → Subscription), сильный скилл работы с CJM</li> <li>Опыт бюджетирования, сильный скилл анализа каналов для оптимизации и масштабирования;</li> <li>Навык формирования GTM стратегии;</li> <li>Сильный скилл постановки задач в кросс-функциональной команде;</li> <li>Опыт работы с каналами трафика: GA (включая UAC), Twitter ADS, Meta ADS, TikTok ADS, ретаргет, influence маркетинг, affilate, SEO / GEO / ASO;</li> <li>Опыт работы с аналитикой: CAC, LTV, ARPU, Retention (GA4, BI системы, понимание CDP - плюс);</li> <li>Опыт работы с AAARRR воронками.</li> </ul> <p><strong>Мы заботимся о наших сотрудниках и предлагаем:</strong></p> <p><strong>Офис</strong>: светлый и просторный офис в центре Санкт-Петербурга с переговорными комнатами, комфортными рабочими местами и обустроенной кухней (пешая доступность от метро Петроградская).</p> <p><strong>Забота о здоровье:</strong> ДМС высокой категории в СК «РЕСО-Гарантия» для офисных сотрудников (более 150 клиник, включая стоматологию, амбулаторное лечение, вызов скорой помощи, стационар) после испытательного срока.</p> <p><strong>Компенсация обедов</strong>: корпоративная система «НаЛанч».</p> <p><strong>Проекты:</strong> мы предлагаем работу с зарубежным рынком – это позволяет быть на гребне современных технологий, свежих идей и актуальных тенденций IT сферы. У вас точно будут крутые задачи!</p> <p><strong>Команда</strong>: сильные разработчики, которые совместно генерят идеи и обмениваются опытом. В нашей команде каждый понимает, как он может развивать свои навыки, компетенции и профессионально расти.</p> <p><strong>Стабильность: </strong>за 11 лет мы решили множество задач, разработали свою продуктовую экосистему и собрали дружную команду специалистов.</p> <p> </p> <p>Вместе с откликом присылайте ссылку на <strong>ваш аккаунт в tg</strong>, так мы сможем пообщаться быстрее.</p> <p><strong>До встречи в &quot;White Code&quot;!</strong></p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Digital Marketing"
+      },
+      {
+        "name": "Google Analytics"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-23T11:11:51+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  }
+]

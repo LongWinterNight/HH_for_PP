@@ -1,0 +1,1731 @@
+[
+  {
+    "id": "131634970",
+    "premium": false,
+    "name": "Видеомонтажер",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": {
+      "from": 75000,
+      "to": 110000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 75000,
+      "to": 110000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": "Курляндская улица",
+      "building": "27",
+      "lat": 59.911806182999904,
+      "lng": 30.279587415740288,
+      "description": null,
+      "raw": "Санкт-Петербург, Курляндская улица, 27",
+      "metro": {
+        "station_name": "Балтийская",
+        "line_name": "Кировско-Выборгская",
+        "station_id": "14.203",
+        "line_id": "14",
+        "lat": 59.907211,
+        "lng": 30.299578
+      },
+      "metro_stations": [
+        {
+          "station_name": "Балтийская",
+          "line_name": "Кировско-Выборгская",
+          "station_id": "14.203",
+          "line_id": "14",
+          "lat": 59.907211,
+          "lng": 30.299578
+        },
+        {
+          "station_name": "Нарвская",
+          "line_name": "Кировско-Выборгская",
+          "station_id": "14.204",
+          "line_id": "14",
+          "lat": 59.901218,
+          "lng": 30.274908
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T07:59:33+0300",
+    "created_at": "2026-03-29T07:59:33+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131634970",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131634970?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131634970",
+    "relations": [],
+    "employer": {
+      "id": "5389923",
+      "name": "Савелова Александра Сергеевна",
+      "url": "https://api.hh.ru/employers/5389923",
+      "alternate_url": "https://hh.ru/employer/5389923",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/3818034.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/3818035.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/3818036.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=5389923",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Цветокорекция (зачастую достаточно одного плагина). Владение навыком ротоскопинга в after effects. Готовность расти профессионально вместе с каналом. Идеальное знание after...",
+      "responsibility": "Запись собственного голоса для частичной озвучки роликов. Генерирование изображений в чат <highlighttext>GPT</highlighttext> и последующее анимирование в другом ИИ редакторе. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      },
+      {
+        "id": "HOURS_9",
+        "name": "9 часов"
+      },
+      {
+        "id": "HOURS_10",
+        "name": "10 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "20",
+        "name": "Видеооператор, видеомонтажер"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Детский ютуб канал</strong></p> <p><strong>Обязанности:</strong></p> <p>монтаж вертикальных видео: видео разной сложности, 120 - 170 штук в месяц.</p> <p>вставка мелодий и звуков в ролик (1-2 мелодии и 10-40 звуков) - ищем как новые, так и используем имеющуюся у нас базу звуков.</p> <p>наложение анимации (глаза, рот на машинки, как в мультике &quot;тачки&quot;), а также такие эффекты, как взрыв, молния, увеличение глаза и так далее</p> <p>наложение героя с хромакея на ролик</p> <p>создание масок, анимации.</p> <p>запись собственного голоса для частичной озвучки роликов</p> <p>генерирование изображений в чат GPT и последующее анимирование в другом ИИ редакторе.</p> <p>Цветокорекция (зачастую достаточно одного плагина).</p> <p>Владение навыком ротоскопинга в after effects.</p> <p>Взаимодействие с сотрудниками, осуществляющими видиозапись свой работы ( обсудить как лучше снять так что бы вышло по референсу).</p> <p><strong>Требования</strong>: выполнение работы на уровне не ниже существующего</p> <p>соблюдение сроков выполнения работы.</p> <p>готовность расти профессионально вместе с каналом</p> <p>Идеальное знание after effects.</p> <p><strong>Условия</strong>: удаленная работа, полная занятось. В начале сотрудничества возможна 6 дневная рабочая неделя, как только вы овладеете всеми навыками будите успевать выполнять все работу максимум за 5 рабочих дней.</p> <p>От вас потребуется выполнение тестового задания, оно оплачивается.</p> <p>О себе:</p> <p><em>Мы - команда профессионалов работающих на ютубе в детском контенте и собирающие миллиарды просмотров ищем основного видеомонтажера. В случае успеха возможен головокружительный профессиональный рост</em>!</p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Adobe After Effect"
+      },
+      {
+        "name": "Саунд-дизайн"
+      },
+      {
+        "name": "Моушн-дизайн"
+      },
+      {
+        "name": "Монтаж коротких видео"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-29T07:59:33+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131601481",
+    "premium": false,
+    "name": "Графический дизайнер",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": 70000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 70000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T10:13:23+0300",
+    "created_at": "2026-03-27T10:13:23+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131601481",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131601481?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131601481",
+    "relations": [],
+    "employer": {
+      "id": "9379195",
+      "name": "Элстейт",
+      "url": "https://api.hh.ru/employers/9379195",
+      "alternate_url": "https://hh.ru/employer/9379195",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6584727.jpg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6584729.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6584730.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9379195",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Работа в Figma, Photoshop, если умеете. Знание и работа с тильдой не требуется. Необходимые навыки: Способность обучаться и вникать в...",
+      "responsibility": "создавать в Figma дизайн-макеты для соц.сетей. — также в Figma работать с презентациями и прочими материалами (в том числе на..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "34",
+        "name": "Дизайнер, художник"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>Привет!</p> <p>Мы ELSTATE — международная компания, специализирующаяся на продаже элитной недвижимости в Москве, ОАЭ, а также активно развивающая направления в Омане и Таиланде. Мы являемся одними из лидеров по числу партнерских продаж недвижимости бизнес- и премиум-класса.</p> <p>Сейчас мы ищем <strong>графического дизайнера со знанием английского языка</strong>, который усилит нашу команду и возьмёт на себя создание визуального контента для международных направлений.</p> <p><strong>Чем предстоит заниматься:</strong></p> <p>— создавать в Figma дизайн-макеты для соц.сетей</p> <p>— также в Figma работать с презентациями и прочими материалами (в том числе на английском языке)</p> <p>Работа в Figma, Photoshop, если умеете. Знание и работа с тильдой не требуется.</p> <p><strong>Необходимые навыки:</strong></p> <ul> <li>Уверенно работаете в Figma (создание макетов, работа с компонентами, стилями)</li> <li>Умеете создавать контент в chat gpt / midjorney и др. нейронках (предоставляем корп.аккаунты)</li> <li>Способность обучаться и вникать в задачи (думать, что мы делаем и зачем)</li> <li>Наличие чувства вкуса и визуальной насмотренности</li> <li><strong>Уверенное знание английского языка (уровень не ниже C1) — для работы с презентациями и материалами на английском</strong></li> <li>Обязательно наличие портфолио созданных дизайнов</li> </ul> <p>Нужен человек уже с опытом и базой знаний по типографике/композиции.</p> <p><strong>Что мы предлагаем:</strong></p> <ul> <li>Полностью удаленную работу с комфортным графиком 5/2 с 10:00 до 19:00 (по мск.времени)</li> <li>Стабильная выплата зарплаты без задержек</li> <li>Оклад 80,000₽</li> <li>Коллектив профессионалов: смешные мемы – да, душная атмосфера и бюрократия – нет</li> <li>Обучение и помощь от старших коллег, одного в задачах не бросаем</li> </ul> <p> </p> <p>Если вы заинтересованы в работе и дочитали вакансию – начните ваше сопроводительное письмо с фразы «Я тот, кого вы ищете». Расскажите в сопроводительном письме об опыте работы, какие обучения проходили и ваши кейсы.</p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Adobe Photoshop"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-27T10:13:23+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "eng",
+        "name": "Английский",
+        "level": {
+          "id": "c1",
+          "name": "C1 — Продвинутый"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131461402",
+    "premium": false,
+    "name": "AI инженер",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T11:49:28+0300",
+    "created_at": "2026-03-23T11:49:28+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131461402",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131461402?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131461402",
+    "relations": [],
+    "employer": {
+      "id": "3151065",
+      "name": "FIRST DATA LLC",
+      "url": "https://api.hh.ru/employers/3151065",
+      "alternate_url": "https://hh.ru/employer/3151065",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/4118079.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/4118080.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/4118081.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=3151065",
+      "country_id": 1,
+      "accredited_it_employer": true,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы с n8n или аналогами. Опыт с LangChain / LangGraph или другими AI-фреймворками. Python (уверенный уровень). ",
+      "responsibility": "Разработка AI-решений для автоматизации бизнес-процессов. Настройка сценариев в n8n (интеграции, API, обработка ошибок). Построение цепочек и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "40",
+        "name": "Другое"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Идеальный кандидат для нас</strong> - это инженер, который не просто пишет код, а видит компанию как систему процессов. Он знает, как превратить хаос в структурированный поток данных с помощью связки n8n + LangGraph, умеет «допилить» решение на Python и понимает, когда для задачи достаточно регулярного выражения, а когда нужен агент на базе GPT-4.</p><br /><strong>Обязанности:</strong> <ul> <li>Разработка AI-решений для автоматизации бизнес-процессов</li> <li>Настройка сценариев в n8n (интеграции, API, обработка ошибок)</li> <li>Построение цепочек и агентных систем (LangChain / LangGraph)</li> <li>Разработка логики на Python (обработка данных, работа с AI API)</li> <li>Внедрение решений на базе LLM (prompt engineering, оптимизация)</li> <li>Интеграция с CRM и другими сервисами (Bitrix24, Telegram и др.)</li> <li>Анализ процессов и поиск задач для автоматизации</li> </ul> <strong>Требования:</strong> <ul> <li>Опыт работы с n8n или аналогами</li> <li>Опыт с LangChain / LangGraph или другими AI-фреймворками</li> <li>Python (уверенный уровень)</li> <li>Понимание LLM (prompt engineering, контекст, параметры генерации)</li> <li>Опыт работы с векторными БД (ChromaDB, Pinecone, Weaviate)</li> <li>Опыт автоматизации бизнес-процессов</li> <li>Понимание современных AI-моделей и их применения</li> </ul> <strong>Условия:</strong> <ul> <li> <p>Фиксированный белый оклад (обсуждается персонально с кандидатом)</p> </li> <li> <p>При необходимости офис в центре (улица Покровка)</p> </li> <li> <p>Формат работы: удаленный</p> </li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-23T11:49:28+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131553838",
+    "premium": false,
+    "name": "Маркетолог",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": 100000,
+      "to": 200000,
+      "currency": "RUR",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 100000,
+      "to": 200000,
+      "currency": "RUR",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-25T19:10:46+0300",
+    "created_at": "2026-03-25T19:10:46+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131553838",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131553838?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131553838",
+    "relations": [],
+    "employer": {
+      "id": "3623146",
+      "name": "Макарова Галина Константиновна",
+      "url": "https://api.hh.ru/employers/3623146",
+      "alternate_url": "https://hh.ru/employer/3623146",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/7050029.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/7050030.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/7050031.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=3623146",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Рассматриваем кандидатов с опытом в прошлом в роли: Опыт в нише онлайн-образования в роли маркетолога от 1 года. ",
+      "responsibility": "Написание постов и рассылок с помощью корпоративного ИИ-агента и <highlighttext>gpt</highlighttext>. Создание и обучение корпоративных ИИ-агентов с помощью специалиста..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [
+      {
+        "id": "SELF_EMPLOYED",
+        "name": "с самозанятым"
+      },
+      {
+        "id": "INDIVIDUAL_ENTREPRENEUR",
+        "name": "с ИП"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "68",
+        "name": "Менеджер по маркетингу, интернет-маркетолог"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<div> <p><strong>РАБОТА МАРКЕТОЛОГОМ В ПРОЕКТ ГАЛИНЫ МАКАРОВОЙ</strong></p> <p>Рассматриваем кандидатов с опытом в прошлом в роли:</p> <p>• Маркетолог автоворонок</p> <p>• Маркетолог запусков Ключевые критерии на конкурс:</p> <p>• Опыт в нише онлайн-образования в роли маркетолога от 1 года</p> <p>• Навык расчета декомпозиции воронки, продаж, запусков и знание ключевых показателей и конверсий, влияющих на результат (обязательно) 🎙</p> <p> </p> <p><strong>ОБЯЗАННОСТИ:</strong></p> Маркетолог — ценный конечный продукт роли: выполнение плана по объему заказов и заявок для ОП по услугам и инфопродуктам. <p> </p> Выполнение плана по заказам и заявкам для отдела продаж по продуктам компании (услуги, инфопродукты) <p> </p> Выполнение и улучшение (докрутка) плановых показателей по двум ключевым действующим воронкам компании <p> </p> Разработка графика мероприятий: вебинары, рассылки, квизы и т.д. <p> </p> Разработка контент-плана и самостоятельная реализация <p> </p> Разработка презентаций на вебинары и эфиры с участием дизайнера, под ключ <p> </p> Написание постов и рассылок с помощью корпоративного ИИ-агента и gpt. <p> </p> Создание и обучение корпоративных ИИ-агентов с помощью специалиста (при необходимости) <p> </p> Сбор сквозной аналитики, разработка гипотез на докрутку воронок <p> </p> Менеджмент и управление подрядчиками <p> </p> <p><strong>Упаковка кейсов и кастдевы </strong></p> <p><strong>🎙 ТРЕБУЕМЫЕ НАВЫКИ:</strong></p> <p> </p> Рассматриваем кандидатов, кто уже работает на рынке инфобизнес и четко принял решение в нем развиваться <p> </p> <strong>Hard skills (важные навыки под вакансию)</strong> <p> </p> Навык работы со смыслами (обязательное): • Умеете работать с текстом (самостоятельно или через ИИ) • Есть опыт создания текстов постов/email рассылок, которые приводили к продажам • Можете взять ответственность за конечный результат • Знаете как работать с триггерами <p> </p> Расчет декомпозиции (обязательно): • Как рассчитывать декомпозицию по показателям <p> </p> Google-Doc (обязательное): • Как структурировать информацию в Таблице • Как оформлять по шаблону и под задачи • Как работать с простыми формулами и сводными таблицами <p> </p> ИИ-сервисы (обязательно): • Как использовать для задач • Как писать промты под письма • Используете в личных и рабочих задачах <p> </p> <strong>Soft skills (личные качества):</strong><br />чёткость, системность, склонность к порядку<br />мультизадачность<br />умение ставить задачи команде, делегировать<br />аналитические навыки, системное и структурное мышление<br />проактивность и инициативность <p>чувство юмора 🎙</p> <p><strong>ЗАДАЧИ НА СТАРТЕ:</strong></p> Актуализация ключевых воронок<br />Упаковка продуктов под основные воронки<br />Проведение акций и распродаж по инфопродуктам 🎙 Система подчинений в проекте: Маркетолог подчиняется руководителю проекта + собственнику проекта. <p> </p> <p><strong>В подчинении у маркетолога находятся:</strong></p> <p>• Монтажер (подрядно)</p> <p>• Дизайнер (подрядно)</p> <p>• Технический специалист</p> <p><strong>Взаимодействие со смежным специалистами:</strong></p> <p>• Отдел продаж</p> <p>• Технический специалист</p> <p><strong>🎙КАРЬЕРНЫЙ РОСТ</strong></p> <p> </p> <p><strong>Руководитель отдела маркетинга </strong></p> <p><strong>🎙УСЛОВИЯ:</strong><br />Гонорар: фикс+KPI=150К и выше (KPI с третьего месяца). KPI от выполнения плановых показателей<br />Формат: удаленно (из дома) ВАЖНО! Не на бегу, не из кафе, не из спортзала, не &quot;между делом&quot;...</p> <p> </p> <strong>Дополнительные вводные:</strong><br />Важен стабильный Интернет с возможностью вести видеоконференции в Zoom с камерой <p>Форма оплаты через СЗ или ИП (предпочтительно!)</p> <p> </p> </div>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Анализ воронки продаж"
+      },
+      {
+        "name": "Маркетинговый анализ"
+      },
+      {
+        "name": "Продвижение бренда"
+      },
+      {
+        "name": "Аналитическое мышление"
+      },
+      {
+        "name": "Маркетинговые исследования"
+      },
+      {
+        "name": "Анализ рынка"
+      },
+      {
+        "name": "Ценообразование"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-25T19:10:46+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131452878",
+    "premium": false,
+    "name": "Системный аналитик (Senior)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T10:13:24+0300",
+    "created_at": "2026-03-23T10:13:24+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131452878",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131452878?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131452878",
+    "relations": [],
+    "employer": {
+      "id": "10991285",
+      "name": "letitgo.agency",
+      "url": "https://api.hh.ru/employers/10991285",
+      "alternate_url": "https://hh.ru/employer/10991285",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1395125.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7200283.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7200284.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10991285",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы с CASE-средствами. Базовые навыки python + <highlighttext>gpt</highlighttext> (для автоматизации рутины), уметь написать скрипты под типичные задачи. ",
+      "responsibility": "Сбор и анализ бизнес-требований для разработки информационных систем. Проведение системного и бизнес-анализа, моделирование бизнес-процессов. Разработка технических заданий..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [
+      {
+        "id": "INDIVIDUAL_ENTREPRENEUR",
+        "name": "с ИП"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "148",
+        "name": "Системный аналитик"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<strong>Эта вакансия размещена в рамках HR-направления нашего ИТ-агентства letitgo.agency. Мы помогаем найти специалиста не в нашу команду, а в штат компании-партнёра.<br /><br />Обязанности:</strong> <ul> <li>Сбор и анализ бизнес-требований для разработки информационных систем.</li> <li>Проведение системного и бизнес-анализа, моделирование бизнес-процессов.</li> <li>Разработка технических заданий и спецификаций на основе собранных требований.</li> <li>Взаимодействие с разработчиками, тестировщиками и другими участниками проекта для обеспечения точной реализации требований.</li> <li>Подготовка документации и отчетов по результатам анализа и тестирования.</li> <li>Обучение и поддержка пользователей информационной системы.</li> </ul> <strong>Требования:</strong> <ul> <li>Опыт работы на позиции системного аналитика от 2 лет</li> <li>Знание методологий разработки ПО (Agile, Scrum, Waterfall и др.)</li> <li>Навыки работы с базами данных и знание SQL - SELECT, JOIN</li> <li>Аналитические способности и внимание к деталям</li> <li>Хорошие коммуникативные навыки и умение четко излагать мысли</li> <li>Понимание UML</li> <li>Опыт работы с CASE-средствами</li> <li>Базовые навыки python + gpt (для автоматизации рутины), уметь написать скрипты под типичные задачи</li> <li>Техническое писательство</li> </ul> <strong>Условия:</strong> <ul> <li>График: 5/2</li> <li>Достойная заработная плата и прозрачная система мотивации</li> <li>Возможность влиять на архитектурные решения и стек</li> <li>Качественные проекты + задачи с вызовом — без рутины и поддержания «мертвых» проектов</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-23T10:13:24+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131588966",
+    "premium": false,
+    "name": "Project Manager",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1002",
+      "name": "Минск",
+      "url": "https://api.hh.ru/areas/1002"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Минск",
+      "street": "проспект Дзержинского",
+      "building": "104А",
+      "lat": 53.86098,
+      "lng": 27.481737,
+      "description": null,
+      "raw": "Минск, проспект Дзержинского, 104А",
+      "metro": {
+        "station_name": "Грушевка",
+        "line_name": "Московская",
+        "station_id": "62.413",
+        "line_id": "62",
+        "lat": 53.88669,
+        "lng": 27.514786
+      },
+      "metro_stations": [
+        {
+          "station_name": "Грушевка",
+          "line_name": "Московская",
+          "station_id": "62.413",
+          "line_id": "62",
+          "lat": 53.88669,
+          "lng": 27.514786
+        },
+        {
+          "station_name": "Малиновка",
+          "line_name": "Московская",
+          "station_id": "62.472",
+          "line_id": "62",
+          "lat": 53.849722,
+          "lng": 27.474722
+        },
+        {
+          "station_name": "Михалово",
+          "line_name": "Московская",
+          "station_id": "62.414",
+          "line_id": "62",
+          "lat": 53.876664,
+          "lng": 27.49691
+        },
+        {
+          "station_name": "Петровщина",
+          "line_name": "Московская",
+          "station_id": "62.415",
+          "line_id": "62",
+          "lat": 53.86458,
+          "lng": 27.485807
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-26T17:51:34+0300",
+    "created_at": "2026-03-26T17:51:34+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131588966",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131588966?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131588966",
+    "relations": [],
+    "employer": {
+      "id": "4304501",
+      "name": "ЛемеЛ Лабс",
+      "url": "https://api.hh.ru/employers/4304501",
+      "alternate_url": "https://hh.ru/employer/4304501",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/4100938.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/4100939.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4304501",
+      "country_id": 4,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Базовые навыки планирования, оценки и приоритизации задач. Опыт или понимание работы AI-инструментов (<highlighttext>GPT</highlighttext>, Gemini и др.). Будет плюсом опыт...",
+      "responsibility": "Анализ и уточнение бизнес-требований. Подготовка и ведение проектной документации. Планирование и координация задач в рамках проекта. Декомпозиция задач и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [
+      {
+        "id": "SELF_EMPLOYED",
+        "name": "с самозанятым"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "107",
+        "name": "Руководитель проектов"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Компания LemeL Labs</strong> — full-cycle компания по разработке мобильных и веб-приложений. Мы помогаем малому и среднему бизнесу создавать, развивать и запускать цифровые продукты, а также разрабатываем собственные приложения.</p> <p>Мы обладаем опытом разработки решений для различных сфер: утилиты и сервисы, развлечения, CRM-системы, здоровье и фитнес, e-commerce, финансы и другие.</p> <p><strong>Обязанности:</strong></p> <p>• Анализ и уточнение бизнес-требований;</p> <p>• Подготовка и ведение проектной документации;</p> <p>• Планирование и координация задач в рамках проекта;</p> <p>• Декомпозиция задач и работа с backlog;</p> <p>• Контроль сроков и статусов выполнения задач;</p> <p>• Взаимодействие с командой разработки, дизайна и другими участниками проекта;</p> <p>• Участие во встречах (дейли, планирования, груминги);</p> <p>• Подготовка отчетности по проектам;</p> <p>• Выявление рисков и своевременная эскалация.</p> <p><strong>Требования:</strong></p> <p><strong>Hard skills:</strong></p> <p>• Опыт работы Project Manager от 6 месяцев (или релевантный опыт в IT);</p> <p>• Уровень английского языка B2;</p> <p>• Опыт работы с Jira, Confluence, Slack, Google Docs;</p> <p>• Понимание жизненного цикла разработки ПО;</p> <p>• Базовые навыки планирования, оценки и приоритизации задач;</p> <p>• Опыт или понимание работы AI-инструментов (GPT, Gemini и др.);</p> <p>• Будет плюсом опыт работы с системами аналитики (Google Analytics, Adjust и др.).</p> <p><strong>Soft skills:</strong></p> <p>• Ответственность и организованность;</p> <p>• Умение доводить задачи до результата;</p> <p>• Хорошие коммуникативные навыки;</p> <p>• Способность работать с несколькими задачами одновременно;</p> <p>• Критическое мышление и внимательность к деталям;</p> <p>• Проактивность и желание развиваться.</p> <p><strong>Мы предлагаем:</strong></p> <p>• Участие в реальных проектах и влияние на процессы;</p> <p>• Поддержку команды и обмен опытом;</p> <p>• Возможность профессионального роста и развития;</p> <p>• Дружелюбную атмосферу и открытую коммуникацию;</p> <p>• Гибкий подход к работе.</p> <p><strong>Условия:</strong></p> <p>⁃ Стабильная зарплата с привязкой к курсу доллара США</p> <p>⁃ Прозрачная и конструктивная обратная связь, которая позволит улучшать свои hard skills</p> <p>⁃ Комфортный офис в центре города, недалеко от метро</p> <p>⁃ Гибкий график работы, возможность удаленно работать из дома</p> <p>⁃ Оформление по ТК РБ, ЛемеЛ Лабс входит в ПВТ</p> <p> </p> <p>Мы будем рады видеть тебя частью нашей команды!</p> <div> </div>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Project management"
+      },
+      {
+        "name": "Деловая коммуникация"
+      },
+      {
+        "name": "Проектный менеджмент"
+      },
+      {
+        "name": "Управление коммуникациями"
+      },
+      {
+        "name": "Agile"
+      },
+      {
+        "name": "Английский язык"
+      },
+      {
+        "name": "Анализ требований"
+      },
+      {
+        "name": "Основы управления проектами"
+      },
+      {
+        "name": "Жизненный цикл команды"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-26T17:51:34+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "eng",
+        "name": "Английский",
+        "level": {
+          "id": "b2",
+          "name": "B2 — Средне-продвинутый"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "130322122",
+    "premium": false,
+    "name": "Дизайнер-иллюстратор (художник)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": true,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "Западный административный округ, район Солнцево, Киевское шоссе, 22-й километр",
+      "building": "6Ас1кВ2",
+      "lat": 55.635904,
+      "lng": 37.430929,
+      "description": null,
+      "raw": "Москва, Западный административный округ, район Солнцево, Киевское шоссе, 22-й километр, 6Ас1кВ2",
+      "metro": {
+        "station_name": "Говорово",
+        "line_name": "Солнцевская",
+        "station_id": "133.609",
+        "line_id": "133",
+        "lat": 55.6588,
+        "lng": 37.4174
+      },
+      "metro_stations": [
+        {
+          "station_name": "Говорово",
+          "line_name": "Солнцевская",
+          "station_id": "133.609",
+          "line_id": "133",
+          "lat": 55.6588,
+          "lng": 37.4174
+        },
+        {
+          "station_name": "Саларьево",
+          "line_name": "Сокольническая",
+          "station_id": "1.514",
+          "line_id": "1",
+          "lat": 55.6227,
+          "lng": 37.424
+        },
+        {
+          "station_name": "Тропарево",
+          "line_name": "Сокольническая",
+          "station_id": "1.505",
+          "line_id": "1",
+          "lat": 55.6459,
+          "lng": 37.4725
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T16:01:44+0300",
+    "created_at": "2026-03-29T16:01:44+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=130322122",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/130322122?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/130322122",
+    "relations": [],
+    "employer": {
+      "id": "1306788",
+      "name": "Элан Галерея",
+      "url": "https://api.hh.ru/employers/1306788",
+      "alternate_url": "https://hh.ru/employer/1306788",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1473529.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7734886.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7734887.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=1306788",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Обязательный опыт использование нейросетей (Adobe AI, <highlighttext>GPT</highlighttext>, Midjourney, Gemini и т.д.). - Опыт работы с типографиями (офсет, цифра), глубокие знания...",
+      "responsibility": "Дизайнер-иллюстратор, который сосредоточится на полном цикле создания вещей — от эскиза принта до прототипа формы. В ваши задачи войдет разработка..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "34",
+        "name": "Дизайнер, художник"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard_plus",
+      "name": "Стандарт плюс"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Кто мы. </strong></p> <p><strong>Компания «Элан Галерея»</strong> — это 20 лет на рынке и статус лидера на маркетплейсах. Мы создаём продукты, которые становятся частью уюта в тысячах домов, и постоянно расширяем наш большой ассортимент. Наша энергия и рост основаны на главном — крепком, сплочённом коллективе, где ценятся инициатива и взаимная поддержка. Мы строим компанию, в которую хочется возвращаться каждый день.<br /><br /><strong>Кто нам нужен.</strong></p> <p>Дизайнер-иллюстратор, который сосредоточится на полном цикле создания вещей — от эскиза принта до прототипа формы. В ваши задачи войдет разработка принтов для посуды, а также проектирование и визуализация новых изделий.<br />Мы ценим в кандидате не только технические навыки, но и способность наделять каждый предмет уникальным характером и эстетикой.<br />Для нас важна ваша открытость к инновациям, включая использование нейросетей в качестве инструмента для поиска идей и визуальных решений.<br />Идеальный кандидат обладает безупречным вкусом, вниманием к деталям и глубокой внутренней мотивацией, где главной наградой становится момент, когда твой рисунок или форма обретают жизнь в фарфоре.</p> <p><strong>Мы создаем среду для тех, кто живет своими проектами и стремится к их материальному воплощению.</strong></p> <div><strong>Обязанности:<br /><em>Создание дизайна продукции в сфере посуды и домашних товаров от идеи до поступления в продажу.</em></strong><br />- Мониторинг российский и европейских трендов в интерьерном дизайне, декоре, посуде и lifestyle-категориях;<br />- Планирование выпуска сезонных коллекций на год, квартал, месяц</div> <div>- Умение собирать moodboard и reference и на их основе оперативно генерировать эскизы<br />- Прототипирование в нейросетях (формы, принты, применение, фотореалистичные мокапы)<br />- Коммуникация со смежными отделами. Участие в обсуждении дизайнерских идей, умение работать с фидбеком.<br />- Отрисовка растровых и векторных изображений для печати на разных носителях<br />- Подбором решений и проработкой цветопроб для различных материалов и технологий производства</div> <div>- Работой с образцами и прототипами, внесением корректировок по цвету, масштабу и качеству исполнения</div> <div>- Точной техническая подготовкой файлов для производителя с учетом всех технических требований</div> <div>- Поддержания организационного порядка в структуре файлов Ведение реестров упаковки в excel;</div> <p> </p> <p><strong>Требования:</strong></p> <div>- Отличные навыки рисования от руки (карандаш)<br />- Digital painting на высоком уровне (обязательно вектор и растр)</div> <div>- Обязательное знание графических программ Adobe (Photoshop, Illustrator, InDesign), а также CorelDraw, Procreate и как преимущество Blender.</div> <div>- Обязательный опыт использование нейросетей (Adobe AI, GPT, Midjourney, Gemini и т.д.)<br />- Опыт работы с типографиями (офсет, цифра), глубокие знания специфики допечатной подготовки файлов под различные способы печати и особенности полиграфических процессов<br />- Оконченное высшее образование по профилю (художественное, полиграфическое, дизайн).<br />- Умение работать с большим объемом задач и дедлайнами, умение организовать свою работу.<br />- Обязателен опыт офисной работы<br />- Самостоятельность и инициативность, творческий подход. Креативность мышления, чувство стиля, прекрасный художественный вкус и готовность воплощать идеи в жизнь.<br />- Наличие ссылки на портфолио с реальными кейсами (желательно на behance.net)</div> <p> </p> <p>Условия:</p> <ul> <li><strong>Удаленную и частичную занятость не рассматриваем, только работа в офисе.</strong></li> <li>График работы 5/2, с 9:00 до 18:00. Суббота и воскресенье выходные дни.</li> <li>Метро Румянцево, «Бизнес Парк Com City»</li> <li>Оборудованное рабочее место: мощный компьютер, профессиональные мониторы, графический планшет.</li> <li>Официальное трудоустройство по ТК РФ</li> <li>Обсуждается с успешными кандидатами</li> </ul> <p><strong>На данную вакансию у нас творческий конкурс:<br />после подачи резюме мы предложим Вам тестовое задание.</strong></p> <p> </p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Дизайн"
+      },
+      {
+        "name": "Художник"
+      },
+      {
+        "name": "Графика"
+      },
+      {
+        "name": "рисунок карандашом"
+      },
+      {
+        "name": "Digital painting"
+      },
+      {
+        "name": "Adobe Photoshop"
+      },
+      {
+        "name": "Adobe Illustrator"
+      },
+      {
+        "name": "Adobe InDesign"
+      },
+      {
+        "name": "CorelDRAW"
+      },
+      {
+        "name": "Procreate"
+      },
+      {
+        "name": "blender"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-02-10T13:37:11+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131580868",
+    "premium": false,
+    "name": "Менеджер по работе с социальными сетями",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "3",
+      "name": "Екатеринбург",
+      "url": "https://api.hh.ru/areas/3"
+    },
+    "salary": {
+      "from": 65000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 65000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Екатеринбург",
+      "street": "улица Бахчиванджи",
+      "building": "2",
+      "lat": 56.762977,
+      "lng": 60.805893,
+      "description": null,
+      "raw": "Екатеринбург, улица Бахчиванджи, 2",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-26T14:45:25+0300",
+    "created_at": "2026-03-26T14:45:25+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131580868",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131580868?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131580868",
+    "relations": [],
+    "employer": {
+      "id": "10750602",
+      "name": "ТК Докер (АО Сиайти Терминал)",
+      "url": "https://api.hh.ru/employers/10750602",
+      "alternate_url": "https://hh.ru/employer/10750602",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1458333.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7452946.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7452947.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10750602",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Законченное высшее образование. Опыт работы SMM-специалистом от 2-х лет (с подтвержденными кейсами, наличие портфолио обязательно). Понимание специфики продвижения...",
+      "responsibility": "Анализ ЦА, конкурентов, трендов; разработка контент-планов. Планирование публикаций на неделю/месяц: ВК, TG, Дзен, Яндекс Ритм. Подготовка постов: тексты..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "68",
+        "name": "Менеджер по маркетингу, интернет-маркетолог"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<strong>Обязанности:</strong> <p><strong>1. Стратегия и планирование</strong></p> <ul> <li>Анализ ЦА, конкурентов, трендов; разработка контент-планов.</li> <li>Планирование публикаций на неделю/месяц: ВК, TG, Дзен, Яндекс Ритм.</li> </ul> <p><strong>2.</strong> <strong>Создание контента</strong></p> <ul> <li>Подготовка постов: тексты, визуалы (фото, Reels, видео).</li> <li>Использование AI и отложенного постинга. ​​​​​​​​​​​​​​ </li> </ul> <p><strong>3</strong>. ​​​ <strong>Взаимодействие с аудиторией</strong></p> <ul> <li>Модерация комментариев, чатов, сообщений.</li> <li>Опросы, конкурсы, розыгрыши; работа с отзывами, негативами; стимулирование репостов/UGC. ​​​​​​​</li> </ul> <p><strong>4</strong>. ​​​​​​​<strong>Продвижение и реклама</strong></p> <ul> <li>Настройка таргета (VK Ads, Telegram Ads); закупка рекламы, взаимопиар, инфлюенсеры (ОРД-маркировка).</li> <li>Тестирование креативов без накруток; мониторинг конкурентов/трендов.​​​​​​​ ​​​​​​​ ​​​​​​​</li> </ul> <p><strong>5. </strong>​​​​​​​<strong>Аналитика и отчеты</strong></p> <ul> <li>Ежемесячные отчеты: динамика подписчиков (прирост/отток, демография), охват/ER/CR, топ-посты, реклама (ROI, лиды), трафик/конверсии (LiveDune, TGstat).</li> <li>Выводы, бенчмарки (рынок/конкуренты), рекомендации, цели.</li> </ul> <strong>Требования:</strong> <ul> <li>Законченное высшее образование.</li> <li>Опыт работы SMM-специалистом от 2-х лет (с подтвержденными кейсами, наличие портфолио обязательно).</li> <li>Понимание специфики продвижения в ВКонтакте, Telegram, Дзен, Яндекс Ритм. Знание трендов конкретной площадки (что сейчас в рекомендациях, какие форматы «залетают»).</li> <li>Умение составлять контент-план на месяц/неделю под бизнес-задачи компании.</li> <li>Написание продающих, имиджевых и информационных текстов. Адаптация Ton of Voice под конкретную площадку и аудиторию.</li> <li>Базовое владение Photoshop/Figma.</li> <li>Умение снимать контент на телефон и фотоаппарат (свет, композиция, ракурсы).</li> <li>Отличные навыки видеомонтажа: CapCut или аналоги (наложение звука, субтитры, склейки, базовые эффекты, попадание в тренды).</li> <li>Понимание принципов настройки рекламы в VK/Telegram/Яндекс Директ.</li> <li>Базовый уровень владения AI инструментами:</li> <li>Уверенное использование ChatGPT/YandexGPT для генерации идей, заголовков и текстов.</li> <li>Владение AI-инструментами в Canva (Magic Write, Magic Eraser, Magic Expand).</li> <li>Использование нейросетей для генерации референсов интерьеров и визуальных идей (room-gpt.ru).</li> <li>Применение AI-сервисов для работы с видео: автосубтитры, озвучка, удаление фона (Veed.io и др.).</li> <li>Навыки работы с инструментами аналитики: LiveDune/Popsters/ TGstat.</li> </ul> <strong>Условия:</strong> <ul> <li>Место работы - Кольцово</li> <li>Корпоративный транспорт по установленным маршрутам: Автовокзал, Ботаника, Уктус, Компрессорный, Птицефабрика, Химмаш</li> <li>Официальное трудоустройство согласно ТК РФ</li> <li>Социальный пакет</li> <li>Возможности для профессионального и карьерного роста</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-26T14:45:25+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "130874890",
+    "premium": false,
+    "name": "Менеджер по продажам+Аккаунт-менеджер (Москва) — B2B digital-проекты",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": true,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": 150000,
+      "to": 250000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 150000,
+      "to": 250000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": null,
+      "building": null,
+      "lat": 55.755864,
+      "lng": 37.617698,
+      "description": null,
+      "raw": "Москва",
+      "metro": null,
+      "metro_stations": [],
+      "id": "16806515"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T11:42:51+0300",
+    "created_at": "2026-03-29T11:42:51+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=130874890",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/130874890?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/130874890",
+    "relations": [],
+    "employer": {
+      "id": "4733503",
+      "name": "W2W Group",
+      "url": "https://api.hh.ru/employers/4733503",
+      "alternate_url": "https://hh.ru/employer/4733503",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6218361.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6218362.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6218363.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4733503",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Мы ценим тех, кто написал сопроводительное письмо о своём опыте - не через <highlighttext>GPT</highlighttext> :). Ты нам подойдешь если: - Ты ответственный человек...",
+      "responsibility": "Нужно будет регулярно посещать тематические мероприятия, выставки и конференции в Москве. Самостоятельно выходить на потенциальных клиентов, назначать встречи и формировать..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      },
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [
+      {
+        "id": "SELF_EMPLOYED",
+        "name": "с самозанятым"
+      },
+      {
+        "id": "INDIVIDUAL_ENTREPRENEUR",
+        "name": "с ИП"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "71",
+        "name": "Менеджер по работе с партнерами"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131551534",
+    "premium": false,
+    "name": "Инженер по интеграциям и цифровой инфраструктуре (электронная коммерция)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "Гамсоновский переулок",
+      "building": "2с1",
+      "lat": 55.70774,
+      "lng": 37.625406,
+      "description": null,
+      "raw": "Москва, Гамсоновский переулок, 2с1",
+      "metro": {
+        "station_name": "ЗИЛ",
+        "line_name": "МЦК",
+        "station_id": "95.531",
+        "line_id": "95",
+        "lat": 55.698333,
+        "lng": 37.648333
+      },
+      "metro_stations": [
+        {
+          "station_name": "ЗИЛ",
+          "line_name": "МЦК",
+          "station_id": "95.531",
+          "line_id": "95",
+          "lat": 55.698333,
+          "lng": 37.648333
+        },
+        {
+          "station_name": "ЗИЛ",
+          "line_name": "Троицкая",
+          "station_id": "137.964",
+          "line_id": "137",
+          "lat": 55.697915,
+          "lng": 37.647565
+        },
+        {
+          "station_name": "Тульская",
+          "line_name": "Серпуховско-Тимирязевская",
+          "station_id": "9.142",
+          "line_id": "9",
+          "lat": 55.70961,
+          "lng": 37.622569
+        },
+        {
+          "station_name": "Шаболовская",
+          "line_name": "Калужско-Рижская",
+          "station_id": "6.157",
+          "line_id": "6",
+          "lat": 55.718828,
+          "lng": 37.607892
+        }
+      ],
+      "id": "24209762"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-25T17:29:22+0300",
+    "created_at": "2026-03-25T17:29:22+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131551534",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131551534?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131551534",
+    "relations": [],
+    "employer": {
+      "id": "4969043",
+      "name": "ДжиАйТиЭл",
+      "url": "https://api.hh.ru/employers/4969043",
+      "alternate_url": "https://hh.ru/employer/4969043",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/5931464.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/5931465.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/5931466.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4969043",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Практический опыт работы с инструментами искусственного интеллекта (<highlighttext>GPT</highlighttext>, Codex, Claude и аналоги). Умение использовать искусственный интеллект для решения инженерных задач. ",
+      "responsibility": "Использовать искусственный интеллект как рабочий инструмент: Применять современные технологии (<highlighttext>GPT</highlighttext>, Codex, Claude и аналоги) для ускорения настройки, отладки интеграций, автоматизации..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      },
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      },
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "107",
+        "name": "Руководитель проектов"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  }
+]

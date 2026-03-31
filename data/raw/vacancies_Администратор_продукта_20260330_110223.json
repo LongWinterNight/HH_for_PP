@@ -1,0 +1,2725 @@
+[
+  {
+    "id": "131636767",
+    "premium": false,
+    "name": "Администратор - кассир",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "159",
+      "name": "Астана",
+      "url": "https://api.hh.ru/areas/159"
+    },
+    "salary": {
+      "from": 300000,
+      "to": 350000,
+      "currency": "KZT",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 300000,
+      "to": 350000,
+      "currency": "KZT",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Астана",
+      "street": "проспект Улы Дала",
+      "building": "65/2",
+      "lat": 51.09593,
+      "lng": 71.442565,
+      "description": null,
+      "raw": "Астана, проспект Улы Дала, 65/2",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T14:58:58+0300",
+    "created_at": "2026-03-29T14:58:58+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131636767",
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131636767?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131636767",
+    "relations": [],
+    "employer": {
+      "id": "9563371",
+      "name": "Maki Maki Astana",
+      "url": "https://api.hh.ru/employers/9563371",
+      "alternate_url": "https://hh.ru/employer/9563371",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9563371",
+      "country_id": 3,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы в административной части до 1 года. Знание кассовых аппаратов. Знание казахского и русского языков. Умение работать в команде...",
+      "responsibility": "Сеть заведений и службы доставки (фудкорды). Обслуживание гостей и прием оплат (касса). Ведение кассового отчета, открытие и закрытие смены. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "flexible",
+      "name": "Гибкий график"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_12",
+        "name": "12 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "SIX_ON_ONE_OFF",
+        "name": "6/1"
+      },
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Maki Maki</strong> — это динамичная сеть ресторанов и доставка японской и азиатской кухни. Бренд известен своими <strong>авторскими роллами, ярким визуальным стилем и вниманием к качеству продуктов</strong>.</p> <p> </p> <p> </p> <p>Требуется администратор-кассир / логист</p> <p><br />Сеть заведений и службы доставки (фудкорды)<br />Адрес: ул.Тлендиева 12А, ТЦ «Азия Парк»<br />График работы: 5/2<br />Время работы: 10:00–23:00<br />Обязательный выход: пятница–воскресенье<br />Стажировка: 3 дня (оплата 50%)<br />Зарплата: 14 000 тг + 500 тг за смену</p> <p>Обязанности:<br />• Обслуживание гостей и прием оплат (касса)<br />• Ведение кассового отчета, открытие и закрытие смены<br />• Отправка курьеров на доставку, контроль логистики<br />• Контроль работы сотрудников в смене<br />• Поддержание чистоты в зале и рабочей зоне<br />• Взаимодействие с кухней, передача заказов<br />• Общение с гостями, решение текущих вопросов</p> <p>Требования:<br />• Опыт работы в административной части до 1 года<br />• Знание кассовых аппаратов<br />• Знание казахского и русского языков<br />• Умение работать в команде, ответственность, общительность</p> <p> </p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Обслуживание покупателей"
+      },
+      {
+        "name": "Точность и внимательность к деталям"
+      },
+      {
+        "name": "Кассовые операции"
+      },
+      {
+        "name": "Администрирование"
+      },
+      {
+        "name": "Работа с жалобами клиентов"
+      },
+      {
+        "name": "Обучение и развитие"
+      },
+      {
+        "name": "Обучение персонала"
+      },
+      {
+        "name": "1С: Предприятие 8"
+      },
+      {
+        "name": "Мерчандайзинг"
+      },
+      {
+        "name": "1С: Документооборот"
+      },
+      {
+        "name": "Медицинская документация"
+      },
+      {
+        "name": "Работа с поставщиками"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-29T14:58:58+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131651477",
+    "premium": false,
+    "name": "Системный администратор",
+    "department": {
+      "id": "53797-53797-efkoinfo",
+      "name": " Информационные технологии"
+    },
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": null,
+      "to": 320000,
+      "currency": "RUR",
+      "gross": true
+    },
+    "salary_range": {
+      "from": null,
+      "to": 320000,
+      "currency": "RUR",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "Ленинградский проспект",
+      "building": "37Ак5",
+      "lat": 55.791202,
+      "lng": 37.541943,
+      "description": null,
+      "raw": "Москва, Ленинградский проспект, 37Ак5",
+      "metro": {
+        "station_name": "Аэропорт",
+        "line_name": "Замоскворецкая",
+        "station_id": "2.12",
+        "line_id": "2",
+        "lat": 55.800441,
+        "lng": 37.530477
+      },
+      "metro_stations": [
+        {
+          "station_name": "Аэропорт",
+          "line_name": "Замоскворецкая",
+          "station_id": "2.12",
+          "line_id": "2",
+          "lat": 55.800441,
+          "lng": 37.530477
+        },
+        {
+          "station_name": "Динамо",
+          "line_name": "Замоскворецкая",
+          "station_id": "2.34",
+          "line_id": "2",
+          "lat": 55.789704,
+          "lng": 37.558212
+        },
+        {
+          "station_name": "Петровский парк",
+          "line_name": "Большая кольцевая линия",
+          "station_id": "97.599",
+          "line_id": "97",
+          "lat": 55.79233,
+          "lng": 37.55952
+        },
+        {
+          "station_name": "ЦСКА",
+          "line_name": "Большая кольцевая линия",
+          "station_id": "97.600",
+          "line_id": "97",
+          "lat": 55.78643,
+          "lng": 37.53502
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-30T10:03:02+0300",
+    "created_at": "2026-03-30T10:03:02+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131651477",
+    "branding": {
+      "type": "MAKEUP",
+      "tariff": null
+    },
+    "show_logo_in_search": true,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131651477?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131651477",
+    "relations": [],
+    "employer": {
+      "id": "53797",
+      "name": "ЭФКО",
+      "url": "https://api.hh.ru/employers/53797",
+      "alternate_url": "https://hh.ru/employer/53797",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1471896.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7728366.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7728367.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=53797",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Знание ОС Windows, сетевых служб и технологий Windows Server на высоком уровне. Опыт работы с системами мониторинга. Опыт работы с...",
+      "responsibility": "Настройка, администрирование активного сетевого оборудования: коммутаторы; маршрутизаторы WiFi оборудование. Администрирование баз данных. Обслуживание в зоне ответственности <highlighttext>продуктов</highlighttext>, серверных <highlighttext>продуктов</highlighttext> и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "113",
+        "name": "Системный администратор"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<strong>Обязанности:</strong> <ul> <li>Эксплуатация серверного оборудования и ОС семейства Windows Server (настройка,администрирование, регламентные работы, резервное копирование, аварийное восстановление и т.д.);</li> <li>Настройка, администрирование активного сетевого оборудования: коммутаторы; маршрутизаторы WiFi оборудование;</li> <li>Администрирование баз данных;</li> <li>Обслуживание в зоне ответственности продуктов, серверных продуктов и систем хранения данных.</li> </ul> <strong>Требования:</strong> <ul> <li>Знание ОС Windows, сетевых служб и технологий Windows Server на высоком уровне;</li> <li>Опыт работы с системами мониторинга;</li> <li>Опыт работы с системами резервного копирования;</li> <li>Хорошее знание работы стека протоколов;</li> <li>Базовые знания по администрированию баз данных;</li> <li>Базовое владение powershell, опыт написания функций для автоматизации административных задач.</li> </ul> <strong>Условия:</strong> <ul> <li>5/2 с 09:00 до 18:00, офисный фиксированный;</li> <li>командировки 4 дня в месяц (по необходимости);</li> <li>работа в современном офисе на территории работодателя;</li> <li>возможности для профессионального роста и обучения;</li> <li>дружная команда и поддержка коллег;</li> <li>участие в масштабных проектах лидера рынка.</li> </ul>",
+    "branded_description": " <style>/*14.11.2025-hh-team-007*/\n.hht-vacancydescription {\n  padding: 0;\n}\n\n.tmpl_hh_wrapper {\n  position: relative;\n  z-index: 1;\n  overflow: hidden;\n  width: 100%;\n  max-width: 690px;\n  margin: 0 auto;\n  font-weight: 400;\n  font-size: 16px;\n  font-family: Arial, sans-serif;\n  line-height: 22px;\n  letter-spacing: 0.01em;\n  word-break: normal;\n}\n\n@media (max-width: 1019px) {\n  .tmpl_hh_wrapper {\n    max-width: 610px;\n  }\n}\n\n.tmpl_hh_wrapper p, .tmpl_hh_wrapper h1, .tmpl_hh_wrapper h2, .tmpl_hh_wrapper h3, .tmpl_hh_wrapper h4, .tmpl_hh_wrapper h5, .tmpl_hh_wrapper h6, .tmpl_hh_wrapper a, .tmpl_hh_wrapper img, .tmpl_hh_wrapper ol, .tmpl_hh_wrapper ul, .tmpl_hh_wrapper li {\n  vertical-align: baseline;\n  margin: 0;\n  padding: 0;\n  border: 0;\n  font-weight: inherit;\n  font-size: inherit;\n}\n\n.tmpl_hh_wrapper ul {\n  list-style: none;\n}\n\n.tmpl_hh_wrapper a {\n  text-decoration: none;\n}\n\n.tmpl_hh_wrapper a:hover {\n  color: inherit;\n}\n\n.tmpl_hh_wrapper img {\n  display: block;\n}\n\n.tmpl_hh_wrapper button {\n  display: block;\n  padding: 0;\n  border: none;\n  background-color: transparent;\n  outline: none;\n  font-family: Arial, sans-serif;\n  cursor: pointer;\n}\n\n.tmpl_hh_wrapper button svg {\n  cursor: pointer;\n}\n\n.tmpl_hh_wrapper .l-cell, .tmpl_hh_wrapper .l-paddings {\n  padding: 0 !important;\n}\n\n.tmpl_hh_wrapper .b-vacancy-desc-wrapper {\n  margin-top: 0 !important;\n}\n\n.tmpl_hh_wrapper .b-vacancy-desc {\n  overflow: visible !important;\n  line-height: inherit;\n}\n\n.tmpl_hh_content ol li b, .tmpl_hh_content ol li strong, .tmpl_hh_content ol li p b, .tmpl_hh_content ol li p strong, .tmpl_hh_content ul li b, .tmpl_hh_content ul li strong, .tmpl_hh_content ul li p b, .tmpl_hh_content ul li p strong {\n  margin: 0 !important;\n  color: inherit !important;\n  font-size: inherit !important;\n  line-height: inherit;\n  text-transform: none;\n}\n\n.tmpl_hh_content ol li p, .tmpl_hh_content ul li p {\n  margin: 0;\n  font-weight: normal;\n}\n\n.tmpl_hh_content p {\n  margin-bottom: 16px;\n}\n\n.tmpl_hh_content p b, .tmpl_hh_content p strong {\n  display: inline;\n  margin: 0;\n}\n\n.tmpl_hh_content ol, .tmpl_hh_content ul {\n  margin-bottom: 32px;\n  margin-left: 18px;\n  list-style: none !important;\n}\n\n.tmpl_hh_content ol {\n  counter-reset: list_counter;\n}\n\n.tmpl_hh_content li {\n  position: relative;\n  margin-bottom: 8px;\n  font-size: 16px;\n}\n\n.tmpl_hh_content li:last-child {\n  margin-bottom: 0;\n}\n\n.tmpl_hh_content ul ul, .tmpl_hh_content ul ol, .tmpl_hh_content ol ol, .tmpl_hh_content ol ul {\n  margin-top: 14px;\n}\n\n.tmpl_hh_content ol > li {\n  counter-increment: list_counter;\n}\n\n.tmpl_hh_content ul > li::before {\n  content: \"\";\n  position: absolute;\n  top: 9px;\n  left: -18px;\n  width: 5px;\n  height: 5px;\n  border-radius: 100%;\n  background-color: #000;\n}\n\n.tmpl_hh_content ol > li::before {\n  content: counter(list_counter) \".\";\n  right: 100%;\n  left: auto;\n  margin-right: 2px;\n}\n\n.tmpl_hh_content :last-child {\n  margin-bottom: 0;\n}\n\n/* stylelint-disable block-no-empty */\n\n/* stylelint-enable block-no-empty */\n\n.tmpl_hh_wrapper {\n  box-sizing: border-box;\n  color: #000;\n  font-size: 18px;\n  line-height: 120%;\n}\n\n.tmpl_hh_wrapper .tmpl_hh_designation {\n  color: #b5b5b5;\n  font-size: 14px;\n  line-height: 120%;\n}\n\n.tmpl_hh_wrapper p.tmpl_hh_text, .tmpl_hh_wrapper li.tmpl_hh_text {\n  color: #fff;\n  font-weight: 700;\n  font-style: normal;\n  font-size: 14px;\n  line-height: 120%;\n}\n\n.tmpl_hh_wrapper .tmpl_hh_box {\n  /* @include box-horisontal(px); */\n  padding-right: 0;\n  padding-left: 0;\n}\n\n.tmpl_hh_wrapper .tmpl_hh_box-t {\n  padding-top: 0;\n}\n\n.tmpl_hh_wrapper .tmpl_hh_box-b {\n  padding-bottom: 0;\n}\n\n.tmpl_hh_wrapper * {\n  box-sizing: border-box;\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_xxl, .tmpl_hh_wrapper p.tmpl_hh_xxl, .tmpl_hh_wrapper div.tmpl_hh_xxl {\n  display: none;\n}\n\n@media (min-width: 1340px) {\n  .tmpl_hh_wrapper br.tmpl_hh_xxl, .tmpl_hh_wrapper p.tmpl_hh_xxl, .tmpl_hh_wrapper div.tmpl_hh_xxl {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_xl, .tmpl_hh_wrapper p.tmpl_hh_xl, .tmpl_hh_wrapper div.tmpl_hh_xl {\n  display: none;\n}\n\n@media (min-width: 1020px) and (max-width: 1339px) {\n  .tmpl_hh_wrapper br.tmpl_hh_xl, .tmpl_hh_wrapper p.tmpl_hh_xl, .tmpl_hh_wrapper div.tmpl_hh_xl {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_lg, .tmpl_hh_wrapper p.tmpl_hh_lg, .tmpl_hh_wrapper div.tmpl_hh_lg {\n  display: none;\n}\n\n@media (min-width: 656px) and (max-width: 1019px) {\n  .tmpl_hh_wrapper br.tmpl_hh_lg, .tmpl_hh_wrapper p.tmpl_hh_lg, .tmpl_hh_wrapper div.tmpl_hh_lg {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_md, .tmpl_hh_wrapper p.tmpl_hh_md, .tmpl_hh_wrapper div.tmpl_hh_md {\n  display: none;\n}\n\n@media (min-width: 414px) and (max-width: 655px) {\n  .tmpl_hh_wrapper br.tmpl_hh_md, .tmpl_hh_wrapper p.tmpl_hh_md, .tmpl_hh_wrapper div.tmpl_hh_md {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_sm, .tmpl_hh_wrapper p.tmpl_hh_sm, .tmpl_hh_wrapper div.tmpl_hh_sm {\n  display: none;\n}\n\n@media (min-width: 0px) and (max-width: 413px) {\n  .tmpl_hh_wrapper br.tmpl_hh_sm, .tmpl_hh_wrapper p.tmpl_hh_sm, .tmpl_hh_wrapper div.tmpl_hh_sm {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_desctop, .tmpl_hh_wrapper p.tmpl_hh_desctop, .tmpl_hh_wrapper div.tmpl_hh_desctop {\n  display: none;\n}\n\n@media (min-width: 656px) {\n  .tmpl_hh_wrapper br.tmpl_hh_desctop, .tmpl_hh_wrapper p.tmpl_hh_desctop, .tmpl_hh_wrapper div.tmpl_hh_desctop {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_wrapper br.tmpl_hh_mobile, .tmpl_hh_wrapper p.tmpl_hh_mobile, .tmpl_hh_wrapper div.tmpl_hh_mobile {\n  display: none;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_wrapper br.tmpl_hh_mobile, .tmpl_hh_wrapper p.tmpl_hh_mobile, .tmpl_hh_wrapper div.tmpl_hh_mobile {\n    display: block !important;\n  }\n}\n\n.tmpl_hh_flex {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n\n.tmpl_hh_header {\n  padding: 40px 30px 0;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_header {\n    padding: 30px 20px 0;\n  }\n}\n\n.tmpl_hh_header .tmpl_hh_box {\n  height: 391px;\n  padding: 40px 20px;\n  border-radius: 10px;\n  background: url(\"https://img.hhcdn.ru/ichameleon/493722.png\") no-repeat center/cover;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_header .tmpl_hh_box {\n    height: 249px;\n    padding: 20px;\n    background: url(\"https://img.hhcdn.ru/ichameleon/493806.png\") no-repeat center/cover;\n  }\n}\n\n.tmpl_hh_header .tmpl_hh_box h2 {\n  color: #fff;\n  font-weight: 700;\n  font-style: normal;\n  font-size: 24px;\n  line-height: 110%; /* 26.4px */\n  text-transform: uppercase;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_header .tmpl_hh_box h2 {\n    font-size: 16px;\n  }\n}\n\n.tmpl_hh_header .tmpl_hh_box h3 {\n  color: #fff;\n  font-weight: 400;\n  font-style: normal;\n  font-size: 18px;\n  line-height: 110%;\n  text-transform: uppercase;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_header .tmpl_hh_box h3 {\n    font-size: 15px;\n  }\n}\n\n.tmpl_hh_logo {\n  margin-bottom: 20px;\n  margin-left: 20px;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_logo {\n    margin-left: 0;\n  }\n}\n\n.tmpl_hh_about {\n  display: flex;\n  justify-content: center;\n  margin-top: -73px;\n  margin-bottom: 10px;\n  padding: 0 30px;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about {\n    flex-direction: column;\n    margin-top: -41px;\n    padding: 0 20px;\n  }\n}\n\n.tmpl_hh_about_item {\n  display: flex;\n  flex-direction: column;\n  gap: 9px;\n  justify-content: space-between;\n  width: 100%;\n  padding: 20px 13px;\n  border: 2px solid #112aef;\n  background: #fff;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about_item {\n    gap: 10px;\n  }\n}\n\n.tmpl_hh_about_item:nth-child(1) {\n  max-width: 239px;\n  border-radius: 10px 10px 0;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about_item:nth-child(1) {\n    max-width: 100%;\n    border-radius: 10px;\n  }\n}\n\n.tmpl_hh_about_item:nth-child(2) {\n  max-width: 169px;\n  border-radius: 10px 10px 0 0;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about_item:nth-child(2) {\n    max-width: 100%;\n    margin-top: -2px;\n    border-radius: 10px;\n  }\n}\n\n.tmpl_hh_about_item:nth-child(3) {\n  max-width: 224px;\n  border-radius: 10px 10px 10px 0;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about_item:nth-child(3) {\n    max-width: 100%;\n    margin-top: -2px;\n    border-radius: 10px;\n  }\n}\n\n.tmpl_hh_about_item h4 {\n  color: #00e462;\n  font-weight: 700;\n  font-style: normal;\n  font-size: 20px;\n  line-height: 110%;\n}\n\n.tmpl_hh_about_item p {\n  color: #112aef;\n  font-weight: 400;\n  font-style: normal;\n  font-size: 12px;\n  line-height: 120%;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about_item p {\n    font-size: 14px;\n  }\n}\n\n.tmpl_hh_about_item p span {\n  font-weight: 700;\n}\n\n.tmpl_hh_team {\n  padding: 0 30px;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_team {\n    padding: 0 20px;\n  }\n}\n\n.tmpl_hh_team .tmpl_hh_img1 {\n  position: relative;\n  z-index: 2;\n  height: 200px;\n  border-radius: 10px;\n  background: url(\"https://img.hhcdn.ru/ichameleon/493764.png\") no-repeat center/cover;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_team .tmpl_hh_img1 {\n    background: url(\"https://img.hhcdn.ru/ichameleon/493807.png\") no-repeat center/cover;\n  }\n}\n\n.tmpl_hh_team .tmpl_hh_info {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  gap: 30px;\n  max-width: 589px;\n  margin-top: -24px;\n  margin-bottom: 20px;\n  padding: 54px 20px 30px;\n  border-radius: 10.227px;\n  background-color: #112aef;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_team .tmpl_hh_info {\n    gap: 20px;\n    margin-top: -61px;\n    margin-bottom: 206px;\n    padding: 81px 15px 123px 20px;\n  }\n}\n\n.tmpl_hh_team .tmpl_hh_info__slogan {\n  display: flex;\n  gap: 10px;\n  align-items: center;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_team .tmpl_hh_info__slogan {\n    justify-content: center;\n  }\n}\n\n.tmpl_hh_team .tmpl_hh_info__slogan h2 {\n  color: #fff;\n  font-weight: 700;\n  font-style: normal;\n  font-size: 30px;\n  line-height: 120%; /* 36px */\n}\n\n.tmpl_hh_team .tmpl_hh_info ul li {\n  display: flex;\n  gap: 15px;\n  align-items: start;\n  max-width: 280px;\n  margin-bottom: 12px;\n}\n\n.tmpl_hh_team .tmpl_hh_info ul li::before {\n  content: \"\";\n  display: flex;\n  min-width: 5px;\n  height: 5px;\n  margin-top: 6px;\n  background-color: #fff;\n}\n\n.tmpl_hh_team .tmpl_hh_info ul li:last-of-type {\n  margin-bottom: 0;\n}\n\n.tmpl_hh_team .tmpl_hh_info::after {\n  content: \"\";\n  position: absolute;\n  top: 54px;\n  right: -41px;\n  width: 310px;\n  height: 389px;\n  border-radius: 10px;\n  background: url(\"https://img.hhcdn.ru/ichameleon/494625.png\") no-repeat center;\n}\n\n@media (max-width: 1019px) {\n  .tmpl_hh_team .tmpl_hh_info::after {\n    top: 52px;\n    right: 9px;\n    width: 227px;\n    height: 342px;\n    background: url(\"https://img.hhcdn.ru/ichameleon/494625.png\") no-repeat center/cover;\n  }\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_team .tmpl_hh_info::after {\n    top: 447px;\n    right: 0;\n    left: 0;\n    width: 265px;\n    height: 289px;\n    margin: 0 auto;\n    background: url(\"https://img.hhcdn.ru/ichameleon/494627.png\") center/cover no-repeat;\n  }\n}\n\n.tmpl_hh_content {\n  padding: 0 50px;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_content {\n    padding: 0 40px;\n  }\n}\n\n.tmpl_hh_content h2, .tmpl_hh_content p.tmpl_hh_content_title, .tmpl_hh_content b.tmpl_hh_content_title, .tmpl_hh_content strong.tmpl_hh_content_title {\n  display: block;\n  margin-bottom: 20px;\n  font-weight: 700;\n  font-style: normal;\n  font-size: 20px;\n  line-height: 110%;\n  color: inherit;\n}\n\n.tmpl_hh_content h2.tmpl_hh_content_title--first, .tmpl_hh_content p.tmpl_hh_content_title--first, .tmpl_hh_content b.tmpl_hh_content_title--first, .tmpl_hh_content strong.tmpl_hh_content_title--first {\n  margin-top: 30px;\n}\n\n.tmpl_hh_content h2, .tmpl_hh_content p.tmpl_hh_content_title > b, .tmpl_hh_content p.tmpl_hh_content_title > strong {\n  font-weight: 700;\n  font-style: normal;\n  font-size: 20px;\n  line-height: 110%;\n  color: inherit;\n}\n\n.tmpl_hh_content p, .tmpl_hh_content div {\n  font-weight: 400;\n  font-style: normal;\n  font-size: 14px;\n  line-height: 120%;\n}\n\n.tmpl_hh_content ul:not(:last-child) {\n  margin-bottom: 20px;\n}\n\n.tmpl_hh_content ul:last-child {\n  margin-bottom: 0;\n}\n\n.tmpl_hh_content ul li {\n  font-weight: 400;\n  font-style: normal;\n  font-size: 14px;\n  line-height: 120%;\n}\n\n.tmpl_hh_content ul li:not(:last-of-type) {\n  margin-bottom: 12px;\n}\n\n.tmpl_hh_content ul li::before {\n  width: 5px;\n  height: 5px;\n  background: #000;\n  top: 6px;\n  border-radius: 0;\n}\n\n.tmpl_hh_about-vacantion {\n  padding: 10px 50px 20px;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_about-vacantion {\n    padding: 0 40px 20px;\n  }\n}\n\n.tmpl_hh_about-vacantion h3 {\n  color: #000;\n  font-weight: 700;\n  font-style: normal;\n  font-size: 20px;\n  line-height: 110%;\n}\n\n.tmpl_hh_about-vacantion p {\n  margin-top: 20px;\n  color: #000;\n  font-weight: 400;\n  font-style: normal;\n  font-size: 14px;\n  line-height: 120%;\n}\n\n.tmpl_hh_designation {\n  padding: 20px 0 40px 30px;\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_designation {\n    padding: 20px 40px 30px;\n  }\n}\n\n.tmpl_hh_designation p {\n  color: rgba(0, 0, 0, 0.3);\n  font-weight: 400;\n  font-style: normal;\n  font-size: 10px;\n  line-height: 130%; /* 13px */\n}\n\n@media (max-width: 655px) {\n  .tmpl_hh_designation p {\n    font-weight: 400;\n    font-style: normal;\n    font-size: 10px;\n    line-height: 130%;\n  }\n}\n</style>\n<div>\n    <div class=\"tmpl_hh_wrapper\">\n      <header class=\"tmpl_hh_header\">\n        <div class=\"tmpl_hh_logo\">\n          <img src=\"https://img.hhcdn.ru/ichameleon/493720.svg\" alt=\"Логотип\" srcset=\"\">\n        </div>\n        <div class=\"tmpl_hh_box\">\n          <h2>Работа и жизнь</h2>\n          <h3>\n            как увлекательное <br class=\"tmpl_hh_xxl tmpl_hh_xl tmpl_hh_lg tmpl_hh_md tmpl_hh_sm\">\n            приключение\n          </h3>\n        </div>\n      </header>\n      <section class=\"tmpl_hh_about\">\n        <div class=\"tmpl_hh_about_item\">\n          <h4>01</h4>\n          <p>\n            <span>Надежная компания:</span> <br class=\"tmpl_hh_xxl tmpl_hh_xl tmpl_hh_lg tmpl_hh_md tmpl_hh_sm\">\n            ⁃ 30 лет на рынке <br>\n            ⁃ 20 тысяч сотрудников <br>\n            ⁃ один из крупнейших* российских производителей продуктов питания\n          </p>\n        </div>\n        <div class=\"tmpl_hh_about_item\">\n          <h4>02</h4>\n          <p>\n            <span>Команда единомышленников,</span> <br class=\"tmpl_hh_xxl tmpl_hh_xl tmpl_hh_lg tmpl_hh_md tmpl_hh_sm\">\n            которые всегда <br class=\"tmpl_hh_xxl tmpl_hh_xl tmpl_hh_lg\"> помогут и поддержат\n          </p>\n        </div>\n        <div class=\"tmpl_hh_about_item\">\n          <h4>03</h4>\n          <p>\n            Работа, в которой \n            <span>инновации, наука <br class=\"tmpl_hh_md tmpl_hh_sm\">\n              и амбициозные проекты</span>\n            встречаются <br class=\"tmpl_hh_md tmpl_hh_sm\"> с многолетним опытом и лучшими корпоративными практиками\n          </p>\n        </div>\n      </section>\n      <section class=\"tmpl_hh_team\">\n        <div class=\"tmpl_hh_img1\"></div>\n        <div class=\"tmpl_hh_info\">\n          <ul>\n            <li class=\"tmpl_hh_text\">\n              Перенимайте опыт <br class=\"tmpl_hh_xxl tmpl_hh_xl tmpl_hh_lg tmpl_hh_md tmpl_hh_sm\">\n              у профессиональных наставников\n            </li>\n\n            <li class=\"tmpl_hh_text\">Учитесь в корпоративном университете</li>\n\n            <li class=\"tmpl_hh_text\">Участвуйте в корпоративных мероприятиях</li>\n\n            <li class=\"tmpl_hh_text\">Растите по карьерной лестнице</li>\n\n            <li class=\"tmpl_hh_text\">Зарабатывайте с помощью системы корпоративных контрактов</li>\n          </ul>\n          <div class=\"tmpl_hh_info__slogan\">\n            <h2>СТАНЬТЕ <br>ЧАСТЬЮ <br>КОМАНДЫ</h2>\n\n            <img src=\"https://img.hhcdn.ru/ichameleon/492516.svg\" alt=\"Стрелка\">\n          </div>\n        </div>\n      </section>\n      <section class=\"tmpl_hh_about-vacantion\">\n        <h3>О вакансии</h3>\n\n        <p>\n          Вы знаете ЭФКО как крупнейшего* российского производителя продуктов питания, экспортера масложировой продукции, компанию с более чем 30-летней\n          историей, создавшей всеми любимые бренды «Слобода» и Altero.\n        </p>\n\n        <p>\n          Однако сегодня ЭФКО — это не только производство качественных продуктов питания, но и целый ряд инновационных проектов: от биотехнологий\n          до искусственного интеллекта, от аккумуляторных батарей до цифровой трансформации бизнеса.\n        </p>\n\n        <p>\n          Вы спросите: как мы создаем и развиваем такое количество настолько разных проектов? Мы ответим: с удовольствием! Потому что настоящий бизнес и\n          инновации — это увлекательное приключение, которое помогает развиваться, становиться сильнее, решать нестандартные задачи и добиваться больших\n          успехов.\n        </p>\n        <p>\n          Хотите так же? <br>\n          Тогда ждем ваше резюме.\n        </p>\n      </section>\n      <main class=\"tmpl_hh_content\">\n        <strong>Обязанности:</strong> <ul> <li>Эксплуатация серверного оборудования и ОС семейства Windows Server (настройка,администрирование, регламентные работы, резервное копирование, аварийное восстановление и т.д.);</li> <li>Настройка, администрирование активного сетевого оборудования: коммутаторы; маршрутизаторы WiFi оборудование;</li> <li>Администрирование баз данных;</li> <li>Обслуживание в зоне ответственности продуктов, серверных продуктов и систем хранения данных.</li> </ul> <strong>Требования:</strong> <ul> <li>Знание ОС Windows, сетевых служб и технологий Windows Server на высоком уровне;</li> <li>Опыт работы с системами мониторинга;</li> <li>Опыт работы с системами резервного копирования;</li> <li>Хорошее знание работы стека протоколов;</li> <li>Базовые знания по администрированию баз данных;</li> <li>Базовое владение powershell, опыт написания функций для автоматизации административных задач.</li> </ul> <strong>Условия:</strong> <ul> <li>5/2 с 09:00 до 18:00, офисный фиксированный;</li> <li>командировки 4 дня в месяц (по необходимости);</li> <li>работа в современном офисе на территории работодателя;</li> <li>возможности для профессионального роста и обучения;</li> <li>дружная команда и поддержка коллег;</li> <li>участие в масштабных проектах лидера рынка.</li> </ul></main>\n      <div class=\"tmpl_hh_designation\">\n        <p>*Рейтинг INFOLine FOOD&amp;DRINK RATING RUSSIA, 2024 г.</p>\n      </div>\n    </div>\n  </div>\n<script>\n//\n\n\nconst main = \"\";\nconst customTitle = () => {\n  const allUl = document.querySelectorAll(\".tmpl_hh_content ul\");\n  allUl.forEach((ul, i) => {\n    const ulTitle = ul.previousElementSibling;\n    if (ulTitle) {\n      ulTitle.classList.add(\"tmpl_hh_content_title\");\n      if (i === 0) {\n        ul.previousElementSibling.classList.add(\"tmpl_hh_content_title--first\");\n      }\n    }\n  });\n};\ndocument.addEventListener(\"DOMContentLoaded\", () => {\n  try {\n    customTitle();\n  } catch (error) {\n    console.log(error);\n  }\n});\n\n\n//\n</script> ",
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "MikroTik"
+      },
+      {
+        "name": "MS SQL"
+      },
+      {
+        "name": "VMware"
+      },
+      {
+        "name": "Active Directory"
+      },
+      {
+        "name": "DNS"
+      },
+      {
+        "name": "DHCP"
+      },
+      {
+        "name": "GPO"
+      },
+      {
+        "name": "TCP/IP"
+      },
+      {
+        "name": "PowerShell"
+      },
+      {
+        "name": "Windows Server"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-30T10:03:02+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131609303",
+    "premium": false,
+    "name": "Администратор (свидание на крыше)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "78",
+      "name": "Самара",
+      "url": "https://api.hh.ru/areas/78"
+    },
+    "salary": {
+      "from": 70000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 70000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Самара",
+      "street": "Московское шоссе",
+      "building": "17",
+      "lat": 53.203068,
+      "lng": 50.15641,
+      "description": null,
+      "raw": "Самара, Московское шоссе, 17",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T12:32:07+0300",
+    "created_at": "2026-03-27T12:32:07+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131609303",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131609303?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131609303",
+    "relations": [],
+    "employer": {
+      "id": "2486440",
+      "name": "Мельников Андрей Григорьевич",
+      "url": "https://api.hh.ru/employers/2486440",
+      "alternate_url": "https://hh.ru/employer/2486440",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/3222599.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/3222600.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/3222601.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=2486440",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Аккуратно и неравнодушно относиться к выполнению задач. Мобильность и оперативность в работе. Высокий уровень ответственности и педантичности.",
+      "responsibility": "Встреча и консультирование наших любимых гостей. Проведение фотосессий без ретуши фотографий (всему научим). Покупка необходимых <highlighttext>продуктов</highlighttext> и инвентаря для проведения..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [
+      {
+        "id": "from_four_to_six_hours_in_a_day",
+        "name": "Можно сменами по 4-6 часов в день"
+      }
+    ],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_2",
+        "name": "2 часа"
+      },
+      {
+        "id": "HOURS_3",
+        "name": "3 часа"
+      },
+      {
+        "id": "HOURS_4",
+        "name": "4 часа"
+      },
+      {
+        "id": "HOURS_5",
+        "name": "5 часов"
+      },
+      {
+        "id": "HOURS_6",
+        "name": "6 часов"
+      },
+      {
+        "id": "HOURS_7",
+        "name": "7 часов"
+      },
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      },
+      {
+        "id": "HOURS_9",
+        "name": "9 часов"
+      },
+      {
+        "id": "HOURS_10",
+        "name": "10 часов"
+      },
+      {
+        "id": "HOURS_11",
+        "name": "11 часов"
+      },
+      {
+        "id": "HOURS_12",
+        "name": "12 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "SIX_ON_ONE_OFF",
+        "name": "6/1"
+      },
+      {
+        "id": "OTHER",
+        "name": "Другое"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard_plus",
+      "name": "Стандарт плюс"
+    },
+    "allow_messages": true,
+    "description": "<p><em>Мы – самая амбициозная команда, которая под брендом </em><em>SKY</em> <em>LOVE ежедневно работает над уникальными проектами в сфере организации романтических мероприятий – «Свидание на крыше», «Прогулки на самолете».</em></p> <p><em>Продукт, который мы создаем, востребован в России и потому уже в 16-ти городах открыты собственные филиалы, в том числе в Новосибирске, Москве, Санкт-Петербурге. </em></p> <p><em>Проекты, которыми мы занимаемся, приносят исключительно положительные эмоции и делают людей счастливее!</em></p> <p><strong>На данный момент нам требуется организатор романтических мероприятий.</strong><br /><br /><em>Мы готовы взять человека без опыта и научить его с нуля. От вас требуется только огромное желание развиваться и работать!</em></p> <p><strong>Что будет входить в задачи?</strong><br />Полный спектр работ по проведению мероприятия:</p> <ul> <li>подготовка площадки к проведению события;</li> <li>встреча и консультирование наших любимых гостей;</li> <li>проведение фотосессий без ретуши фотографий <strong>(всему научим)</strong>;</li> <li>покупка необходимых продуктов и инвентаря для проведения мероприятия.</li> </ul> <p><strong>Что мы ждем от кандидата?</strong></p> <ul> <li>аккуратно и неравнодушно относиться к выполнению задач;</li> <li>мобильность и оперативность в работе;</li> <li>высокий уровень ответственности и педантичности.</li> </ul> <p><strong>Что мы предлагаем:</strong></p> <ul> <li><strong>гарантированная</strong> ставка 70 000 рублей + оплата такси до дома после 21:00;</li> <li>время работы напрямую зависит от количества свиданий, в том числе возможны ночные свидания, понедельник - выходной день;</li> <li>работа в самом романтичном месте города!</li> </ul> <p> </p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Фотография"
+      },
+      {
+        "name": "Грамотная речь"
+      },
+      {
+        "name": "Дружелюбность"
+      },
+      {
+        "name": "Организация мероприятий"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-27T12:32:07+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131436834",
+    "premium": false,
+    "name": "Администратор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "174",
+      "name": "Кызылорда",
+      "url": "https://api.hh.ru/areas/174"
+    },
+    "salary": {
+      "from": 230000,
+      "to": 400000,
+      "currency": "KZT",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 230000,
+      "to": 400000,
+      "currency": "KZT",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Кызылорда",
+      "street": "улица Ахмета Байтурсынова",
+      "building": "122",
+      "lat": 44.832004,
+      "lng": 65.510028,
+      "description": null,
+      "raw": "Кызылорда, улица Ахмета Байтурсынова, 122",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T14:36:10+0300",
+    "created_at": "2026-03-27T14:36:10+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131436834",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131436834?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131436834",
+    "relations": [],
+    "employer": {
+      "id": "11878999",
+      "name": "Beauty-NUR",
+      "url": "https://api.hh.ru/employers/11878999",
+      "alternate_url": "https://hh.ru/employer/11878999",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1461094.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7463986.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7463987.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=11878999",
+      "country_id": 3,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Важно понимание работы. Опыт не обязателен но приветствуется. Коммуникабельность, вежливость.",
+      "responsibility": "Работа и поддержание связи с нашими клиентами. Вежливое отношение к клиентам для обеспечения их лояльности. Встреча гостей. Взаимодействие со всеми..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "SIX_ON_ONE_OFF",
+        "name": "6/1"
+      },
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": true,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><em>Мы - международный бренд космонавтики премиум класса, наши центры открыты в крупных городах мира! </em></p> <p><em>Компания успешно развивается с 2007 года, тесно сотрудничает с ведущими дерматологами и экспертами в области косметики, разработки передовых продуктов для клиентов. </em></p> <p><em>Находимся в поиске энергичного и ответственного администратора в нашу команду! </em></p> <p><strong>Обязанности:</strong></p> <p>Работа и поддержание связи с нашими клиентами</p> <p>Вежливое отношение к клиентам для обеспечения их лояльности</p> <p>Встреча гостей</p> <p>Взаимодействие со всеми отделами центра</p> <p>Консультирования клиентов по процедурам/услугам</p> <strong>Требования:</strong> <p>Важно понимание работы</p> <p>Опыт не обязателен но приветствуется</p> <p>Коммуникабельность, вежливость,</p> <p>Решение конфликтных ситуаций, стрессоустойчивость</p> <p><strong>Условия:</strong></p> <p>Стабильный график</p> <p>Своевременная заработная плата</p> <p>Бесплатное обучение</p> <p>Новый, светлый офис в центре города</p> <p>Официальное трудоустройство</p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-22T12:56:17+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131602549",
+    "premium": false,
+    "name": "Системный администратор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "3",
+      "name": "Екатеринбург",
+      "url": "https://api.hh.ru/areas/3"
+    },
+    "salary": {
+      "from": 80000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 80000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T10:32:24+0300",
+    "created_at": "2026-03-27T10:32:24+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131602549",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131602549?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131602549",
+    "relations": [],
+    "employer": {
+      "id": "2254358",
+      "name": "Бисквитный Двор",
+      "url": "https://api.hh.ru/employers/2254358",
+      "alternate_url": "https://hh.ru/employer/2254358",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1401187.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7224519.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7224520.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=2254358",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Опыт работы системным <highlighttext>администратором</highlighttext> от 1 года. Знание <highlighttext>продуктов</highlighttext> и сервисов Microsoft: Windows / Windows Server (AD, GPO, DHCP). ",
+      "responsibility": "Обеспечение бесперебойной работы и поддержка сетевой инфраструктуры компании. Обеспечение бесперебойного функционирования аппаратного и программного обеспечения компании. Поддержка системы видеонаблюдения. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "FIELD_WORK",
+        "name": "Разъездной"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "113",
+        "name": "Системный администратор"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131429180",
+    "premium": false,
+    "name": "Администратор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": {
+      "from": 60000,
+      "to": 70000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 60000,
+      "to": 70000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": "улица Веденеева",
+      "building": "2",
+      "lat": 60.02298,
+      "lng": 30.36939,
+      "description": null,
+      "raw": "Санкт-Петербург, улица Веденеева, 2",
+      "metro": {
+        "station_name": "Академическая",
+        "line_name": "Кировско-Выборгская",
+        "station_id": "14.192",
+        "line_id": "14",
+        "lat": 60.012806,
+        "lng": 30.396044
+      },
+      "metro_stations": [
+        {
+          "station_name": "Академическая",
+          "line_name": "Кировско-Выборгская",
+          "station_id": "14.192",
+          "line_id": "14",
+          "lat": 60.012806,
+          "lng": 30.396044
+        },
+        {
+          "station_name": "Политехническая",
+          "line_name": "Кировско-Выборгская",
+          "station_id": "14.193",
+          "line_id": "14",
+          "lat": 60.008942,
+          "lng": 30.370907
+        }
+      ],
+      "id": "16343440"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-20T17:13:29+0300",
+    "created_at": "2026-03-20T17:13:29+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131429180",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131429180?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131429180",
+    "relations": [],
+    "employer": {
+      "id": "228110",
+      "name": "Инфинитив, центр иностранных языков",
+      "url": "https://api.hh.ru/employers/228110",
+      "alternate_url": "https://hh.ru/employer/228110",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6883733.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6883734.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6883735.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=228110",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Оконченное среднее-специальное / высшее образование. Аналогичный опыт работы (можно в смежной, но обязательно коммерческой сфере - школы танцев, языковые курсов, тренингов...",
+      "responsibility": "Заказ и учет материальной базы - канцелярии, <highlighttext>продуктов</highlighttext>, хозяйственных средств и т.п. Взаимодействие с преподавательским составом. Работа вожатым детского лагеря..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      },
+      {
+        "id": "OTHER",
+        "name": "Другое"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131470597",
+    "premium": false,
+    "name": "Системный администратор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": {
+      "from": 100000,
+      "to": null,
+      "currency": "RUR",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 100000,
+      "to": null,
+      "currency": "RUR",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": "Свеаборгская улица",
+      "building": "10Б",
+      "lat": 59.874205,
+      "lng": 30.329999,
+      "description": null,
+      "raw": "Санкт-Петербург, Свеаборгская улица, 10Б",
+      "metro": {
+        "station_name": "Бухарестская",
+        "line_name": "Фрунзенско-Приморская",
+        "station_id": "18.259",
+        "line_id": "18",
+        "lat": 59.883769,
+        "lng": 30.368932
+      },
+      "metro_stations": [
+        {
+          "station_name": "Бухарестская",
+          "line_name": "Фрунзенско-Приморская",
+          "station_id": "18.259",
+          "line_id": "18",
+          "lat": 59.883769,
+          "lng": 30.368932
+        },
+        {
+          "station_name": "Московские ворота",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.221",
+          "line_id": "15",
+          "lat": 59.891788,
+          "lng": 30.317873
+        },
+        {
+          "station_name": "Парк Победы",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.223",
+          "line_id": "15",
+          "lat": 59.866344,
+          "lng": 30.321802
+        },
+        {
+          "station_name": "Электросила",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.222",
+          "line_id": "15",
+          "lat": 59.879189,
+          "lng": 30.318659
+        }
+      ],
+      "id": "22915409"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T14:08:41+0300",
+    "created_at": "2026-03-23T14:08:41+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131470597",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131470597?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131470597",
+    "relations": [],
+    "employer": {
+      "id": "2716404",
+      "name": "Оптимальное Движение",
+      "url": "https://api.hh.ru/employers/2716404",
+      "alternate_url": "https://hh.ru/employer/2716404",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/3162199.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/3162200.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/3162201.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=2716404",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "У тебя есть опыт работы с Linux (Ubuntu) от 1 года. Опыт администрирования PostgreSQL: настройка, бэкап/восстановление, оптимизация запросов. ",
+      "responsibility": "Поддержка и администрирование серверов Linux (Ubuntu). Управление PostgreSQL: настройка, бэкап/восстановление, мониторинг и оптимизация производительности. Поддержка Java-приложений: развёртывание, настройка..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      },
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "113",
+        "name": "Системный администратор"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131482950",
+    "premium": false,
+    "name": "Администратор проектов / Ассистент подразделения",
+    "department": {
+      "id": "80-80-expert",
+      "name": "Альфа-Банк. Центральный офис"
+    },
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "проспект Андропова",
+      "building": "18к3",
+      "lat": 55.6945,
+      "lng": 37.662021,
+      "description": null,
+      "raw": "Москва, проспект Андропова, 18к3",
+      "metro": {
+        "station_name": "Технопарк",
+        "line_name": "Замоскворецкая",
+        "station_id": "2.512",
+        "line_id": "2",
+        "lat": 55.695,
+        "lng": 37.664167
+      },
+      "metro_stations": [
+        {
+          "station_name": "Технопарк",
+          "line_name": "Замоскворецкая",
+          "station_id": "2.512",
+          "line_id": "2",
+          "lat": 55.695,
+          "lng": 37.664167
+        }
+      ],
+      "id": "602591"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T18:40:05+0300",
+    "created_at": "2026-03-23T18:40:05+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131482950",
+    "branding": {
+      "type": "MAKEUP",
+      "tariff": null
+    },
+    "show_logo_in_search": true,
+    "show_contacts": false,
+    "insider_interview": {
+      "id": "32631",
+      "url": "https://hh.ru/interview/32631?employerId=80"
+    },
+    "url": "https://api.hh.ru/vacancies/131482950?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131482950",
+    "relations": [],
+    "employer": {
+      "id": "80",
+      "name": "Альфа-Банк",
+      "url": "https://api.hh.ru/employers/80",
+      "alternate_url": "https://hh.ru/employer/80",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/3096623.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/3096624.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/3096625.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=80",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Высшее образование. Опыт работы в Jira, Confluence. Опыт работы на схожей должности (координатор проектов, ассистент подразделения) от 3-х лет. ",
+      "responsibility": "Помощь с заполнением табеля и ведение заявок на оплату компенсаций и премий сотрудников. Контроль расхода бюджета подразделения – административная помощь руководителю. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "130967567",
+    "premium": false,
+    "name": "Администратор интернет-магазина",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1002",
+      "name": "Минск",
+      "url": "https://api.hh.ru/areas/1002"
+    },
+    "salary": {
+      "from": 2200,
+      "to": null,
+      "currency": "BYR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 2200,
+      "to": null,
+      "currency": "BYR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Минск",
+      "street": "Промышленная улица",
+      "building": "20к1",
+      "lat": 53.845068,
+      "lng": 27.692257,
+      "description": null,
+      "raw": "Минск, Промышленная улица, 20к1",
+      "metro": {
+        "station_name": "Могилевская",
+        "line_name": "Автозаводская",
+        "station_id": "63.429",
+        "line_id": "63",
+        "lat": 53.861862,
+        "lng": 27.674381
+      },
+      "metro_stations": [
+        {
+          "station_name": "Могилевская",
+          "line_name": "Автозаводская",
+          "station_id": "63.429",
+          "line_id": "63",
+          "lat": 53.861862,
+          "lng": 27.674381
+        }
+      ],
+      "id": "20647324"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-28T14:31:14+0300",
+    "created_at": "2026-03-28T14:31:14+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=130967567",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/130967567?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/130967567",
+    "relations": [],
+    "employer": {
+      "id": "975712",
+      "name": "Санта Импэкс",
+      "url": "https://api.hh.ru/employers/975712",
+      "alternate_url": "https://hh.ru/employer/975712",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1430171.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7340333.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7340334.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=975712",
+      "country_id": 4,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Высшее образование (бухгалтерское, экономическое) предпочтительно товароведение. Опыт работы в сфере торговли (<highlighttext>продукты</highlighttext> питания). Знание программ и уверенное пользование: MS Office...",
+      "responsibility": "Работа с сайтом интернет-магазина. Консультирование по ассортименту. Оформление заказов и сопровождающих документов (ТТН/ТН). Поддержание клиентской базы и поиск..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "70",
+        "name": "Менеджер по продажам, менеджер по работе с клиентами"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131301311",
+    "premium": false,
+    "name": "Администратор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "43",
+      "name": "Калуга",
+      "url": "https://api.hh.ru/areas/43"
+    },
+    "salary": {
+      "from": 60000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 60000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Калуга",
+      "street": "улица Циолковского",
+      "building": "10",
+      "lat": 54.51580751908249,
+      "lng": 36.240551398947076,
+      "description": null,
+      "raw": "Калуга, улица Циолковского, 10",
+      "metro": null,
+      "metro_stations": [],
+      "id": "13488869"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T13:03:58+0300",
+    "created_at": "2026-03-29T13:03:58+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131301311",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131301311?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131301311",
+    "relations": [],
+    "employer": {
+      "id": "2026445",
+      "name": "ПремиумСтрой",
+      "url": "https://api.hh.ru/employers/2026445",
+      "alternate_url": "https://hh.ru/employer/2026445",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=2026445",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Опыт работы на аналогичной позиции (помощник руководителя, офис-менеджер, <highlighttext>администратор</highlighttext>, секретарь) будет преимуществом. Опыт работы в сфере недвижимости будет преимуществом. ",
+      "responsibility": "Обеспечение бесперебойной работы офиса: контроль чистоты и порядка, учет и своевременное пополнение расходных материалов (канцтовары, вода, хоз. товары, <highlighttext>продукты</highlighttext> питания). "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131623950",
+    "premium": false,
+    "name": "Администратор офиса",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": {
+      "from": 70000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 70000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": "набережная реки Мойки",
+      "building": "36",
+      "lat": 59.937986,
+      "lng": 30.320189,
+      "description": null,
+      "raw": "Санкт-Петербург, набережная реки Мойки, 36",
+      "metro": {
+        "station_name": "Адмиралтейская",
+        "line_name": "Фрунзенско-Приморская",
+        "station_id": "18.258",
+        "line_id": "18",
+        "lat": 59.935867,
+        "lng": 30.31523
+      },
+      "metro_stations": [
+        {
+          "station_name": "Адмиралтейская",
+          "line_name": "Фрунзенско-Приморская",
+          "station_id": "18.258",
+          "line_id": "18",
+          "lat": 59.935867,
+          "lng": 30.31523
+        },
+        {
+          "station_name": "Гостиный двор",
+          "line_name": "Невско-Василеостровская",
+          "station_id": "16.229",
+          "line_id": "16",
+          "lat": 59.933933,
+          "lng": 30.33341
+        },
+        {
+          "station_name": "Невский проспект",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.217",
+          "line_id": "15",
+          "lat": 59.935421,
+          "lng": 30.327052
+        },
+        {
+          "station_name": "Сенная площадь",
+          "line_name": "Московско-Петроградская",
+          "station_id": "15.218",
+          "line_id": "15",
+          "lat": 59.927135,
+          "lng": 30.320316
+        }
+      ],
+      "id": "21448297"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T17:25:47+0300",
+    "created_at": "2026-03-27T17:25:47+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131623950",
+    "branding": {
+      "type": "MAKEUP",
+      "tariff": null
+    },
+    "show_logo_in_search": true,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131623950?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131623950",
+    "relations": [],
+    "employer": {
+      "id": "4258610",
+      "name": "TrendAgent",
+      "url": "https://api.hh.ru/employers/4258610",
+      "alternate_url": "https://hh.ru/employer/4258610",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1491576.png",
+        "90": "https://img.hhcdn.ru/employer-logo/12256667.png",
+        "240": "https://img.hhcdn.ru/employer-logo/12256668.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4258610",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Эрудированный и убедительный переговорщик — знаешь, когда нужно показать хватку, а когда просто выслушать. Умеешь работать в режиме многозадачности. ",
+      "responsibility": "Б. Обеспечение классной работы внутреннего офиса. ⁃ Закупки и контроль запасов (<highlighttext>продукты</highlighttext> питания, канцелярия). ⁃ Содержание офиса (взаимодействие с БЦ, заказ мебели..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "shift",
+      "name": "Сменный график"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_12",
+        "name": "12 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "TWO_ON_TWO_OFF",
+        "name": "2/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "88",
+        "name": "Офис-менеджер"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131577496",
+    "premium": false,
+    "name": "Менеджер-администратор в студию растяжки (Селезнева, 4/9)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "53",
+      "name": "Краснодар",
+      "url": "https://api.hh.ru/areas/53"
+    },
+    "salary": {
+      "from": 60000,
+      "to": 120000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 60000,
+      "to": 120000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Краснодар",
+      "street": "улица Селезнёва",
+      "building": "4/9",
+      "lat": 45.02635650334774,
+      "lng": 39.01777564418003,
+      "description": null,
+      "raw": "Краснодар, улица Селезнёва, 4/9",
+      "metro": null,
+      "metro_stations": [],
+      "id": "14682510"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T13:39:07+0300",
+    "created_at": "2026-03-29T13:39:07+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131577496",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131577496?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131577496",
+    "relations": [],
+    "employer": {
+      "id": "9629325",
+      "name": "Stretch House (ИП Кутелия Теймураз Зурабович)",
+      "url": "https://api.hh.ru/employers/9629325",
+      "alternate_url": "https://hh.ru/employer/9629325",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/5884204.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/5884205.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/5884206.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9629325",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Энергичный. Любишь общаться с людьми. Любишь видеть свой результат работы. Будет преимуществом, если ты: Имеешь опыт в продажах и общении...",
+      "responsibility": "Вести базу клиентов. Записывать девочек на пробные занятия. Продавать абонементы на занятия в студиях. Следить за тем, чтобы в студии..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "shift",
+      "name": "Сменный график"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_12",
+        "name": "12 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "TWO_ON_TWO_OFF",
+        "name": "2/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131463503",
+    "premium": false,
+    "name": "Администратор отдела продаж",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "76",
+      "name": "Ростов-на-Дону",
+      "url": "https://api.hh.ru/areas/76"
+    },
+    "salary": {
+      "from": 50000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 50000,
+      "to": 80000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Ростов-на-Дону",
+      "street": "улица Текучёва",
+      "building": "358",
+      "lat": 47.241163,
+      "lng": 39.740902,
+      "description": null,
+      "raw": "Ростов-на-Дону, улица Текучёва, 358",
+      "metro": null,
+      "metro_stations": [],
+      "id": "24366625"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-23T12:15:27+0300",
+    "created_at": "2026-03-23T12:15:27+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131463503",
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131463503?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131463503",
+    "relations": [],
+    "employer": {
+      "id": "12677942",
+      "name": "Основание",
+      "url": "https://api.hh.ru/employers/12677942",
+      "alternate_url": "https://hh.ru/employer/12677942",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=12677942",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Опыт работы с клиентами (консультации, продажи) желателен. - Уверенный пользователь ПК. - Выдержка, внимательность.",
+      "responsibility": "Обработка заявок на поставку оборудования клиентам. - Оформление счетов и отгрузочных документов клиентов. - Взаимодействие с клиентами по вопросам согласования сделок и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131493211",
+    "premium": false,
+    "name": "Администратор детского клуба",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "Северо-Западный административный округ, район Хорошёво-Мнёвники",
+      "building": null,
+      "lat": 55.778011,
+      "lng": 37.473995,
+      "description": null,
+      "raw": "Москва, Северо-Западный административный округ, район Хорошёво-Мнёвники",
+      "metro": {
+        "station_name": "Мнёвники",
+        "line_name": "Большая кольцевая линия",
+        "station_id": "97.805",
+        "line_id": "97",
+        "lat": 55.761153,
+        "lng": 37.47139
+      },
+      "metro_stations": [
+        {
+          "station_name": "Мнёвники",
+          "line_name": "Большая кольцевая линия",
+          "station_id": "97.805",
+          "line_id": "97",
+          "lat": 55.761153,
+          "lng": 37.47139
+        },
+        {
+          "station_name": "Народное Ополчение",
+          "line_name": "Большая кольцевая линия",
+          "station_id": "97.806",
+          "line_id": "97",
+          "lat": 55.77592,
+          "lng": 37.485073
+        },
+        {
+          "station_name": "Октябрьское поле",
+          "line_name": "Таганско-Краснопресненская",
+          "station_id": "7.95",
+          "line_id": "7",
+          "lat": 55.793581,
+          "lng": 37.493317
+        },
+        {
+          "station_name": "Хорошево",
+          "line_name": "МЦК",
+          "station_id": "95.539",
+          "line_id": "95",
+          "lat": 55.777222,
+          "lng": 37.507222
+        }
+      ],
+      "id": "21030279"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-30T09:42:15+0300",
+    "created_at": "2026-03-30T09:42:15+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131493211",
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131493211?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131493211",
+    "relations": [],
+    "employer": {
+      "id": "10093757",
+      "name": "Никитина Ирина Игоревна",
+      "url": "https://api.hh.ru/employers/10093757",
+      "alternate_url": "https://hh.ru/employer/10093757",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10093757",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Бесплатное корпоративное обучение навыкам продаж, работе с CRM и грамотному общению с клиентами.",
+      "responsibility": "Помощь и поддержка от руководства и коллег. -Поддержку и помощь. -Работать с входящими обращениями и записывать клиентов на пробные уроки. -"
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "flexible",
+      "name": "Гибкий график"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "FLEXIBLE",
+        "name": "По договорённости"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      },
+      {
+        "id": "TWO_ON_TWO_OFF",
+        "name": "2/2"
+      },
+      {
+        "id": "WEEKEND",
+        "name": "По выходным"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [
+      {
+        "id": "SELF_EMPLOYED",
+        "name": "с самозанятым"
+      },
+      {
+        "id": "INDIVIDUAL_ENTREPRENEUR",
+        "name": "с ИП"
+      },
+      {
+        "id": "INDIVIDUAL_PERSON",
+        "name": "с физлицом"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "132",
+        "name": "Учитель, преподаватель, педагог"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131507898",
+    "premium": false,
+    "name": "Head of Hardware",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": true,
+    "area": {
+      "id": "2",
+      "name": "Санкт-Петербург",
+      "url": "https://api.hh.ru/areas/2"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Санкт-Петербург",
+      "street": null,
+      "building": null,
+      "lat": 59.961033,
+      "lng": 30.292006,
+      "description": null,
+      "raw": "Санкт-Петербург",
+      "metro": {
+        "station_name": "Чкаловская",
+        "line_name": "Фрунзенско-Приморская",
+        "station_id": "18.248",
+        "line_id": "18",
+        "lat": 59.961033,
+        "lng": 30.292006
+      },
+      "metro_stations": [
+        {
+          "station_name": "Чкаловская",
+          "line_name": "Фрунзенско-Приморская",
+          "station_id": "18.248",
+          "line_id": "18",
+          "lat": 59.961033,
+          "lng": 30.292006
+        }
+      ],
+      "id": "458509"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-24T13:56:33+0300",
+    "created_at": "2026-03-24T13:56:33+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131507898",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131507898?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131507898",
+    "relations": [],
+    "employer": {
+      "id": "472",
+      "name": "Дартс рекрутинг сервисез",
+      "url": "https://api.hh.ru/employers/472",
+      "alternate_url": "https://hh.ru/employer/472",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1459331.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7456938.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7456939.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=472",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Опыт управления P&L программно-аппаратного или инженерного <highlighttext>продукта</highlighttext>. Опыт работы на стыке hardware + software. Опыт формирования продуктовой стратегии. ",
+      "responsibility": "Формировать продуктовый roadmap и приоритеты развития. Принимать решения о конфигурации <highlighttext>продукта</highlighttext>, балансируя ценность и себестоимость. Выстроить системный процесс discovery и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      },
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "73",
+        "name": "Менеджер продукта"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "moreThan6",
+      "name": "Более 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131409685",
+    "premium": false,
+    "name": "Администратор в магазин бренда Women'secret (ТЦ Европолис Ростокино)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": 75000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 75000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "проспект Мира",
+      "building": "211к2",
+      "lat": 55.845855,
+      "lng": 37.662093,
+      "description": null,
+      "raw": "Москва, проспект Мира, 211к2",
+      "metro": {
+        "station_name": "Ботанический сад",
+        "line_name": "Калужско-Рижская",
+        "station_id": "6.24",
+        "line_id": "6",
+        "lat": 55.844597,
+        "lng": 37.637811
+      },
+      "metro_stations": [
+        {
+          "station_name": "Ботанический сад",
+          "line_name": "Калужско-Рижская",
+          "station_id": "6.24",
+          "line_id": "6",
+          "lat": 55.844597,
+          "lng": 37.637811
+        },
+        {
+          "station_name": "Ботанический сад",
+          "line_name": "МЦК",
+          "station_id": "95.517",
+          "line_id": "95",
+          "lat": 55.845556,
+          "lng": 37.640278
+        },
+        {
+          "station_name": "Ростокино",
+          "line_name": "МЦК",
+          "station_id": "95.518",
+          "line_id": "95",
+          "lat": 55.839444,
+          "lng": 37.667778
+        },
+        {
+          "station_name": "Свиблово",
+          "line_name": "Калужско-Рижская",
+          "station_id": "6.129",
+          "line_id": "6",
+          "lat": 55.855558,
+          "lng": 37.653379
+        }
+      ],
+      "id": "19660273"
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-29T10:58:53+0300",
+    "created_at": "2026-03-29T10:58:53+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131409685",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131409685?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131409685",
+    "relations": [],
+    "employer": {
+      "id": "1670287",
+      "name": "РУСМАРКЕТЦЕНТР",
+      "url": "https://api.hh.ru/employers/1670287",
+      "alternate_url": "https://hh.ru/employer/1670287",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/7051741.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/7051742.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/7051743.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=1670287",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Ориентация на достижение результата. Знание и понимание <highlighttext>продукта</highlighttext>. Готовность работать в режиме многозадачности. Желание работать и развиваться в сфере Fashion...",
+      "responsibility": "Обеспечение выполнения KPI показателей и плана продаж магазина. Управление персоналом, формирование команды. Обучение новых сотрудников магазина. Поддержание и развитие товарного..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "shift",
+      "name": "Сменный график"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_12",
+        "name": "12 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "TWO_ON_TWO_OFF",
+        "name": "2/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "9",
+        "name": "Администратор магазина, администратор торгового зала"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  },
+  {
+    "id": "131026306",
+    "premium": false,
+    "name": "Junior Data Engineer (Laboratory 2.0)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1002",
+      "name": "Минск",
+      "url": "https://api.hh.ru/areas/1002"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-25T14:41:33+0300",
+    "created_at": "2026-03-25T14:41:33+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131026306",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131026306?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131026306",
+    "relations": [],
+    "employer": {
+      "id": "2227394",
+      "name": "IDF Technology",
+      "url": "https://api.hh.ru/employers/2227394",
+      "alternate_url": "https://hh.ru/employer/2227394",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/5391659.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/5391660.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/5391661.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=2227394",
+      "country_id": 4,
+      "accredited_it_employer": false,
+      "trusted": true
+    },
+    "snippet": {
+      "requirement": "Кого мы ищем: Выпускников IT-курсов с хорошей теоретической базой. Кандидатов с небольшим опытом работы, которые хотят прокачать практические навыки. ",
+      "responsibility": "Изучаемый стек технологий:"
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "165",
+        "name": "Дата-сайентист"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null
+  }
+]

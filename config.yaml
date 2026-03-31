@@ -59,6 +59,54 @@ search_queries:
 - Закупщик
 hard_skills:
 - python
+- python 3
+- fastapi
+- fast api
+- django
+- flask
+- sqlalchemy
+- pydantic
+- asyncio
+- asyncpg
+- aiohttp
+- celery
+- redis
+- postgresql
+- postgres
+- mysql
+- mongodb
+- docker
+- docker compose
+- kubernetes
+- k8s
+- git
+- github
+- gitlab
+- ci/cd
+- cicd
+- rest api
+- rest
+- graphql
+- grpc
+- microservices
+- микросервисы
+- mvp
+- mvc
+- solid
+- clean architecture
+- tdd
+- unit тесты
+- интеграционные тесты
+- pytest
+- unittest
+- ruff
+- black
+- pylint
+- mypy
+- type hints
+- async/await
+- multithreading
+- multiprocessing
 - java
 - javascript
 - typescript
@@ -90,73 +138,88 @@ hard_skills:
 - svelte
 - next.js
 - nuxt
-- django
-- flask
-- fastapi
 - spring
 - spring boot
 - express
 - nest.js
 - laravel
-
-# Системное администрирование и сети
-- tcp/ip
-- tcpip
-- osi
-- vlan
-- vpn
-- ipsec
-- dns
-- dhcp
-- http
-- https
-- ftp
-- ssh
-- ssl
-- tls
-- nat
-- acl
-- routing
-- switching
-- lan
-- wan
-- wifi
-- wireless
-- ethernet
-- raid
-- cpu
-- ram
-- rom
-- bios
-- uefi
-- itil
-- itsm
-- active directory
-- ad
-- group policy
-- gpo
-- wsus
-- sccm
-- microsoft exchange
-- exchange server
-- iis
-- apache
+- llm
+- llm api
+- openai api
+- langchain
+- ollama
+- sentence-transformers
+- ai/ml
+- machine learning
+- deep learning
+- nlp
+- computer vision
+- rag
+- embeddings
+- vector search
+- transformers
+- pytorch
+- tensorflow
+- keras
+- scikit-learn
+- pandas
+- numpy
+- matplotlib
+- seaborn
+- xgboost
+- lightgbm
+- catboost
+- opencv
+- hugging face
+- langfuse
+- sentry
+- opentelemetry
+- elk
+- elasticsearch
+- logstash
+- kibana
+- prometheus
+- grafana
+- zabbix
+- new relic
+- datadog
+- rabbitmq
+- kafka
+- celery
+- job-системы
+- очереди задач
 - nginx
-- haproxy
-- pfsense
-- mikrotik
-- cisco
-- huawei
-- juniper
-- ubiquiti
-
-# Операционные системы
-- linux
-- unix
-- windows server
-- windows 10
-- windows 11
-- ubuntu
+- reverse proxy
+- api gateway
+- load balancer
+- yoyo-migrations
+- alembic
+- миграции бд
+- code review
+- автоматические тесты
+- автотесты
+- покрытие тестов
+- ruff
+- black
+- pylint
+- pre-commit
+- tox
+- cursor
+- claude
+- github copilot
+- gemini
+- ai-ассистенты
+- clean architecture
+- solid принципы
+- микросервисная архитектура
+- распределённые системы
+- мониторинг
+- логирование
+- алертинг
+- деплой
+- ci/cd пайплайн
+- автоматический деплой
+- код ревью
 - debian
 - centos
 - rhel

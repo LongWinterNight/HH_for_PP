@@ -1,0 +1,1148 @@
+[
+  {
+    "id": "131644002",
+    "premium": false,
+    "name": "Личный водитель",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2759",
+      "name": "Ташкент",
+      "url": "https://api.hh.ru/areas/2759"
+    },
+    "salary": {
+      "from": 6000000,
+      "to": 8000000,
+      "currency": "UZS",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 6000000,
+      "to": 8000000,
+      "currency": "UZS",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Ташкент",
+      "street": "Яккасарайский район",
+      "building": null,
+      "lat": 41.286011,
+      "lng": 69.253766,
+      "description": null,
+      "raw": "Ташкент, Яккасарайский район",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-30T08:01:05+0300",
+    "created_at": "2026-03-30T08:01:05+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131644002",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131644002?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131644002",
+    "relations": [],
+    "employer": {
+      "id": "5253960",
+      "name": "ООО BUKA SPORTSWEAR",
+      "url": "https://api.hh.ru/employers/5253960",
+      "alternate_url": "https://hh.ru/employer/5253960",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=5253960",
+      "country_id": 6,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Наличие водительских прав категорий B, C, D. Опыт работы водителем (желательно персональным или корпоративным). Отличное знание города и дорожной инфраструктуры. ",
+      "responsibility": "...передвижения <highlighttext>руководства</highlighttext>. Встреча и сопровождение гостей компании. Выполнение служебных поездок по городу и за его пределами. Сопровождение гостей и <highlighttext>руководства</highlighttext>..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_9",
+        "name": "9 часов"
+      },
+      {
+        "id": "OTHER",
+        "name": "Другое"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": true,
+    "professional_roles": [
+      {
+        "id": "21",
+        "name": "Водитель"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "moreThan6",
+      "name": "Более 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": true,
+    "description": "<em>Мы динамична развивающаяся компания <strong>&quot;Buka Sportswear&quot; </strong>- ведущее иностранное предприятие по производству одежды в Узбекистане, приглашает на работу <strong>Личного водителя </strong>для руководства.</em><br /><br /><strong>Обязанности</strong> <ul> <li>Обеспечение комфортного и безопасного передвижения руководства</li> <li>Встреча и сопровождение гостей компании</li> <li>Выполнение служебных поездок по городу и за его пределами</li> <li>Сопровождение гостей и руководства в вечернее время (при необходимости)</li> <li>Контроль технического состояния автомобиля</li> </ul> <strong>Требования</strong> <ul> <li>Наличие водительских прав категорий B, C, D</li> <li>Опыт работы водителем (желательно персональным или корпоративным)</li> <li>Отличное знание города и дорожной инфраструктуры</li> <li>Ответственность, пунктуальность, аккуратность</li> <li>Готовность к ненормированному графику</li> </ul> <strong>Условия</strong> <ul> <li>График работы: 5/2</li> <li>Официальное трудоустройство</li> <li>Сверхурочная работа оплачивается</li> <li>Стабильная заработная плата</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [
+      {
+        "id": "B"
+      },
+      {
+        "id": "C"
+      },
+      {
+        "id": "D"
+      }
+    ],
+    "initial_created_at": "2026-03-30T08:01:05+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131630408",
+    "premium": false,
+    "name": "Менеджер Kaspi магазина (менеджер по работе с маркетплейсами)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "159",
+      "name": "Астана",
+      "url": "https://api.hh.ru/areas/159"
+    },
+    "salary": {
+      "from": 350000,
+      "to": 350000,
+      "currency": "KZT",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 350000,
+      "to": 350000,
+      "currency": "KZT",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Астана",
+      "street": "улица Тараса Шевченко",
+      "building": "4/1",
+      "lat": 51.16037,
+      "lng": 71.403156,
+      "description": null,
+      "raw": "Астана, улица Тараса Шевченко, 4/1",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-28T10:30:26+0300",
+    "created_at": "2026-03-28T10:30:26+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131630408",
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131630408?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131630408",
+    "relations": [],
+    "employer": {
+      "id": "11073076",
+      "name": "Aiya AB",
+      "url": "https://api.hh.ru/employers/11073076",
+      "alternate_url": "https://hh.ru/employer/11073076",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=11073076",
+      "country_id": 3,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Знание работы с платформой Kaspi или аналогичными системами (как плюс, если нет, то всему обучим). Грамотная устная и письменная речь...",
+      "responsibility": "Ежедневная упаковка и передача заказов в склад Zammler. Оформление, упаковка отправка курьером доставок по городу. Консультация клиентов по телефону, WhatsApp..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_9",
+        "name": "9 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "40",
+        "name": "Другое"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": true,
+    "description": "<p><em>Ищем активного и коммуникабельного сотрудника на позицию <strong>Менеджера </strong>в<strong> Kaspi (каспи) магазин.</strong></em></p> <p><strong>Обязанности:</strong></p> <ul> <li>⁠Ежедневная упаковка и передача заказов в склад Zammler</li> <li>Оформление, упаковка отправка курьером доставок по городу.</li> <li>Консультация клиентов по телефону, WhatsApp ( по ассортименту, по статусу их заказов).</li> <li>Работа с возвратами и негативными отзывами.</li> <li>Прием поступающих товаров, их учет, инвентаризация и организация хранения, поддержание порядка на складе.</li> <li>Создание новых карточек товаров(описание, загрузка фото).</li> <li>Проверка актуальности цен и наличия товара.</li> </ul> <p><strong>Требования:</strong></p> <ul> <li>Знание работы с платформой Kaspi или аналогичными системами (как плюс, если нет, то всему обучим).</li> <li>Грамотная устная и письменная речь, способность четко и уверенно коммуницировать с клиентами.</li> <li><em>Разговорный русский и казахский язык обязателен.</em></li> <li>Уверенное владение компьютером и онлайн-инструментами (мессенджеры, соц сети).</li> <li>⁠Базовые знания работы с MS Office (обязательно Excel).</li> <li>Стрессоустойчивость и умение работать в условиях многозадачности.</li> <li>Готовность к обучению и нацеленность на результат.</li> </ul> <p><strong>Условия:</strong></p> <ul> <li><strong>График работы: 5/2 с 10:00 до 20.00. Выходные выпадают на будние дни (не суббота и воскресенье).</strong></li> <li>Испытательный срок 1 месяц (оплачиваемый).</li> <li>Справедливое и контактное руководство.</li> <li><strong>Адрес:</strong> БЦ &quot;Business Hall&quot;, Шевченко 4/1.</li> <li><strong>Работа на полный рабочий день! Не онлайн!</strong></li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Маркетплейсы"
+      },
+      {
+        "name": "Грамотность"
+      },
+      {
+        "name": "Грамотная речь"
+      },
+      {
+        "name": "Консультирование"
+      },
+      {
+        "name": "Работа с клиентами"
+      },
+      {
+        "name": "Грамотная устная речь"
+      },
+      {
+        "name": "Грамотная письменная речь"
+      },
+      {
+        "name": "Консультирование клиентов"
+      },
+      {
+        "name": "Ozon"
+      },
+      {
+        "name": "Kaspi"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-28T10:30:26+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "rus",
+        "name": "Русский",
+        "level": {
+          "id": "c1",
+          "name": "C1 — Продвинутый"
+        }
+      },
+      {
+        "id": "kaz",
+        "name": "Казахский",
+        "level": {
+          "id": "b2",
+          "name": "B2 — Средне-продвинутый"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131582606",
+    "premium": false,
+    "name": "Администратор офиса",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "153",
+      "name": "Атырау",
+      "url": "https://api.hh.ru/areas/153"
+    },
+    "salary": {
+      "from": 250000,
+      "to": 250000,
+      "currency": "KZT",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 250000,
+      "to": 250000,
+      "currency": "KZT",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Атырау",
+      "street": "проспект Азаттык",
+      "building": "7",
+      "lat": 47.107934,
+      "lng": 51.922579,
+      "description": null,
+      "raw": "Атырау, проспект Азаттык, 7",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-26T15:16:01+0300",
+    "created_at": "2026-03-26T15:16:01+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131582606",
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131582606?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131582606",
+    "relations": [],
+    "employer": {
+      "id": "9852565",
+      "name": "KBS",
+      "url": "https://api.hh.ru/employers/9852565",
+      "alternate_url": "https://hh.ru/employer/9852565",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9852565",
+      "country_id": 3,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": null,
+      "responsibility": "Административная поддержка: Выполнение поручений <highlighttext>руководства</highlighttext>, заказ билетов, бронирование гостиниц для сотрудников. Внутренняя коммуникация: Поддержание корпоративной культуры, помощь в организации мероприятий. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Ключевые обязанности администратора офиса:</strong></p> <ul> <li><strong>Хозяйственное обеспечение:</strong> Закупка канцелярских товаров, хозяйственных средств, чая/кофе, питьевой воды.</li> <li><strong>Работа с оргтехникой:</strong> Контроль исправности принтеров, сканеров, компьютеров; вызов мастеров для ремонта.</li> <li><strong>Организация пространства:</strong> Обеспечение чистоты и порядка в офисе, контроль работы клининговой службы.</li> <li><strong>Прием посетителей и звонков:</strong> Встреча гостей, входящие звонки, бронирование переговорных комнат.</li> <li><strong>Документооборот:</strong> Прием, учет и распределение входящей/исходящей корреспонденции, работа с курьерскими службами.</li> <li><strong>Административная поддержка:</strong> Выполнение поручений руководства, заказ билетов, бронирование гостиниц для сотрудников.</li> <li><strong>Внутренняя коммуникация:</strong> Поддержание корпоративной культуры, помощь в организации мероприятий</li> <li>Другие поручения руководителя компании и отделов.</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Обеспечение жизнедеятельности офиса"
+      },
+      {
+        "name": "Деловая переписка"
+      },
+      {
+        "name": "Английский язык"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-26T15:16:01+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [
+      {
+        "id": "eng",
+        "name": "Английский",
+        "level": {
+          "id": "b2",
+          "name": "B2 — Средне-продвинутый"
+        }
+      },
+      {
+        "id": "rus",
+        "name": "Русский",
+        "level": {
+          "id": "c2",
+          "name": "C2 — В совершенстве"
+        }
+      }
+    ],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131550186",
+    "premium": false,
+    "name": "Продавец-консультант",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2759",
+      "name": "Ташкент",
+      "url": "https://api.hh.ru/areas/2759"
+    },
+    "salary": {
+      "from": 6000000,
+      "to": null,
+      "currency": "UZS",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 6000000,
+      "to": null,
+      "currency": "UZS",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Ташкент",
+      "street": "улица Нуронийлар",
+      "building": "19",
+      "lat": 41.306301,
+      "lng": 69.27317,
+      "description": null,
+      "raw": "Ташкент, улица Нуронийлар, 19",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-25T16:54:37+0300",
+    "created_at": "2026-03-25T16:54:37+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131550186",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131550186?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131550186",
+    "relations": [],
+    "employer": {
+      "id": "9792395",
+      "name": "NCS",
+      "url": "https://api.hh.ru/employers/9792395",
+      "alternate_url": "https://hh.ru/employer/9792395",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1427756.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7330673.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7330674.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9792395",
+      "country_id": 6,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Внимательное <highlighttext>руководство</highlighttext> и заботливый HR Отдел.",
+      "responsibility": "Основная цель роли специалиста по продажам в NCS JEANS магазин одежды и обуви – обеспечение высокого уровня обслуживания клиентов и эффективное..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_9",
+        "name": "9 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "SIX_ON_ONE_OFF",
+        "name": "6/1"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "97",
+        "name": "Продавец-консультант, продавец-кассир"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": true,
+    "description": "<div> <p><strong>История компании NCS</strong></p> <p>NCS Jeans была основана в 1996 году в Турции под именем NECONS. Название фирмы, общего дела четырех братьев, было составлено из имени младшего брата Неджат и меры джинсов «онс».</p> <p>Компания решила развиваться в производстве качественной джинсовой одежды с целью стать лучшими в этом направлении.<br />Компания NCS экспортирует прежде всего в Россию, затем следуют Украина, Казахстан, Узбекистан, Алжир, Египет, Иран, Румыния, Греция, страны Балтики и т.д.<br />NCS следит за дизайном в Европе и занимаемся собственными исследованиями.</p> <p>Наша Компания придает большое значение доверию в торговле, мы видим в наших клиентах партнеров.<br />Честность – наш главный принцип, и мы стараемся каждого покупателя сделать нашим постоянным клиентом. Мы работаем, ориентируясь на вкусы клиента, принимая во внимание его мнение и критику. Также для нас важна организация торговли.<br /></p> <div><strong>Наше ценностное предложение для тебя: </strong></div> <div>● Возможность управления собственным доходом.</div> <div>● Удобная униформа и комфортные условия работы</div> <div>● Оплачиваемые переработки и сменный график работы</div> <div>● Регулярные тренинги по повышению квалификации и техникам продаж</div> <div>● Скидки на продукцию компании для сотрудников</div> <div>● Рост и развитие до управленческой должности магазина</div> <div>● Поддержка с первых дней работы в Компании.</div> <div>● Внимательное руководство и заботливый HR Отдел.</div><br /><strong>Ценный конечный продукт должности </strong></div> <div>Основная цель роли специалиста по продажам в NCS JEANS магазин одежды и обуви – обеспечение высокого уровня обслуживания клиентов и эффективное осуществление расчетно-кассовых операций. Позиция направлена на создание положительного клиентского опыта, поддержание порядка в торговом зале и точный учет денежных средств. <strong><em>Ключевая задача </em></strong>– увеличение лояльности клиентов и выполнение плановых показателей по продажам посредством консультирования покупателей и помощи в выборе продукции. 7 филиалов в разных частях города.</div> <div><br /><strong><em>Мы не продаем, мы являемся проводниками в сфере fashion-индустрии и стиля. </em></strong><br /><br /><strong>Задачи и функционал: </strong></div> <div>● Повышение уровня удовлетворенности клиентов</div> <div>● Увеличение среднего чека покупки</div> <div>● Сокращение количества ошибок при кассовых операциях</div> <div>● Оптимизация процесса выкладки товара</div> <div>● Улучшение знания ассортимента продукции</div> <div>● Поддержание чистоты и порядка в торговом зале</div>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Ориентация на клиента"
+      },
+      {
+        "name": "Управление продажами"
+      },
+      {
+        "name": "Оценка потребностей клиентов"
+      },
+      {
+        "name": "Навыки презентации"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-25T16:54:37+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131650395",
+    "premium": false,
+    "name": "Директор филиала/региональный директор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "153",
+      "name": "Атырау",
+      "url": "https://api.hh.ru/areas/153"
+    },
+    "salary": {
+      "from": 500000,
+      "to": 1000000,
+      "currency": "KZT",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 500000,
+      "to": 1000000,
+      "currency": "KZT",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Атырау",
+      "street": "улица Курмангазы",
+      "building": "72",
+      "lat": 47.115765,
+      "lng": 51.886233,
+      "description": null,
+      "raw": "Атырау, улица Курмангазы, 72",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-30T09:46:05+0300",
+    "created_at": "2026-03-30T09:46:05+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131650395",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131650395?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131650395",
+    "relations": [],
+    "employer": {
+      "id": "4424531",
+      "name": "AG-HOME",
+      "url": "https://api.hh.ru/employers/4424531",
+      "alternate_url": "https://hh.ru/employer/4424531",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/4229207.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/4229208.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/4229209.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4424531",
+      "country_id": 3,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы в сфере продаж не менее двух лет. Отличное знание продуктов компании и конкурентов. Выраженные лидерские, управленческие и организаторские...",
+      "responsibility": "<highlighttext>Руководство</highlighttext> салоном дверей и напольных покрытии. Работа с клиентами B2C и B2B. Прямые активные продажи дверей..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "70",
+        "name": "Менеджер по продажам, менеджер по работе с клиентами"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>Обязанности:</strong></p> <ul> <li>Руководство салоном дверей и напольных покрытии</li> <li>Работа с клиентами B2C и B2B</li> <li>Прямые активные продажи дверей и напольных покрытий</li> <li>Проведение переговоров с партнерами‚ заключение договоров</li> <li>Ведение клиентской базы</li> <li>Прием и обработка заказов клиентов</li> <li>Отличное знание техники продаж‚ умение работать с людьми</li> <li>Ориентированность на результат</li> <li>Знание основ маркетинга</li> </ul> <p><strong>Требования:</strong></p> <p> </p> <ul> <li>Опыт работы в сфере продаж не менее двух лет.</li> <li>Отличное знание продуктов компании и конкурентов.</li> <li>Выраженные лидерские, управленческие и организаторские навыки.</li> <li>Умение работать в команде и самостоятельно.</li> <li>Опыт организации и проведения конференций, мероприятий.</li> <li>Коммуникабельность.</li> <li>Умение разрешать конфликтные ситуации.</li> <li>Выраженные навыки командообразования и поддержания командного духа.</li> <li>Возможность выезда в командировки.</li> <li>Оперативное решение всех возникающих вопросов с клиентами</li> <li>Подготовка коммерческих предложений</li> <li>Заключение договоров</li> <li>Ведение отчетности</li> <li>Умение планировать и организовывать свою работу, рабочее время</li> <li>Стремление к высоким доходам и карьерному росту</li> <li>Уверенный пользователь ПК</li> </ul> <p><strong>Условия:</strong></p> <ul> <li>Оформление по ТК РК,</li> <li>Возможность профессионального развития и карьерного роста,</li> <li>Обучение,</li> <li>Все условия при собеседовании</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Консультативные продажи"
+      },
+      {
+        "name": "Консультирование клиентов"
+      },
+      {
+        "name": "Оценка потребностей клиентов"
+      },
+      {
+        "name": "Ориентация на клиента"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-30T09:46:05+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131526622",
+    "premium": false,
+    "name": "Администратор",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "159",
+      "name": "Астана",
+      "url": "https://api.hh.ru/areas/159"
+    },
+    "salary": {
+      "from": 320000,
+      "to": 360000,
+      "currency": "KZT",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 320000,
+      "to": 360000,
+      "currency": "KZT",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "MONTHLY",
+        "name": "Раз в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Астана",
+      "street": null,
+      "building": null,
+      "lat": 51.128201,
+      "lng": 71.430429,
+      "description": null,
+      "raw": "Астана",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-25T08:43:41+0300",
+    "created_at": "2026-03-25T08:43:41+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131526622",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131526622?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131526622",
+    "relations": [],
+    "employer": {
+      "id": "11628264",
+      "name": "Хасенов",
+      "url": "https://api.hh.ru/employers/11628264",
+      "alternate_url": "https://hh.ru/employer/11628264",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=11628264",
+      "country_id": 3,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Коммуникабельность. Пунктуальность. Знание казахского и русского языка. Уверенный пользователь ПК.",
+      "responsibility": "Прием, регистрация и распределение входящей и исходящей корреспонденции. Ведение внутренней регистрации. Подготовка документации по поручении <highlighttext>руководство</highlighttext>. Прием входящих звонков и..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "8",
+        "name": "Администратор"
+      }
+    ],
+    "accept_incomplete_resumes": true,
+    "experience": {
+      "id": "noExperience",
+      "name": "Нет опыта"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "free",
+      "name": "Бесплатная"
+    },
+    "allow_messages": false,
+    "description": "<strong>Обязанности:</strong> <ul> <li>прием, регистрация и распределение входящей и исходящей корреспонденции</li> <li>ведение внутренней регистрации</li> <li>подготовка документации по поручении руководство</li> <li>прием входящих звонков и их распределение</li> <li>работа с мессенджерами и почтой</li> </ul> <strong>Требования:</strong> <ul> <li>коммуникабельность</li> <li>пунктуальность</li> <li>знание казахского и русского языка</li> <li>уверенный пользователь ПК</li> </ul> <strong>Условия:</strong> <ul> <li>соц.пакеты</li> <li>нормированный график</li> <li>стабильная оплата труда</li> <li>возможность карьерного роста</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Организаторские навыки"
+      },
+      {
+        "name": "Административная поддержка руководителя"
+      },
+      {
+        "name": "Деловая этика"
+      },
+      {
+        "name": "Корпоративная этика"
+      },
+      {
+        "name": "Мотивация"
+      },
+      {
+        "name": "Умение планировать"
+      },
+      {
+        "name": "Ориентация на клиента"
+      },
+      {
+        "name": "Поиск информации в интернет"
+      },
+      {
+        "name": "Электронная почта"
+      },
+      {
+        "name": "Организационные навыки"
+      },
+      {
+        "name": "Исполнение личных поручений руководителя"
+      },
+      {
+        "name": "Расстановка приоритетов"
+      },
+      {
+        "name": "Деловая корреспонденция"
+      },
+      {
+        "name": "Оценка потребностей клиентов"
+      },
+      {
+        "name": "Обслуживание покупателей"
+      },
+      {
+        "name": "Контроль исполнения решений"
+      },
+      {
+        "name": "Оперативный поиск информации в сети Интернет"
+      },
+      {
+        "name": "оформление документации"
+      },
+      {
+        "name": "Управление отношениями с клиентами"
+      },
+      {
+        "name": "Управление временем"
+      },
+      {
+        "name": "Ведение переписки"
+      },
+      {
+        "name": "Проведение праздников"
+      },
+      {
+        "name": "Навыки презентации"
+      },
+      {
+        "name": "Написание рекламных статей"
+      },
+      {
+        "name": "Организация встреч"
+      },
+      {
+        "name": "Бумажный документооборот"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-25T08:43:41+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  }
+]

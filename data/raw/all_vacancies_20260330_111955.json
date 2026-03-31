@@ -1,0 +1,145 @@
+[
+  {
+    "id": "131615868",
+    "premium": false,
+    "name": "AI creator (Hyper-realistic Photo & Video)",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": {
+      "from": 1500,
+      "to": null,
+      "currency": "USD",
+      "gross": true
+    },
+    "salary_range": {
+      "from": 1500,
+      "to": null,
+      "currency": "USD",
+      "gross": true,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-27T14:22:13+0300",
+    "created_at": "2026-03-27T14:22:13+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131615868",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131615868?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131615868",
+    "relations": [],
+    "employer": {
+      "id": "12685254",
+      "name": "Назария",
+      "url": "https://api.hh.ru/employers/12685254",
+      "alternate_url": "https://hh.ru/employer/12685254",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=12685254",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Плюсом будет. Stable Diffusion / Flux, <highlighttext>ComfyUI</highlighttext>, ControlNet, Inpainting, IP-Adapter, LoRA (training). Опыт video generation пайплайнов и пост-процессинга (цвет...",
+      "responsibility": "Генерировать фотореалистичные фотосеты AI-персонажей: локации, эмоции, позы, одежда — при сохранении стабильной узнаваемости лица и тела. Создавать короткие видеокреативы (Reels..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "34",
+        "name": "Дизайнер, художник"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard_plus",
+      "name": "Стандарт плюс"
+    },
+    "allow_messages": true,
+    "description": "<p>Мы ищем AI креатора, который создаёт <strong>гиперреалистичный контент кинематографического качества</strong>: персонажи, которых невозможно отличить от настоящих людей. Наша планка — fashion/lifestyle эстетика, консистентность образа и высокий контроль качества.</p> <p><strong>Задачи</strong></p> <ul> <li>Генерировать <strong>фотореалистичные фотосеты</strong> AI-персонажей: локации, эмоции, позы, одежда — при сохранении стабильной узнаваемости лица и тела.</li> <li>Создавать <strong>короткие видеокреативы</strong> (Reels/Shorts): естественное движение, взгляд, взаимодействие с окружением — без артефактов, “плавания” лица, мутных текстур и мутаций.</li> <li>Формировать и поддерживать <strong>единый визуальный стиль</strong>: референсы по свету/оптике/цвету/вайбу, визуальная режиссура.</li> <li>Постоянно улучшать пайплайн: скорость, качество, консистентность, контроль ошибок.</li> </ul> <p><strong>Требования (must-have)</strong></p> <ul> <li>Сильная визуальная насмотренность: понимание студийного света, контрового освещения, оптики, глубины резкости, зерна и композиции.</li> <li>Умение доводить материал до “дорогого” результата: микро-контроль деталей (глаза, кожа, руки, фон, текстуры).</li> <li>Практика построения <strong>consistent character workflows</strong> (стабильное лицо/тело/стиль).</li> </ul> <p><strong>Плюсом будет</strong></p> <ul> <li>Stable Diffusion / Flux, ComfyUI, ControlNet, Inpainting, IP-Adapter, LoRA (training).</li> <li>Опыт video generation пайплайнов и пост-процессинга (цвет/зерно/стабилизация/cleanup).</li> </ul> <p><strong>Как откликнуться</strong><br /><br />В сопроводительном письме присылайте:</p> <ul> <li>портфолио (обязательно)</li> <li>5–10 примеров фото (один персонаж в разных сетах)</li> <li>2–3 примера видео (Reels/Shorts)</li> <li>кратко: ваш стек и пайплайн (что используете для консистентности и видео)</li> </ul> <p><strong>Будем рады познакомиться и обсудить детали. </strong></p> <p><strong>Рассматриваем также проектное сотрудничество с оплатой за выполненную работу. </strong><br /></p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-27T14:22:13+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  }
+]

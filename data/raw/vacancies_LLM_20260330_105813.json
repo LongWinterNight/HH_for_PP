@@ -1,0 +1,749 @@
+[
+  {
+    "id": "131587928",
+    "premium": false,
+    "name": "Python/AI разработчик",
+    "department": null,
+    "has_test": true,
+    "response_letter_required": false,
+    "area": {
+      "id": "1",
+      "name": "Москва",
+      "url": "https://api.hh.ru/areas/1"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Москва",
+      "street": "1-я Тверская-Ямская улица",
+      "building": "21",
+      "lat": 55.774527,
+      "lng": 37.587093,
+      "description": null,
+      "raw": "Москва, 1-я Тверская-Ямская улица, 21",
+      "metro": {
+        "station_name": "Белорусская",
+        "line_name": "Замоскворецкая",
+        "station_id": "2.19",
+        "line_id": "2",
+        "lat": 55.777439,
+        "lng": 37.582107
+      },
+      "metro_stations": [
+        {
+          "station_name": "Белорусская",
+          "line_name": "Замоскворецкая",
+          "station_id": "2.19",
+          "line_id": "2",
+          "lat": 55.777439,
+          "lng": 37.582107
+        },
+        {
+          "station_name": "Белорусская",
+          "line_name": "Кольцевая",
+          "station_id": "5.20",
+          "line_id": "5",
+          "lat": 55.775179,
+          "lng": 37.582303
+        },
+        {
+          "station_name": "Белорусская",
+          "line_name": "МЦД-1",
+          "station_id": "131.700",
+          "line_id": "131",
+          "lat": 55.775179,
+          "lng": 37.582303
+        },
+        {
+          "station_name": "Белорусская",
+          "line_name": "МЦД-4",
+          "station_id": "136.894",
+          "line_id": "136",
+          "lat": 55.776389,
+          "lng": 37.580278
+        }
+      ],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-26T17:15:10+0300",
+    "created_at": "2026-03-26T17:15:10+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131587928",
+    "show_logo_in_search": null,
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131587928?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131587928",
+    "relations": [],
+    "employer": {
+      "id": "1805574",
+      "name": "Инсейлс Рус",
+      "url": "https://api.hh.ru/employers/1805574",
+      "alternate_url": "https://hh.ru/employer/1805574",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original/1391338.png",
+        "90": "https://img.hhcdn.ru/employer-logo/7185139.png",
+        "240": "https://img.hhcdn.ru/employer-logo/7185140.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=1805574",
+      "country_id": 1,
+      "accredited_it_employer": true,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт создания ML-сервисов, работы с GenAI. Понимание особенностей работы с <highlighttext>LLM</highlighttext>. Понимание принципов работы с RAG. Опыт работы с...",
+      "responsibility": "Проектированием схем автоматизации бизнес-процессов с использованием AI/ML-технологий. Разработкой и поддержкой AI-агентов, сервисов и приложений для работы..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      },
+      {
+        "id": "HYBRID",
+        "name": "Гибрид"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "96",
+        "name": "Программист, разработчик"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p><strong>inSales </strong>— это многоканальная платформа управления онлайн-торговлей в цифровых направлениях:<br />Свой интернет-магазин, Маркетплейсы, Соц.сети и мессенджеры.<br />В 2021 году мы присоединились к эко-системе Сбера, поэтому мы в процессе очень динамичного роста показателей и направлений в продукте. Штат компании в данный момент более 160 человек. Наш отдел разработки насчитывает почти 50 разработчиков, которые поддерживают основной сервис и ещё несколько десятков вспомогательных.</p> <p><br /><strong>Чем предстоит заниматься:</strong></p> <ul> <li>Проектированием схем автоматизации бизнес-процессов с использованием AI/ML-технологий;</li> <li>Разработкой и поддержкой AI-агентов, сервисов и приложений для работы с ИИ моделями и мультиагентными системами;</li> <li>Интеграциями ИИ-решений в сервисы организации;</li> <li>Тестированием и оценкой качества работы систем по критериям стабильности и воспроизводимости;</li> <li>Оптимизацией производительности моделей и сервисов;</li> <li>Техническим документированием результатов работы.</li> </ul> <p><br /><strong>Что для этого нужно:</strong></p> <ul> <li>Опыт коммерческой разработки на Python от 3-х лет;</li> <li> <p>Опыт работы с библиотеками LangChain, FastAPI / Flask;</p> </li> <li> <p>Опыт создания ML-сервисов, работы с GenAI;</p> </li> <li> <p>Понимание особенностей работы с LLM;</p> </li> <li> <p>Понимание принципов работы с RAG;</p> </li> <li> <p>Опыт работы с векторными БД;</p> </li> <li> <p>Понимание и опыт использования MCP.</p> </li> </ul> <p><br /><strong>Будет большим плюсом:</strong></p> <ul> <li> <p>Понимание протоколов агентского взаимодействия A2A, ACP, AP2;</p> </li> <li> <p>Знание Ruby on Rails;</p> </li> <li> <p>Опыт настройки систем мониторинга и журналирования.</p> </li> </ul> <p><br /><strong>Что мы предлагаем:</strong></p> <ul> <li>Оформление по ТК РФ;</li> <li>Удаленный формат работы;</li> <li>Заботу о здоровье: у нас есть ДМС и специальные условия для стоматологии и страхования семьи, ;</li> <li>Программу адаптации: с первого дня работы простыми словами узнаешь о компании, коллегах, и что от тебя ждут в ближайшие три месяца;</li> <li>Обучение за счет компании: участие в конференциях, выставках, семинарах и пр.;</li> <li>Подписка СберПрайм + .</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Python"
+      },
+      {
+        "name": "RAG"
+      },
+      {
+        "name": "LLM"
+      },
+      {
+        "name": "ML"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-26T17:15:10+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": {
+      "required": true
+    },
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131640460",
+    "premium": false,
+    "name": "Аналитик данных",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "80",
+      "name": "Якутск",
+      "url": "https://api.hh.ru/areas/80"
+    },
+    "salary": {
+      "from": 100000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": 100000,
+      "to": null,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": {
+        "id": "TWICE_PER_MONTH",
+        "name": "Два раза в месяц"
+      }
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Якутск",
+      "street": "проспект Ленина",
+      "building": "1",
+      "lat": 62.032664,
+      "lng": 129.749947,
+      "description": null,
+      "raw": "Якутск, проспект Ленина, 1",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-30T05:09:56+0300",
+    "created_at": "2026-03-30T05:09:56+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131640460",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131640460?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131640460",
+    "relations": [],
+    "employer": {
+      "id": "5270587",
+      "name": "Государственное бюджетное учреждение Республики Саха (Якутия) Республиканский центр инфокоммуникационных технологий",
+      "url": "https://api.hh.ru/employers/5270587",
+      "alternate_url": "https://hh.ru/employer/5270587",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/5762995.png",
+        "90": "https://img.hhcdn.ru/employer-logo-round/5762996.png",
+        "240": "https://img.hhcdn.ru/employer-logo-round/5762997.png"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=5270587",
+      "country_id": 1,
+      "accredited_it_employer": true,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Профильное образование (техническое, математическое, ИТ). Знание Python (работа с данными, скрипты), SQL (запросы, агрегации, витрины) на базовом уровне, REST API. ",
+      "responsibility": "Участвовать в разработке ИИ-сервисов: сбор, очистка, нормализация и структурирование данных для использования в системах с <highlighttext>LLM</highlighttext> и RAG-системах. "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "fullDay",
+      "name": "Полный день"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": false,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "156",
+        "name": "BI-аналитик, аналитик данных"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>Мы в поиске крутого специалиста для участия в реализации новых цифровых проектов в роли <strong>Аналитика</strong><strong> данных</strong><strong> (ИИ-направление)</strong>.</p> <p><strong>Что предстоит делать:</strong></p> <p>Исследование источников данных, оценка качества данных, формирование требований к данным.</p> <p>Участвовать в разработке ИИ-сервисов: сбор, очистка, нормализация и структурирование данных для использования в системах с LLM и RAG-системах.</p> <p>Подготовка датасетов для:</p> <ul> <li> <p>ML-моделей;</p> </li> <li> <p>Автоматического тестирования ИИ-сервисов.</p> </li> </ul> <p>Настройка и сопровождение ETL/ELT-процессов для загрузки данных в аналитические хранилища и пайплайны.</p> <p>Подготовка и согласование технической и проектной документации (ТЗ, требования к данным, описание процессов).</p> <p> </p> <p><strong>Что мы ожидаем:</strong></p> <ul> <li> <p>профильное образование (техническое, математическое, ИТ);</p> </li> <li> <p>знание Python (работа с данными, скрипты), SQL (запросы, агрегации, витрины) на базовом уровне, REST API;</p> </li> <li> <p>знание инструментов визуализации (любой);</p> </li> <li> <p>знание основ ETL/ELT-процессов;</p> </li> <li> <p>знание основ модели хранения данных, построения дата-сетов;</p> </li> <li> <p>системное мышление, развитые аналитические способности;</p> </li> <li> <p>коммуникабельность, инициативность, умение работать в команде.</p> </li> </ul> <p><strong>Будет плюсом:</strong></p> <ul> <li> <p>опыт работы с СУБД (PostgreSQL, Oracle, MS SQL, GraphQL и др.);</p> </li> <li> <p>опыт участия в проектах с применением AI/ML в любой роли;</p> </li> <li> <p>базовые знания ML-фреймворков;</p> </li> <li> <p>опыт разработки решения для автоматизации и упрощения анализа данных.</p> </li> </ul> <p><strong>Условия:</strong></p> <p>Оформление по ТК РФ.</p> <p>Офис в центре города.</p> <p>Опытный коллектив.</p> <p>Доступ к программам обучения для повышения своих компетенций.</p> <p>Вознаграждение обсуждается по результатам собеседования.</p>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "SQL"
+      },
+      {
+        "name": "Анализ данных"
+      },
+      {
+        "name": "Аналитическое мышление"
+      },
+      {
+        "name": "Работа с большим объемом информации"
+      },
+      {
+        "name": "REST API"
+      },
+      {
+        "name": "Apache Airflow"
+      },
+      {
+        "name": "Исследовательский анализ данных"
+      },
+      {
+        "name": "Визуализация данных"
+      },
+      {
+        "name": "Интерпретация данных"
+      },
+      {
+        "name": "Извлечение данных"
+      },
+      {
+        "name": "Python"
+      },
+      {
+        "name": "Предобработка данных"
+      },
+      {
+        "name": "Преобразование данных"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": true
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-30T05:09:56+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131648363",
+    "premium": false,
+    "name": "Python-разработчик",
+    "department": null,
+    "has_test": true,
+    "response_letter_required": false,
+    "area": {
+      "id": "24",
+      "name": "Волгоград",
+      "url": "https://api.hh.ru/areas/24"
+    },
+    "salary": {
+      "from": null,
+      "to": 200000,
+      "currency": "RUR",
+      "gross": false
+    },
+    "salary_range": {
+      "from": null,
+      "to": 200000,
+      "currency": "RUR",
+      "gross": false,
+      "mode": {
+        "id": "MONTH",
+        "name": "За месяц"
+      },
+      "frequency": null
+    },
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": null,
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-30T09:19:13+0300",
+    "created_at": "2026-03-30T09:19:13+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131648363",
+    "show_contacts": false,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131648363?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131648363",
+    "relations": [],
+    "employer": {
+      "id": "4514565",
+      "name": "Плейспартс",
+      "url": "https://api.hh.ru/employers/4514565",
+      "alternate_url": "https://hh.ru/employer/4514565",
+      "logo_urls": null,
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=4514565",
+      "country_id": 1,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Опыт работы с брокерами сообщений (RabbitMQ, Kafka). Опыт работы с Playwright для сложного скрапинга SPA. Опыт использования <highlighttext>LLM</highlighttext> API (OpenAI...",
+      "responsibility": "Разработка и поддержка парсеров и краулеров для сбора данных с веб-сайтов. Проектирование и разработка серверной части приложений (REST API). "
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "remote",
+      "name": "Удаленная работа"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "REMOTE",
+        "name": "Удалённо"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "HOURS_8",
+        "name": "8 часов"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "FIVE_ON_TWO_OFF",
+        "name": "5/2"
+      }
+    ],
+    "accept_labor_contract": true,
+    "civil_law_contracts": [
+      {
+        "id": "SELF_EMPLOYED",
+        "name": "с самозанятым"
+      },
+      {
+        "id": "INDIVIDUAL_ENTREPRENEUR",
+        "name": "с ИП"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "96",
+        "name": "Программист, разработчик"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between3And6",
+      "name": "От 3 до 6 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard_plus",
+      "name": "Стандарт плюс"
+    },
+    "allow_messages": true,
+    "description": "<p>Ищем Python-разработчика для работы над задачами веб-скрапинга и разработки бэкенда.</p> <p><br /><strong>Обязанности:</strong></p> <ul> <li>Разработка и поддержка парсеров и краулеров для сбора данных с веб-сайтов</li> <li>Проектирование и разработка серверной части приложений (REST API)</li> <li>Работа с базами данных: проектирование схем, оптимизация запросов</li> <li>Написание чистого, тестируемого и документированного кода</li> <li>Участие в код-ревью и улучшении архитектуры проекта</li> <li>Использование AI-инструментов для ускорения разработки (vibe coding)</li> </ul> <p><strong>Обязательные требования:</strong></p> <ul> <li>Python (от 3 лет коммерческого опыта):</li> <li>Уверенное владение Python 3.10+</li> <li>Понимание асинхронного программирования (asyncio, aiohttp)</li> <li>Опыт работы с виртуальными окружениями, pip/poetry</li> </ul> <p><strong>Vibe coding и AI-инструменты:</strong></p> <ul> <li>Практический опыт разработки с помощью AI-ассистентов (Cursor, GitHub Copilot, Claude Code, Windsurf и др.)</li> <li>Умение эффективно формулировать промпты для генерации и рефакторинга кода</li> <li>Навык критической оценки и доработки AI-сгенерированного кода</li> <li>Понимание ограничений AI-инструментов, умение отлаживать и исправлять их результат</li> </ul> <p><strong>Парсинг и скрапинг:</strong></p> <ul> <li>Опыт работы с BeautifulSoup, Scrapy, Selenium или Playwright</li> <li>Понимание структуры HTML/CSS, работа с XPath и CSS-селекторами</li> <li>Опыт обхода anti-bot защит, работы с прокси и ротацией User-Agent</li> <li>Работа с API сторонних сервисов (REST, JSON, XML)</li> </ul> <p><strong>Бэкенд:</strong></p> <ul> <li>Опыт работы с одним или несколькими фреймворками: FastAPI, Django, Flask</li> <li>Проектирование и реализация REST API</li> <li>Работа с реляционными БД (PostgreSQL/MySQL) и ORM (SQLAlchemy, Django ORM)</li> <li>Базовое понимание Redis, Celery или аналогичных инструментов для очередей задач</li> </ul> <p><strong>Общие навыки:</strong></p> <ul> <li>Git (ветвление, merge/rebase, PR)</li> <li>Базовые знания Linux, работа в терминале</li> <li>Понимание HTTP/HTTPS, заголовков, cookies, сессий</li> <li>Умение писать юнит- и интеграционные тесты (pytest)</li> </ul> <p><strong>Будет плюсом:</strong></p> <ul> <li>Опыт работы с Docker и Docker Compose</li> <li>Знакомство с CI/CD (GitHub Actions, GitLab CI)</li> <li>Опыт работы с NoSQL (MongoDB, ClickHouse)</li> <li>Опыт работы с брокерами сообщений (RabbitMQ, Kafka)</li> <li>Знакомство с облачными платформами (AWS, GCP, Yandex Cloud)</li> <li>Опыт работы с Playwright для сложного скрапинга SPA</li> <li>Опыт использования LLM API (OpenAI, Anthropic) в рабочих проектах</li> </ul>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [
+      {
+        "name": "Python"
+      },
+      {
+        "name": "CSS"
+      },
+      {
+        "name": "REST"
+      },
+      {
+        "name": "HTML"
+      },
+      {
+        "name": "FastAPI"
+      },
+      {
+        "name": "REST API"
+      },
+      {
+        "name": "ORM"
+      },
+      {
+        "name": "PostgreSQL"
+      },
+      {
+        "name": "MySQL"
+      },
+      {
+        "name": "HTTP"
+      }
+    ],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-30T09:19:13+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": {
+      "required": true
+    },
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  },
+  {
+    "id": "131527307",
+    "premium": false,
+    "name": "Администратор проектов, Тбилиси",
+    "department": null,
+    "has_test": false,
+    "response_letter_required": false,
+    "area": {
+      "id": "2758",
+      "name": "Тбилиси",
+      "url": "https://api.hh.ru/areas/2758"
+    },
+    "salary": null,
+    "salary_range": null,
+    "type": {
+      "id": "open",
+      "name": "Открытая"
+    },
+    "address": {
+      "city": "Тбилиси",
+      "street": "район Дигомский Массив, 6-й квартал Дигоми",
+      "building": "5А",
+      "lat": 41.761616,
+      "lng": 44.774028,
+      "description": null,
+      "raw": "Тбилиси, район Дигомский Массив, 6-й квартал Дигоми, 5А",
+      "metro": null,
+      "metro_stations": [],
+      "can_edit": false
+    },
+    "response_url": null,
+    "sort_point_distance": null,
+    "published_at": "2026-03-25T09:02:05+0300",
+    "created_at": "2026-03-25T09:02:05+0300",
+    "archived": false,
+    "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=131527307",
+    "show_logo_in_search": null,
+    "show_contacts": true,
+    "insider_interview": null,
+    "url": "https://api.hh.ru/vacancies/131527307?host=hh.ru",
+    "alternate_url": "https://hh.ru/vacancy/131527307",
+    "relations": [],
+    "employer": {
+      "id": "10414149",
+      "name": "SILK Medical JSC",
+      "url": "https://api.hh.ru/employers/10414149",
+      "alternate_url": "https://hh.ru/employer/10414149",
+      "logo_urls": {
+        "original": "https://img.hhcdn.ru/employer-logo-original-round/6328381.jpeg",
+        "90": "https://img.hhcdn.ru/employer-logo-round/6328382.jpeg",
+        "240": "https://img.hhcdn.ru/employer-logo-round/6328383.jpeg"
+      },
+      "vacancies_url": "https://api.hh.ru/vacancies?employer_id=10414149",
+      "country_id": 8,
+      "accredited_it_employer": false,
+      "trusted": true,
+      "is_identified_by_esia": false
+    },
+    "snippet": {
+      "requirement": "Базовое понимание документооборота. Опыт работы с современными <highlighttext>LLM</highlighttext> — применение в рабочих задачах. Знакомство с ЭДО и электронными торговыми площадками. ",
+      "responsibility": "Ведение проектной документации: договоры, спецификации, акты, протоколы. Контроль сроков подачи документов, отслеживание этапов согласования. Подготовка отчетов о статусе проектов для..."
+    },
+    "contacts": null,
+    "schedule": {
+      "id": "flexible",
+      "name": "Гибкий график"
+    },
+    "working_days": [],
+    "working_time_intervals": [],
+    "working_time_modes": [],
+    "accept_temporary": true,
+    "fly_in_fly_out_duration": [],
+    "work_format": [
+      {
+        "id": "ON_SITE",
+        "name": "На месте работодателя"
+      }
+    ],
+    "working_hours": [
+      {
+        "id": "FLEXIBLE",
+        "name": "По договорённости"
+      }
+    ],
+    "work_schedule_by_days": [
+      {
+        "id": "OTHER",
+        "name": "Другое"
+      }
+    ],
+    "accept_labor_contract": false,
+    "civil_law_contracts": [
+      {
+        "id": "SELF_EMPLOYED",
+        "name": "с самозанятым"
+      },
+      {
+        "id": "INDIVIDUAL_ENTREPRENEUR",
+        "name": "с ИП"
+      },
+      {
+        "id": "INDIVIDUAL_PERSON",
+        "name": "с физлицом"
+      }
+    ],
+    "night_shifts": false,
+    "professional_roles": [
+      {
+        "id": "107",
+        "name": "Руководитель проектов"
+      }
+    ],
+    "accept_incomplete_resumes": false,
+    "experience": {
+      "id": "between1And3",
+      "name": "От 1 года до 3 лет"
+    },
+    "employment": {
+      "id": "full",
+      "name": "Полная занятость"
+    },
+    "employment_form": {
+      "id": "FULL",
+      "name": "Полная"
+    },
+    "internship": false,
+    "adv_response_url": null,
+    "is_adv_vacancy": false,
+    "adv_context": null,
+    "billing_type": {
+      "id": "standard",
+      "name": "Стандарт"
+    },
+    "allow_messages": true,
+    "description": "<p>планирующие переехать, приценивающихся - просьба не беспокоить</p> <h2><strong>Для кого эта роль</strong></h2> <p>Эта позиция отлично подходит для:</p> <ul> <li>Начинающих специалистов в области управления проектами</li> <li>Выпускников вузов по специальностям: управление проектами, экономика, менеджмент</li> <li>Специалистов с хорошими коммуникативными навыками, желающих развиваться в проектном управлении</li> <li>Технических специалистов, желающих перейти в административную деятельность</li> <li>Людей, готовых разбираться в новых областях знаний и погружаться в управление проектами и технические аспекты</li> </ul> <h2><strong>Задачи</strong></h2> <p><strong>1. Документооборот и отчетность:</strong></p> <ul> <li>Ведение проектной документации: договоры, спецификации, акты, протоколы</li> <li>Контроль сроков подачи документов, отслеживание этапов согласования</li> <li>Подготовка отчетов о статусе проектов для руководителя</li> <li>Работа с ЭДО (электронный документооборот)</li> </ul> <p><strong>2. Координация и коммуникация:</strong></p> <ul> <li>Организация встреч команды проекта и с клиентами</li> <li>Составление протоколов встреч и ведение переговоров</li> <li>Координация взаимодействия между отделами компании</li> <li>Информирование руководителя о статусе работ и возникающих вопросах</li> </ul> <p><strong>3. Административная поддержка:</strong></p> <ul> <li>Поддержание актуальности данных в CRM-системе</li> <li>Работа с базами данных клиентов и проектов</li> <li>Подготовка презентаций и материалов для встреч</li> <li>Организация командировок</li> </ul> <p><strong>4. Финансовый учет:</strong></p> <ul> <li>Внесение данных по первичным документам в учетные системы</li> <li>Контроль оплаты счетов и актов</li> <li>Сбор документов для бухгалтерии</li> </ul> <h2>Требования</h2> <p><strong>Образование:</strong></p> <ul> <li>Высшее или среднее специальное (желательно техническое, экономическое или управление проектами)</li> <li>Рассматриваем также учащихся</li> </ul> <p><strong>Опыт работы:</strong></p> <ul> <li>Опыт работы от 6 месяцев до 1 года</li> <li>Желательно опыт в сфере IT, управления проектами или административной деятельности</li> <li>Понимание основ проектного управления (может быть без глубокого погружения)</li> </ul> <p><strong>Навыки:</strong></p> <ul> <li>Грамотная устная и письменная речь</li> <li>Внимательность к деталям, организованность</li> <li>Уверенное владение ПК: MS Office (Word, Excel, PowerPoint), Outlook</li> <li>Умение работать с большим объемом информации</li> <li>Базовое понимание документооборота</li> </ul> <p><strong>Будет преимуществом:</strong></p> <ul> <li>Опыт работы с современными LLM — применение в рабочих задачах</li> <li>Знакомство с ЭДО и электронными торговыми площадками</li> <li>Опыт работы в CRM-системах</li> <li>Знание 1С</li> <li>Английский язык (чтение технической документации)</li> </ul> <p><strong>Личные качества:</strong></p> <ul> <li>Ответственность и исполнительность</li> <li>Умение расставлять приоритеты</li> <li>Коммуникабельность</li> <li>Стрессоустойчивость</li> <li>Обучаемость и желание развиваться</li> </ul> <h2>Что мы предлагаем</h2> <ul> <li>Оформление с первого дня работы</li> <li>Испытательный срок 3 месяца</li> <li>Гибридный график работы: по договоренности</li> <li>Гибкое начало и окончание рабочего дня</li> <li>Выходные: суббота, воскресенье</li> <li>Заработная плата: обсуждается по результатам собеседования</li> </ul> <h2> </h2>",
+    "branded_description": null,
+    "vacancy_constructor_template": null,
+    "key_skills": [],
+    "auto_response": {
+      "accept_auto_response": false
+    },
+    "accept_handicapped": false,
+    "accept_kids": false,
+    "age_restriction": null,
+    "specializations": [],
+    "code": null,
+    "hidden": false,
+    "quick_responses_allowed": false,
+    "driver_license_types": [],
+    "initial_created_at": "2026-03-25T09:02:05+0300",
+    "negotiations_url": null,
+    "suitable_resumes_url": null,
+    "test": null,
+    "languages": [],
+    "approved": true,
+    "closed_for_applicants": false
+  }
+]
