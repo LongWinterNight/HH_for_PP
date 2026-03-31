@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pathlib import Path
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 from collections import defaultdict
 
@@ -884,48 +884,110 @@ _autocomplete_cache = {}
 _cache_ttl = 300  # 5 минут
 
 @app.get("/api/analytics/kpi")
-def get_kpi_metrics():
+def get_kpi_metrics(
+    period: Optional[str] = Query("all_time", description="Период: today|week|month|quarter|year|all_time"),
+    domain: Optional[str] = Query(None, description="Домен профессии"),
+    regions: Optional[str] = Query(None, description="Регионы через запятую"),
+    experience: Optional[str] = Query(None, description="Опыт работы"),
+    salary_only: bool = Query(False, description="Только вакансии с зарплатой")
+):
     """
-    KPI метрики с трендами для дашборда.
-    
+    KPI метрики с трендами для дашборда с поддержкой фильтров.
+
     Возвращает 8 ключевых метрик с процентами роста/падения.
     """
     from src.storage import VacancyStorage
     from datetime import datetime, timedelta
     import pandas as pd
-    
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
-        
+
         if df.empty:
             return {
                 "metrics": {},
-                "period": "all_time",
+                "period": period,
                 "last_updated": datetime.now().isoformat()
             }
+
+        # === Применяем фильтры ===
         
+        # Фильтр по периоду
+        if period and period != "all_time":
+            if 'published_at' in df.columns:
+                df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
+                now = datetime.now()
+                if period == "today":
+                    df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
+                elif period == "week":
+                    df = df[df['published_at'] >= now - timedelta(days=7)]
+                elif period == "month":
+                    df = df[df['published_at'] >= now - timedelta(days=30)]
+                elif period == "quarter":
+                    df = df[df['published_at'] >= now - timedelta(days=90)]
+                elif period == "year":
+                    df = df[df['published_at'] >= now - timedelta(days=365)]
+
+        # Фильтр по домену (если есть колонка domain/profession)
+        if domain:
+            if 'domain' in df.columns:
+                df = df[df['domain'].str.contains(domain, case=False, na=False)]
+            elif 'profession' in df.columns:
+                df = df[df['profession'].str.contains(domain, case=False, na=False)]
+
+        # Фильтр по регионам
+        if regions:
+            region_list = [r.strip() for r in regions.split(',')]
+            if 'area' in df.columns:
+                mask = df['area'].str.contains('|'.join(region_list), case=False, na=False)
+                df = df[mask]
+
+        # Фильтр по опыту
+        if experience:
+            if 'experience' in df.columns:
+                df = df[df['experience'] == experience]
+
+        # Фильтр только с зарплатой
+        if salary_only:
+            if 'salary_from' in df.columns:
+                df = df[df['salary_from'].notna()]
+
+        if df.empty:
+            return {
+                "metrics": {},
+                "period": period,
+                "filters": {
+                    "period": period,
+                    "domain": domain,
+                    "regions": regions,
+                    "experience": experience,
+                    "salary_only": salary_only
+                },
+                "last_updated": datetime.now().isoformat()
+            }
+
         # === Расчёт метрик ===
-        
+
         # 1. Средняя зарплата
         salary_df = df[df['salary_from'].notna()]
         avg_salary = float(salary_df['salary_from'].mean()) if not salary_df.empty else 0
-        
+
         # 2. Медианная зарплата
         median_salary = float(salary_df['salary_from'].median()) if not salary_df.empty else 0
-        
+
         # 3. Всего вакансий
         total_vacancies = len(df)
-        
+
         # 4. Навыков найдено (сумма всех навыков)
         total_skills = int(df['skill_count'].sum()) if 'skill_count' in df.columns else 0
-        
+
         # 5. Уникальных компаний
         unique_companies = df['employer_name'].nunique() if 'employer_name' in df.columns else 0
-        
+
         # 6. Уникальных регионов
         unique_regions = df['area'].nunique() if 'area' in df.columns else 0
-        
+
         # 7. Hard Skills (подсчёт уникальных)
         hard_skills_set = set()
         if 'hard_skills' in df.columns:
@@ -934,7 +996,7 @@ def get_kpi_metrics():
                     skills = [s.strip() for s in skills_str.split(',')]
                     hard_skills_set.update([s for s in skills if s])
         hard_skills_count = len(hard_skills_set)
-        
+
         # 8. Soft Skills (подсчёт уникальных)
         soft_skills_set = set()
         if 'soft_skills' in df.columns:
@@ -943,7 +1005,7 @@ def get_kpi_metrics():
                     skills = [s.strip() for s in skills_str.split(',')]
                     soft_skills_set.update([s for s in skills if s])
         soft_skills_count = len(soft_skills_set)
-        
+
         # === Расчёт трендов (сравнение с предыдущим периодом) ===
         # Для демо используем случайные значения (в продакшене — сравнение дат)
         import random
@@ -955,7 +1017,7 @@ def get_kpi_metrics():
                 "trend_percent": round(abs(trend_percent), 1),
                 "trend_direction": direction
             }
-        
+
         return {
             "metrics": {
                 "avg_salary": {
@@ -993,42 +1055,119 @@ def get_kpi_metrics():
                     **calc_trend(soft_skills_count, 0, 30)
                 }
             },
-            "period": "all_time",
+            "period": period,
+            "filters": {
+                "period": period,
+                "domain": domain,
+                "regions": regions,
+                "experience": experience,
+                "salary_only": salary_only
+            },
             "last_updated": datetime.now().isoformat()
         }
-        
+
     finally:
         storage.close()
 
 @app.get("/api/analytics/top-skills")
 def get_top_skills(
     type: str = Query("hard", regex="^(hard|soft|tools)$"),
-    limit: int = Query(20, ge=1, le=100)
+    limit: int = Query(20, ge=1, le=100),
+    period: Optional[str] = Query("all_time", description="Период: today|week|month|quarter|year|all_time"),
+    domain: Optional[str] = Query(None, description="Домен профессии"),
+    regions: Optional[str] = Query(None, description="Регионы через запятую"),
+    experience: Optional[str] = Query(None, description="Опыт работы")
 ):
     """
-    Топ навыков по типу.
-    
+    Топ навыков по типу с поддержкой фильтров.
+
     Args:
         type: hard|soft|tools
         limit: 1-100 (default 20)
-    
+        period: Период фильтрации
+        domain: Домен профессии
+        regions: Регионы через запятую
+        experience: Опыт работы
+
     Returns:
         Список навыков с количеством и процентами
     """
     from src.storage import VacancyStorage
+    from datetime import timedelta
     from collections import Counter
-    
+    import pandas as pd
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
-        
+
         if df.empty:
             return {
                 "type": type,
                 "total_unique": 0,
-                "skills": []
+                "skills": [],
+                "filters": {
+                    "type": type,
+                    "limit": limit,
+                    "period": period,
+                    "domain": domain,
+                    "regions": regions,
+                    "experience": experience
+                }
             }
+
+        # === Применяем фильтры ===
         
+        # Фильтр по периоду
+        if period and period != "all_time":
+            if 'published_at' in df.columns:
+                df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
+                now = datetime.now()
+                if period == "today":
+                    df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
+                elif period == "week":
+                    df = df[df['published_at'] >= now - timedelta(days=7)]
+                elif period == "month":
+                    df = df[df['published_at'] >= now - timedelta(days=30)]
+                elif period == "quarter":
+                    df = df[df['published_at'] >= now - timedelta(days=90)]
+                elif period == "year":
+                    df = df[df['published_at'] >= now - timedelta(days=365)]
+
+        # Фильтр по домену
+        if domain:
+            if 'domain' in df.columns:
+                df = df[df['domain'].str.contains(domain, case=False, na=False)]
+            elif 'profession' in df.columns:
+                df = df[df['profession'].str.contains(domain, case=False, na=False)]
+
+        # Фильтр по регионам
+        if regions:
+            region_list = [r.strip() for r in regions.split(',')]
+            if 'area' in df.columns:
+                mask = df['area'].str.contains('|'.join(region_list), case=False, na=False)
+                df = df[mask]
+
+        # Фильтр по опыту
+        if experience:
+            if 'experience' in df.columns:
+                df = df[df['experience'] == experience]
+
+        if df.empty:
+            return {
+                "type": type,
+                "total_unique": 0,
+                "skills": [],
+                "filters": {
+                    "type": type,
+                    "limit": limit,
+                    "period": period,
+                    "domain": domain,
+                    "regions": regions,
+                    "experience": experience
+                }
+            }
+
         # Собираем все навыки
         all_skills = []
         column_map = {
@@ -1036,22 +1175,22 @@ def get_top_skills(
             "soft": "soft_skills",
             "tools": "tools"
         }
-        
+
         column_name = column_map.get(type)
         if column_name and column_name in df.columns:
             for skills_str in df[column_name].dropna():
                 if isinstance(skills_str, str):
                     skills = [s.strip() for s in skills_str.split(',')]
                     all_skills.extend([s for s in skills if s])
-        
+
         # Подсчёт частоты
         counter = Counter(all_skills)
         total_unique = len(counter)
-        
+
         # Топ-N с процентами
         total_vacancies = len(df)
         top_skills = counter.most_common(limit)
-        
+
         return {
             "type": type,
             "total_unique": total_unique,
@@ -1062,9 +1201,17 @@ def get_top_skills(
                     "percentage": round((count / total_vacancies) * 100, 1) if total_vacancies > 0 else 0
                 }
                 for skill, count in top_skills
-            ]
+            ],
+            "filters": {
+                "type": type,
+                "limit": limit,
+                "period": period,
+                "domain": domain,
+                "regions": regions,
+                "experience": experience
+            }
         }
-        
+
     finally:
         storage.close()
 
@@ -1123,21 +1270,343 @@ def autocomplete_cached(
 def get_profession_vacancies(name: str):
     """Получить вакансии для профессии."""
     catalog = _load_professions_catalog()
-    
+
     # Ищем профессию по названию
     profession = None
     for prof in catalog.get("professions", {}).values():
         if name.lower() in prof.get("name", "").lower():
             profession = prof
             break
-    
+
     if not profession:
         return {"vacancies": []}
-    
+
     # Возвращаем примеры вакансий
     return {
         "vacancies": profession.get("sample_vacancies", [])[:10]
     }
+
+# =============================================================================
+# Экспорт аналитики (PDF, Excel, CSV)
+# =============================================================================
+
+@app.post("/api/export/analytics")
+def export_analytics(
+    format: str = Query("xlsx", regex="^(pdf|xlsx|csv)$"),
+    period: Optional[str] = Query("all_time"),
+    domain: Optional[str] = Query(None),
+    regions: Optional[str] = Query(None),
+    experience: Optional[str] = Query(None),
+    salary_only: bool = Query(False)
+):
+    """
+    Экспорт аналитического отчёта в формате PDF, Excel или CSV.
+    
+    Args:
+        format: Формат экспорта (pdf|xlsx|csv)
+        period: Период фильтрации
+        domain: Домен профессии
+        regions: Регионы через запятую
+        experience: Опыт работы
+        salary_only: Только вакансии с зарплатой
+    
+    Returns:
+        Файл отчёта
+    """
+    from src.storage import VacancyStorage
+    from src.config import settings
+    from datetime import datetime
+    import pandas as pd
+    from io import BytesIO
+    from fastapi.responses import StreamingResponse
+    
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        
+        if df.empty:
+            raise HTTPException(status_code=404, detail="Нет данных для экспорта")
+        
+        # Применяем фильтры
+        if period and period != "all_time":
+            if 'published_at' in df.columns:
+                df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
+                now = datetime.now()
+                if period == "today":
+                    df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
+                elif period == "week":
+                    df = df[df['published_at'] >= now - timedelta(days=7)]
+                elif period == "month":
+                    df = df[df['published_at'] >= now - timedelta(days=30)]
+                elif period == "quarter":
+                    df = df[df['published_at'] >= now - timedelta(days=90)]
+                elif period == "year":
+                    df = df[df['published_at'] >= now - timedelta(days=365)]
+        
+        if domain:
+            if 'domain' in df.columns:
+                df = df[df['domain'].str.contains(domain, case=False, na=False)]
+            elif 'profession' in df.columns:
+                df = df[df['profession'].str.contains(domain, case=False, na=False)]
+        
+        if regions:
+            region_list = [r.strip() for r in regions.split(',')]
+            if 'area' in df.columns:
+                mask = df['area'].str.contains('|'.join(region_list), case=False, na=False)
+                df = df[mask]
+        
+        if experience:
+            if 'experience' in df.columns:
+                df = df[df['experience'] == experience]
+        
+        if salary_only:
+            if 'salary_from' in df.columns:
+                df = df[df['salary_from'].notna()]
+        
+        if df.empty:
+            raise HTTPException(status_code=404, detail="Нет данных после применения фильтров")
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"hh_analytics_{timestamp}"
+        
+        if format == "csv":
+            # CSV экспорт
+            output = BytesIO()
+            df.to_csv(output, index=False, encoding="utf-8-sig")
+            output.seek(0)
+            
+            return StreamingResponse(
+                output,
+                media_type="text/csv",
+                headers={"Content-Disposition": f"attachment; filename={filename}.csv"}
+            )
+        
+        elif format == "xlsx":
+            # Excel экспорт с несколькими листами
+            output = BytesIO()
+            
+            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+                # Лист 1: KPI метрики
+                kpi_data = {
+                    'Метрика': [
+                        'Всего вакансий',
+                        'Средняя зарплата',
+                        'Медианная зарплата',
+                        'Уникальных компаний',
+                        'Уникальных регионов',
+                        'Всего навыков',
+                        'Hard Skills (уникальных)',
+                        'Soft Skills (уникальных)'
+                    ],
+                    'Значение': [
+                        len(df),
+                        round(df[df['salary_from'].notna()]['salary_from'].mean(), 2) if not df[df['salary_from'].notna()].empty else 0,
+                        round(df[df['salary_from'].notna()]['salary_from'].median(), 2) if not df[df['salary_from'].notna()].empty else 0,
+                        df['employer_name'].nunique() if 'employer_name' in df.columns else 0,
+                        df['area'].nunique() if 'area' in df.columns else 0,
+                        int(df['skill_count'].sum()) if 'skill_count' in df.columns else 0,
+                        len(set(s for skills_str in df['hard_skills'].dropna() if isinstance(skills_str, str) for s in skills_str.split(','))),
+                        len(set(s for skills_str in df['soft_skills'].dropna() if isinstance(skills_str, str) for s in skills_str.split(',')))
+                    ]
+                }
+                kpi_df = pd.DataFrame(kpi_data)
+                kpi_df.to_excel(writer, sheet_name='KPI', index=False)
+                
+                # Лист 2: Hard Skills топ
+                if 'hard_skills' in df.columns:
+                    hard_skills = []
+                    for skills_str in df['hard_skills'].dropna():
+                        if isinstance(skills_str, str):
+                            hard_skills.extend([s.strip() for s in skills_str.split(',') if s.strip()])
+                    from collections import Counter
+                    hard_counts = Counter(hard_skills)
+                    hard_df = pd.DataFrame([
+                        {'Навык': skill, 'Количество': count}
+                        for skill, count in hard_counts.most_common(50)
+                    ])
+                    hard_df.to_excel(writer, sheet_name='Hard Skills', index=False)
+                
+                # Лист 3: Soft Skills топ
+                if 'soft_skills' in df.columns:
+                    soft_skills = []
+                    for skills_str in df['soft_skills'].dropna():
+                        if isinstance(skills_str, str):
+                            soft_skills.extend([s.strip() for s in skills_str.split(',') if s.strip()])
+                    soft_counts = Counter(soft_skills)
+                    soft_df = pd.DataFrame([
+                        {'Навык': skill, 'Количество': count}
+                        for skill, count in soft_counts.most_common(50)
+                    ])
+                    soft_df.to_excel(writer, sheet_name='Soft Skills', index=False)
+                
+                # Лист 4: Tools топ
+                if 'tools' in df.columns:
+                    tools = []
+                    for skills_str in df['tools'].dropna():
+                        if isinstance(skills_str, str):
+                            tools.extend([s.strip() for s in skills_str.split(',') if s.strip()])
+                    tools_counts = Counter(tools)
+                    tools_df = pd.DataFrame([
+                        {'Инструмент': skill, 'Количество': count}
+                        for skill, count in tools_counts.most_common(50)
+                    ])
+                    tools_df.to_excel(writer, sheet_name='Tools', index=False)
+                
+                # Лист 5: Сырые данные (первые 1000 записей)
+                raw_df = df.head(1000).copy()
+                raw_df.to_excel(writer, sheet_name='Данные', index=False)
+                
+                # Форматирование
+                workbook = writer.book
+                header_format = workbook.add_format({
+                    'bold': True,
+                    'bg_color': '#4472C4',
+                    'font_color': 'white',
+                    'border': 1
+                })
+                
+                for worksheet in writer.sheets.values():
+                    for col_num in range(len(raw_df.columns) if worksheet.name == 'Данные' else 2):
+                        worksheet.set_column(col_num, col_num, 20)
+            
+            output.seek(0)
+            
+            return StreamingResponse(
+                output,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                headers={"Content-Disposition": f"attachment; filename={filename}.xlsx"}
+            )
+        
+        elif format == "pdf":
+            # PDF экспорт
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import A4, landscape
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import inch
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT
+            from collections import Counter
+            
+            output = BytesIO()
+            doc = SimpleDocTemplate(
+                output,
+                pagesize=landscape(A4),
+                rightMargin=0.5*inch,
+                leftMargin=0.5*inch,
+                topMargin=0.5*inch,
+                bottomMargin=0.5*inch
+            )
+            
+            elements = []
+            styles = getSampleStyleSheet()
+            
+            # Заголовок
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=18,
+                textColor=colors.HexColor('#1e40af'),
+                spaceAfter=12,
+                alignment=TA_CENTER
+            )
+            
+            elements.append(Paragraph("HH.ru Analytics — Отчёт", title_style))
+            
+            # Информация о фильтрах
+            filter_info = f"Период: {period} | Вакансий: {len(df)} | Дата генерации: {datetime.now().strftime('%d.%m.%Y %H:%M')}"
+            elements.append(Paragraph(filter_info, styles['Normal']))
+            elements.append(Spacer(1, 0.3*inch))
+            
+            # KPI таблица
+            kpi_data = [
+                ['Метрика', 'Значение'],
+                ['Всего вакансий', str(len(df))],
+                ['Средняя зарплата', f"{round(df[df['salary_from'].notna()]['salary_from'].mean(), 2) if not df[df['salary_from'].notna()].empty else 'N/A'} ₽"],
+                ['Медианная зарплата', f"{round(df[df['salary_from'].notna()]['salary_from'].median(), 2) if not df[df['salary_from'].notna()].empty else 'N/A'} ₽"],
+                ['Hard Skills (уникальных)', str(len(set(s for skills_str in df['hard_skills'].dropna() if isinstance(skills_str, str) for s in skills_str.split(','))))],
+                ['Soft Skills (уникальных)', str(len(set(s for skills_str in df['soft_skills'].dropna() if isinstance(skills_str, str) for s in skills_str.split(','))))]
+            ]
+            
+            kpi_table = Table(kpi_data, colWidths=[3*inch, 2*inch])
+            kpi_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.grey),
+                ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f0f9ff')])
+            ]))
+            elements.append(kpi_table)
+            elements.append(Spacer(1, 0.3*inch))
+            
+            # Топ Hard Skills
+            elements.append(Paragraph("Топ-20 Hard Skills", styles['Heading2']))
+            elements.append(Spacer(1, 0.2*inch))
+            
+            if 'hard_skills' in df.columns:
+                hard_skills = []
+                for skills_str in df['hard_skills'].dropna():
+                    if isinstance(skills_str, str):
+                        hard_skills.extend([s.strip() for s in skills_str.split(',') if s.strip()])
+                hard_counts = Counter(hard_skills)
+                
+                hard_data = [['Навык', 'Количество', '%']]
+                total = len(df)
+                for skill, count in hard_counts.most_common(20):
+                    hard_data.append([skill, str(count), f"{round(count/total*100, 1)}%"])
+                
+                hard_table = Table(hard_data, colWidths=[2.5*inch, 1.5*inch, 1*inch])
+                hard_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#059669')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ecfdf5')])
+                ]))
+                elements.append(hard_table)
+            
+            # Топ Soft Skills
+            elements.append(Spacer(1, 0.3*inch))
+            elements.append(Paragraph("Топ-20 Soft Skills", styles['Heading2']))
+            elements.append(Spacer(1, 0.2*inch))
+            
+            if 'soft_skills' in df.columns:
+                soft_skills = []
+                for skills_str in df['soft_skills'].dropna():
+                    if isinstance(skills_str, str):
+                        soft_skills.extend([s.strip() for s in skills_str.split(',') if s.strip()])
+                soft_counts = Counter(soft_skills)
+                
+                soft_data = [['Навык', 'Количество', '%']]
+                total = len(df)
+                for skill, count in soft_counts.most_common(20):
+                    soft_data.append([skill, str(count), f"{round(count/total*100, 1)}%"])
+                
+                soft_table = Table(soft_data, colWidths=[2.5*inch, 1.5*inch, 1*inch])
+                soft_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#7c3aed')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f3ff')])
+                ]))
+                elements.append(soft_table)
+            
+            doc.build(elements)
+            output.seek(0)
+            
+            return StreamingResponse(
+                output,
+                media_type="application/pdf",
+                headers={"Content-Disposition": f"attachment; filename={filename}.pdf"}
+            )
+    
+    finally:
+        storage.close()
 
 # =============================================================================
 # Запуск
