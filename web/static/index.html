@@ -798,6 +798,32 @@
                                     <i class="fas fa-ruble-sign mr-2"></i>
                                     <span>Только с зарплатой</span>
                                 </button>
+
+                                <!-- Сортировка по зарплате -->
+                                <div class="flex items-center space-x-2 border-l border-gray-300 pl-4">
+                                    <span class="text-xs text-gray-600 font-medium">Сортировка:</span>
+                                    <button @click="setSalarySort('asc')"
+                                            :class="filters.salary_sort === 'asc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                                            class="px-3 py-2 rounded-lg transition text-sm font-medium border border-gray-300"
+                                            title="По возрастанию">
+                                        <i class="fas fa-arrow-up mr-1"></i>
+                                        <span class="hidden sm:inline">По возрастанию</span>
+                                    </button>
+                                    <button @click="setSalarySort('desc')"
+                                            :class="filters.salary_sort === 'desc' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+                                            class="px-3 py-2 rounded-lg transition text-sm font-medium border border-gray-300"
+                                            title="По убыванию">
+                                        <i class="fas fa-arrow-down mr-1"></i>
+                                        <span class="hidden sm:inline">По убыванию</span>
+                                    </button>
+                                    <button @click="setSalarySort(null)"
+                                            :class="filters.salary_sort === null ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                            class="px-3 py-2 rounded-lg transition text-sm font-medium border border-gray-300"
+                                            title="Сбросить сортировку">
+                                        <i class="fas fa-times mr-1"></i>
+                                        <span class="hidden sm:inline">Сброс</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -815,7 +841,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    <tr v-for="vacancy in vacanciesList.items" :key="vacancy.vacancy_id"
+                                    <tr v-for="vacancy in sortedVacancies" :key="vacancy.vacancy_id"
                                         class="hover:bg-blue-50 transition cursor-pointer group"
                                         @click="viewVacancy(vacancy)">
                                         <td class="px-6 py-4">
@@ -2236,7 +2262,8 @@
                         area: '',
                         experience: '',
                         skill: '',
-                        salary_only: false
+                        salary_only: false,
+                        salary_sort: null // null | 'asc' | 'desc'
                     },
 
                     // Autocomplete
@@ -2455,6 +2482,11 @@
                         return currencies[currency].avg_salary;
                     }
                     return this.dashboardData.avg_salary;
+                },
+
+                // Отсортированные вакансии
+                sortedVacancies() {
+                    return this.sortVacanciesBySalary(this.vacanciesList.items);
                 }
             },
 
@@ -2721,6 +2753,35 @@
                 toggleSalaryOnly() {
                     this.filters.salary_only = !this.filters.salary_only;
                     this.applyFilters(); // Сразу применяем фильтр
+                },
+
+                setSalarySort(sortType) {
+                    // sortType: null | 'asc' | 'desc'
+                    this.filters.salary_sort = sortType;
+                    this.pagination.page = 1;
+                    this.loadVacancies();
+                },
+
+                sortVacanciesBySalary(vacancies) {
+                    if (!this.filters.salary_sort) return vacancies;
+
+                    const sorted = [...vacancies];
+                    if (this.filters.salary_sort === 'asc') {
+                        // По возрастанию (сначала с меньшей ЗП)
+                        sorted.sort((a, b) => {
+                            const aSalary = a.salary_from || 0;
+                            const bSalary = b.salary_from || 0;
+                            return aSalary - bSalary;
+                        });
+                    } else if (this.filters.salary_sort === 'desc') {
+                        // По убыванию (сначала с большей ЗП)
+                        sorted.sort((a, b) => {
+                            const aSalary = a.salary_from || 0;
+                            const bSalary = b.salary_from || 0;
+                            return bSalary - aSalary;
+                        });
+                    }
+                    return sorted;
                 },
 
                 async loadAnalytics() {
@@ -3009,7 +3070,7 @@
                 },
 
                 resetFilters() {
-                    this.filters = { search: '', area: '', experience: '', skill: '', salary_only: false };
+                    this.filters = { search: '', area: '', experience: '', skill: '', salary_only: false, salary_sort: null };
                     this.pagination.page = 1;
                     this.loadVacancies();
                 },
