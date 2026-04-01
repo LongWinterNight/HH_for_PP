@@ -835,7 +835,18 @@
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Вакансия</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Компания</th>
                                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Регион</th>
-                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Зарплата</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition"
+                                            @click="setSalarySort(filters.salary_sort === 'asc' ? 'desc' : filters.salary_sort === 'desc' ? null : 'asc')"
+                                            title="Нажмите для сортировки">
+                                            <span class="flex items-center justify-end">
+                                                Зарплата
+                                                <span class="ml-2 text-xs">
+                                                    <i v-if="filters.salary_sort === 'asc'" class="fas fa-arrow-up text-blue-600"></i>
+                                                    <i v-else-if="filters.salary_sort === 'desc'" class="fas fa-arrow-down text-blue-600"></i>
+                                                    <i v-else class="fas fa-sort text-gray-400"></i>
+                                                </span>
+                                            </span>
+                                        </th>
                                         <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Навыки</th>
                                         <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Действия</th>
                                     </tr>
@@ -2723,6 +2734,9 @@
                 async loadVacancies() {
                     this.loading = true;
                     try {
+                        // Сохраняем текущее состояние сортировки в localStorage
+                        this.saveSortState();
+
                         const params = new URLSearchParams({
                             page: this.pagination.page,
                             per_page: this.pagination.per_page,
@@ -2730,7 +2744,9 @@
                             area: this.filters.area || '',
                             experience: this.filters.experience || '',
                             skill: this.filters.skill || '',
-                            salary_only: this.filters.salary_only || false
+                            salary_only: this.filters.salary_only || false,
+                            sort_by: this.filters.salary_sort ? 'salary' : 'none',
+                            sort_order: this.filters.salary_sort || 'desc'
                         });
 
                         const response = await fetch(`${API_BASE}/vacancies?${params}`);
@@ -2762,26 +2778,27 @@
                     this.loadVacancies();
                 },
 
-                sortVacanciesBySalary(vacancies) {
-                    if (!this.filters.salary_sort) return vacancies;
-
-                    const sorted = [...vacancies];
-                    if (this.filters.salary_sort === 'asc') {
-                        // По возрастанию (сначала с меньшей ЗП)
-                        sorted.sort((a, b) => {
-                            const aSalary = a.salary_from || 0;
-                            const bSalary = b.salary_from || 0;
-                            return aSalary - bSalary;
-                        });
-                    } else if (this.filters.salary_sort === 'desc') {
-                        // По убыванию (сначала с большей ЗП)
-                        sorted.sort((a, b) => {
-                            const aSalary = a.salary_from || 0;
-                            const bSalary = b.salary_from || 0;
-                            return bSalary - aSalary;
-                        });
+                // Сохранение состояния сортировки в localStorage
+                saveSortState() {
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('hh_salary_sort', this.filters.salary_sort || 'none');
                     }
-                    return sorted;
+                },
+
+                // Загрузка состояния сортировки из localStorage
+                loadSortState() {
+                    if (typeof localStorage !== 'undefined') {
+                        const saved = localStorage.getItem('hh_salary_sort');
+                        if (saved && saved !== 'none') {
+                            this.filters.salary_sort = saved;
+                        }
+                    }
+                },
+
+                // Удаление клиентской сортировки (теперь на бэкенде)
+                sortVacanciesBySalary(vacancies) {
+                    // Сортировка теперь на бэкенде, возвращаем как есть
+                    return vacancies;
                 },
 
                 async loadAnalytics() {
@@ -3072,6 +3089,10 @@
                 resetFilters() {
                     this.filters = { search: '', area: '', experience: '', skill: '', salary_only: false, salary_sort: null };
                     this.pagination.page = 1;
+                    // Очищаем localStorage при сбросе
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.removeItem('hh_salary_sort');
+                    }
                     this.loadVacancies();
                 },
 
@@ -3444,6 +3465,9 @@
             },
 
             mounted() {
+                // Загружаем сохранённое состояние сортировки
+                this.loadSortState();
+
                 this.fetchDashboard();
                 this.loadVacancies();
                 this.loadParserStatus();
