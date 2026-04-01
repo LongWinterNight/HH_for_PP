@@ -7,6 +7,30 @@
 
 ---
 
+## [1.1.1] — 2026-04-01
+
+### 🐛 Исправлено
+
+- **TypeError при сравнении datetime с разными часовыми поясами** — исправлена ошибка `Invalid comparison between dtype=datetime64[ns, UTC+03:00] and datetime`
+- Добавлено автоматическое определение часового пояса для корректной фильтрации по периоду
+- Исправлено в endpoints: `/api/analytics/kpi`, `/api/analytics/top-skills`, `/api/export/analytics`
+
+### ✨ Улучшено
+
+- **Карточка средней зарплаты на дашборде** — теперь отображается валюта (₽, $, €, ₸ и т.д.)
+- **Мульти-валюта UI** — компактные бейджи с hover-эффектом и tooltip
+- Основная валюта (RUB или первая по количеству вакансий) выделяется, остальные показываются полупрозрачными
+- Добавлены computed свойства `primaryCurrency` и `primaryAvgSalary` для умного определения основной валюты
+
+### 🔧 Техническое
+
+- Добавлен `import pandas as pd` в `web/app/main.py`
+- Обновлён `.gitignore` с улучшенной структурой и комментариями
+- Добавлен `.editorconfig` для единообразия стиля кода
+- Добавлен `pyproject.toml` для современного Python packaging (PEP 621)
+
+---
+
 ## [1.1.0] — 2026-03-29
 
 ### ✨ Добавлено
@@ -120,5 +144,6 @@
 
 ## Ссылки
 
+- [1.1.1]: https://github.com/LongWinterNight/HH_for_PP/compare/v1.1.0...v1.1.1
 - [1.1.0]: https://github.com/LongWinterNight/HH_for_PP/compare/v1.0.0...v1.1.0
 - [1.0.0]: https://github.com/LongWinterNight/HH_for_PP/releases/tag/v1.0.0

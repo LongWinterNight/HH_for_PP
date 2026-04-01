@@ -4,6 +4,10 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com)
 [![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green.svg)](https://vuejs.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI/CD](https://github.com/LongWinterNight/HH_for_PP/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/LongWinterNight/HH_for_PP/actions/workflows/ci-cd.yml)
+[![Last Commit](https://img.shields.io/github/last-commit/LongWinterNight/HH_for_PP/main)](https://github.com/LongWinterNight/HH_for_PP/commits/main)
+[![Issues](https://img.shields.io/github/issues/LongWinterNight/HH_for_PP)](https://github.com/LongWinterNight/HH_for_PP/issues)
+[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/downloads/)
 
 **HH.ru Analytics** — профессиональная ETL-система для сбора, обработки и анализа вакансий с HH.ru с автоматическим извлечением навыков (Hard Skills, Soft Skills, Tools) и формированием аналитических отчётов.
 
@@ -343,5 +347,6 @@ MIT License — см. файл [LICENSE](LICENSE)
 
 ---
 
-**Версия:** 1.1.0  
-**Дата обновления:** 31 марта 2026 г.
+**Версия:** 1.1.1
+**Дата обновления:** 1 апреля 2026 г.
+**Статус:** ✅ Активная разработка

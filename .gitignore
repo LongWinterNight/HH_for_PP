@@ -1,4 +1,7 @@
+# ═══════════════════════════════════════════════════
 # Python
+# ═══════════════════════════════════════════════════
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -16,24 +19,41 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual environments
 venv/
 env/
 ENV/
 .venv
+.pytest_cache/
+.coverage
+htmlcov/
 
+# ═══════════════════════════════════════════════════
 # IDE
-.vscode/
+# ═══════════════════════════════════════════════════
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo
 *~
+.DS_Store
 
-# Data files (игнорируем большие файлы данных)
+# ═══════════════════════════════════════════════════
+# Данные и логи
+# ═══════════════════════════════════════════════════
+
+# Игнорируем большие файлы данных
 # data/raw/*.json
 # data/processed/*.csv
 # data/processed/*.parquet
@@ -45,17 +65,35 @@ logs/*.log
 !data/hh_analytics.db
 !data/professions_catalog.json
 
+# ═══════════════════════════════════════════════════
+# Безопасность и секреты
+# ═══════════════════════════════════════════════════
+
 # Environment variables (.env содержит секреты)
 .env
+.env.local
+.env.*.local
 
+# Ключи и токены
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+*.secret
+
+# ═══════════════════════════════════════════════════
 # OS
+# ═══════════════════════════════════════════════════
+
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Test coverage
-htmlcov/
-.coverage
-.pytest_cache/
+# ═══════════════════════════════════════════════════
+# Прочее
+# ═══════════════════════════════════════════════════
 
 # MyPy
 .mypy_cache/
