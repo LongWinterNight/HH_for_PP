@@ -96,7 +96,9 @@ def get_vacancies(
     area: str = "",
     experience: str = "",
     skill: str = "",
-    salary_only: bool = False
+    salary_only: bool = False,
+    sort_by: str = "salary",  # salary | date | none
+    sort_order: str = "desc"  # asc | desc
 ):
     from src.storage import VacancyStorage
     import pandas as pd
@@ -110,13 +112,13 @@ def get_vacancies(
         # Применяем фильтры
         if search:
             df = df[df["vacancy_name"].str.contains(search, case=False, na=False)]
-        
+
         if area:
             df = df[df["area"].str.contains(area, case=False, na=False)]
-        
+
         if experience:
             df = df[df["experience"] == experience]
-        
+
         if skill:
             # Поиск по навыкам (hard_skills, tools, soft_skills)
             skill_lower = skill.lower()
@@ -126,9 +128,26 @@ def get_vacancies(
                 df["soft_skills"].str.contains(skill_lower, case=False, na=False)
             )
             df = df[mask]
-        
+
         if salary_only:
             df = df[df["salary_from"].notna()]
+
+        # Сортировка
+        if sort_by == "salary" and "salary_from" in df.columns:
+            # Мульти-сортировка: сначала по зарплате, потом по дате
+            df = df.sort_values(
+                by=["salary_from", "published_at"],
+                ascending=[sort_order == "asc", False],  # ЗП по порядку, дата всегда по убыванию
+                na_position="last"
+            )
+        elif sort_by == "date" and "published_at" in df.columns:
+            # Сортировка только по дате
+            df = df.sort_values(
+                by="published_at",
+                ascending=sort_order == "asc",
+                na_position="last"
+            )
+        # else: sort_by == "none" — без сортировки, порядок из БД
 
         total = len(df)
         start = (page - 1) * per_page
@@ -279,12 +298,12 @@ def get_analytics():
             }
 
         analytics = AdvancedAnalytics(df)
-        
+
         # Получаем упрощенные данные по навыкам (только названия и количество)
         tech_summary = analytics.compute_technology_summary()
         hard_summary = analytics.compute_hard_skills_summary()
         soft_summary = analytics.compute_soft_skills_summary()
-        
+
         # Преобразуем в простой формат {навык: количество}
         def simplify_skills(data):
             if not data:
@@ -298,7 +317,7 @@ def get_analytics():
                     # Если это просто число
                     result[key] = value
             return result
-        
+
         # Статистика по зарплате
         salary_stats = {}
         if "salary_from" in df.columns:
@@ -361,7 +380,7 @@ def get_distribution():
             "USD": 92.0,      # 1 USD = 92 RUB
             "EUR": 100.0,     # 1 EUR = 100 RUB
         }
-        
+
         def convert_to_rub(row):
             salary = row.get("salary_from")
             currency = row.get("salary_currency", "RUB")
@@ -369,11 +388,11 @@ def get_distribution():
                 return None
             rate = EXCHANGE_RATES.get(currency, 1.0)
             return salary * rate
-        
+
         # Создаем копию с конвертированными зарплатами
         df_rub = df.copy()
         df_rub["salary_from_rub"] = df_rub.apply(convert_to_rub, axis=1)
-        
+
         # Распределение по зарплате в RUB (конвертированное)
         salary_distribution = {"< 50k": 0, "50k-100k": 0, "100k-150k": 0, "150k-200k": 0, "200k+": 0}
         if "salary_from_rub" in df_rub.columns:
@@ -462,7 +481,7 @@ def stop_parser():
 def cache_stats():
     """Статистика кэша API."""
     from optimized_parser import APICache
-    
+
     try:
         cache = APICache()
         stats = cache.get_stats()
@@ -480,7 +499,7 @@ def cache_stats():
 def clear_cache(days: int = Query(default=7, description="Очистить кэш старше N дней")):
     """Очистка кэша API."""
     from optimized_parser import APICache
-    
+
     try:
         cache = APICache()
         cache.clear_old(days)
@@ -555,12 +574,12 @@ def start_parser(
             # Переопределяем метод сбора для обновления прогресса
             if hasattr(collector, '_collect_by_keyword'):
                 original_collect_by_keyword = collector._collect_by_keyword
-                
+
                 # Проверяем сколько аргументов принимает метод
                 import inspect
                 sig = inspect.signature(original_collect_by_keyword)
                 accepts_progress = 'progress_bar' in sig.parameters
-                
+
                 def collect_by_keyword_with_progress(keyword, delay_between_pages=1.0, progress_bar=None):
                     parser_state["current_keyword"] = keyword
                     logger.info(f"Запрос: {keyword}")
@@ -597,7 +616,7 @@ def start_parser(
                     result = collector.collect_all(keywords=keywords, save_raw=True)
             else:
                 raise AttributeError("Collector doesn't have collect_all method")
-            
+
             parser_state["progress"] = 100
             parser_state["status"] = "completed"
             parser_state["completed_at"] = datetime.now().isoformat()
@@ -618,11 +637,11 @@ def start_parser(
 def list_reports():
     from src.config import settings
     from datetime import datetime
-    
+
     reports_dir = settings.reports_dir
     if not reports_dir.exists():
         return {"reports": []}
-    
+
     reports = [{"name": f.name, "size": f.stat().st_size, "created_at": datetime.fromtimestamp(f.stat().st_ctime).isoformat()} for f in reports_dir.glob("*.xlsx")]
     return {"reports": sorted(reports, key=lambda x: x["created_at"], reverse=True)}
 
@@ -630,11 +649,11 @@ def list_reports():
 def download_report(filename: str):
     from src.config import settings
     from fastapi.responses import FileResponse
-    
+
     filepath = settings.reports_dir / filename
     if not filepath.exists():
         raise HTTPException(404, "Отчёт не найден")
-    
+
     return FileResponse(path=filepath, filename=filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 @app.post("/api/reports/generate")
@@ -643,7 +662,7 @@ def generate_report(background_tasks: BackgroundTasks):
         from src.storage import VacancyStorage
         from src.analyzer import VacancyAnalyzer
         from src.advanced_analyzer import AdvancedAnalytics
-        
+
         storage = VacancyStorage()
         try:
             df = storage.get_all_vacancies()
@@ -652,7 +671,7 @@ def generate_report(background_tasks: BackgroundTasks):
                 AdvancedAnalytics(df).generate_detailed_excel_report()
         finally:
             storage.close()
-    
+
     background_tasks.add_task(run)
     return {"message": "Генерация запущена"}
 
@@ -661,15 +680,15 @@ def export_vacancies(format: str = "csv"):
     from src.storage import VacancyStorage
     from src.config import settings
     from datetime import datetime
-    
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
         if df.empty:
             raise HTTPException(404, "Нет данных")
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
         if format == "csv":
             filepath = settings.reports_dir / f"vacancies_export_{timestamp}.csv"
             df.to_csv(filepath, index=False, encoding="utf-8-sig")
@@ -678,7 +697,7 @@ def export_vacancies(format: str = "csv"):
             filepath = settings.reports_dir / f"vacancies_export_{timestamp}.xlsx"
             df.to_excel(filepath, index=False, engine="openpyxl")
             media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        
+
         return FileResponse(path=filepath, filename=filepath.name, media_type=media_type)
     finally:
         storage.close()
@@ -693,19 +712,19 @@ _professions_catalog_cache = None
 def _load_professions_catalog():
     """Загрузить каталог профессий из файла."""
     global _professions_catalog_cache
-    
+
     if _professions_catalog_cache is not None:
         return _professions_catalog_cache
-    
+
     catalog_path = PROJECT_ROOT / "data" / "professions_catalog.json"
-    
+
     if catalog_path.exists():
         import json
         with open(catalog_path, "r", encoding="utf-8") as f:
             _professions_catalog_cache = json.load(f)
     else:
         _professions_catalog_cache = {"professions": {}, "total": 0}
-    
+
     return _professions_catalog_cache
 
 @app.get("/api/professions/list")
@@ -717,28 +736,28 @@ def get_professions_list(
 ):
     """Получить список профессий с фильтрами."""
     catalog = _load_professions_catalog()
-    
+
     professions = list(catalog.get("professions", {}).values())
-    
+
     # Фильтр по домену
     if domain:
         professions = [p for p in professions if p.get("domain") == domain]
-    
+
     # Фильтр по сфере
     if sphere:
         professions = [p for p in professions if p.get("sphere") == sphere]
-    
+
     # Поиск по названию
     if search:
         search_lower = search.lower()
         professions = [p for p in professions if search_lower in p.get("name", "").lower()]
-    
+
     # Сортировка по количеству вакансий
     professions.sort(key=lambda x: x.get("vacancies_count", 0), reverse=True)
-    
+
     # Ограничение
     professions = professions[:limit]
-    
+
     # Форматируем ответ
     return {
         "professions": professions,
@@ -751,44 +770,44 @@ def get_professions_list(
 def get_profession_detail(profession_key: str):
     """Получить детальную информацию о профессии."""
     catalog = _load_professions_catalog()
-    
+
     profession = catalog.get("professions", {}).get(profession_key)
-    
+
     if not profession:
         raise HTTPException(status_code=404, detail="Профессия не найдена")
-    
+
     return profession
 
 @app.get("/api/autocomplete/vacancies")
 def autocomplete_vacancies(q: str = Query(..., min_length=2)):
     """
     Автодополнение названий вакансий.
-    
+
     Args:
         q: Поисковый запрос (минимум 2 символа)
-    
+
     Returns:
         Список подходящих названий вакансий
     """
     from src.storage import VacancyStorage
     import pandas as pd
-    
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
         if df.empty:
             return {"suggestions": []}
-        
+
         # Фильтрация по запросу (case-insensitive)
         mask = df['vacancy_name'].str.contains(q, case=False, na=False)
         matches = df[mask]
-        
+
         # Уникальные названия + сортировка по частоте + топ-10
         unique = matches['vacancy_name'].value_counts().head(10).index.tolist()
-        
+
         return {
             "suggestions": [
-                {"label": name, "value": name, "count": int(count)} 
+                {"label": name, "value": name, "count": int(count)}
                 for name, count in zip(unique, matches['vacancy_name'].value_counts().head(10).values)
             ],
             "total": len(unique)
@@ -800,28 +819,28 @@ def autocomplete_vacancies(q: str = Query(..., min_length=2)):
 def autocomplete_areas(q: str = Query(..., min_length=2)):
     """
     Автодополнение регионов.
-    
+
     Args:
         q: Поисковый запрос (минимум 2 символа)
-    
+
     Returns:
         Список подходящих регионов
     """
     from src.storage import VacancyStorage
-    
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
         if df.empty:
             return {"suggestions": []}
-        
+
         # Фильтрация
         mask = df['area'].str.contains(q, case=False, na=False)
         matches = df[mask]
-        
+
         # Уникальные регионы + сортировка по частоте
         unique = matches['area'].value_counts().head(10).index.tolist()
-        
+
         return {
             "suggestions": [
                 {"label": area, "value": area, "count": int(count)}
@@ -836,40 +855,40 @@ def autocomplete_areas(q: str = Query(..., min_length=2)):
 def autocomplete_skills(q: str = Query(..., min_length=2)):
     """
     Автодополнение навыков (hard/soft skills, tools).
-    
+
     Args:
         q: Поисковый запрос (минимум 2 символа)
-    
+
     Returns:
         Список подходящих навыков
     """
     from src.storage import VacancyStorage
     from collections import Counter
-    
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
         if df.empty:
             return {"suggestions": []}
-        
+
         # Собираем все навыки
         all_skills = []
-        
+
         for col in ['hard_skills', 'soft_skills', 'tools']:
             if col in df.columns:
                 for skills_str in df[col].dropna():
                     if isinstance(skills_str, str):
                         skills = [s.strip() for s in skills_str.split(',')]
                         all_skills.extend([s for s in skills if s])
-        
+
         # Фильтруем по запросу
         q_lower = q.lower()
         matches = [s for s in all_skills if q_lower in s.lower()]
-        
+
         # Подсчёт частоты + топ-15
         counter = Counter(matches)
         top_skills = counter.most_common(15)
-        
+
         return {
             "suggestions": [
                 {"label": skill, "value": skill, "count": count}
@@ -913,7 +932,7 @@ def get_kpi_metrics(
             }
 
         # === Применяем фильтры ===
-        
+
         # Фильтр по периоду
         if period and period != "all_time":
             if 'published_at' in df.columns:
@@ -1120,7 +1139,7 @@ def get_top_skills(
             }
 
         # === Применяем фильтры ===
-        
+
         # Фильтр по периоду
         if period and period != "all_time":
             if 'published_at' in df.columns:
@@ -1241,15 +1260,15 @@ def autocomplete_cached(
     """
     import time
     from datetime import datetime
-    
+
     cache_key = f"{type}:{q}"
-    
+
     # Проверка кэша
     if cache_key in _autocomplete_cache:
         cached_data, cached_time = _autocomplete_cache[cache_key]
         if time.time() - cached_time < _cache_ttl:
             return {**cached_data, "cached": True}
-    
+
     # Новый запрос
     if type == "vacancies":
         result = autocomplete_vacancies(q)
@@ -1257,10 +1276,10 @@ def autocomplete_cached(
         result = autocomplete_areas(q)
     else:
         result = autocomplete_skills(q)
-    
+
     # Сохранение в кэш
     _autocomplete_cache[cache_key] = (result, time.time())
-    
+
     # Очистка старого кэша (раз в 100 запросов)
     if len(_autocomplete_cache) > 100:
         now = time.time()
@@ -1268,7 +1287,7 @@ def autocomplete_cached(
             k: v for k, v in _autocomplete_cache.items()
             if now - v[1] < _cache_ttl
         }
-    
+
     return {**result, "cached": False}
 
 @app.get("/api/professions/vacancies")
@@ -1306,7 +1325,7 @@ def export_analytics(
 ):
     """
     Экспорт аналитического отчёта в формате PDF, Excel или CSV.
-    
+
     Args:
         format: Формат экспорта (pdf|xlsx|csv)
         period: Период фильтрации
@@ -1314,7 +1333,7 @@ def export_analytics(
         regions: Регионы через запятую
         experience: Опыт работы
         salary_only: Только вакансии с зарплатой
-    
+
     Returns:
         Файл отчёта
     """
@@ -1324,14 +1343,14 @@ def export_analytics(
     import pandas as pd
     from io import BytesIO
     from fastapi.responses import StreamingResponse
-    
+
     storage = VacancyStorage()
     try:
         df = storage.get_all_vacancies()
-        
+
         if df.empty:
             raise HTTPException(status_code=404, detail="Нет данных для экспорта")
-        
+
         # Применяем фильтры
         if period and period != "all_time":
             if 'published_at' in df.columns:
@@ -1355,43 +1374,43 @@ def export_analytics(
                 df = df[df['domain'].str.contains(domain, case=False, na=False)]
             elif 'profession' in df.columns:
                 df = df[df['profession'].str.contains(domain, case=False, na=False)]
-        
+
         if regions:
             region_list = [r.strip() for r in regions.split(',')]
             if 'area' in df.columns:
                 mask = df['area'].str.contains('|'.join(region_list), case=False, na=False)
                 df = df[mask]
-        
+
         if experience:
             if 'experience' in df.columns:
                 df = df[df['experience'] == experience]
-        
+
         if salary_only:
             if 'salary_from' in df.columns:
                 df = df[df['salary_from'].notna()]
-        
+
         if df.empty:
             raise HTTPException(status_code=404, detail="Нет данных после применения фильтров")
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"hh_analytics_{timestamp}"
-        
+
         if format == "csv":
             # CSV экспорт
             output = BytesIO()
             df.to_csv(output, index=False, encoding="utf-8-sig")
             output.seek(0)
-            
+
             return StreamingResponse(
                 output,
                 media_type="text/csv",
                 headers={"Content-Disposition": f"attachment; filename={filename}.csv"}
             )
-        
+
         elif format == "xlsx":
             # Excel экспорт с несколькими листами
             output = BytesIO()
-            
+
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
                 # Лист 1: KPI метрики
                 kpi_data = {
@@ -1418,7 +1437,7 @@ def export_analytics(
                 }
                 kpi_df = pd.DataFrame(kpi_data)
                 kpi_df.to_excel(writer, sheet_name='KPI', index=False)
-                
+
                 # Лист 2: Hard Skills топ
                 if 'hard_skills' in df.columns:
                     hard_skills = []
@@ -1432,7 +1451,7 @@ def export_analytics(
                         for skill, count in hard_counts.most_common(50)
                     ])
                     hard_df.to_excel(writer, sheet_name='Hard Skills', index=False)
-                
+
                 # Лист 3: Soft Skills топ
                 if 'soft_skills' in df.columns:
                     soft_skills = []
@@ -1445,7 +1464,7 @@ def export_analytics(
                         for skill, count in soft_counts.most_common(50)
                     ])
                     soft_df.to_excel(writer, sheet_name='Soft Skills', index=False)
-                
+
                 # Лист 4: Tools топ
                 if 'tools' in df.columns:
                     tools = []
@@ -1458,11 +1477,11 @@ def export_analytics(
                         for skill, count in tools_counts.most_common(50)
                     ])
                     tools_df.to_excel(writer, sheet_name='Tools', index=False)
-                
+
                 # Лист 5: Сырые данные (первые 1000 записей)
                 raw_df = df.head(1000).copy()
                 raw_df.to_excel(writer, sheet_name='Данные', index=False)
-                
+
                 # Форматирование
                 workbook = writer.book
                 header_format = workbook.add_format({
@@ -1471,19 +1490,19 @@ def export_analytics(
                     'font_color': 'white',
                     'border': 1
                 })
-                
+
                 for worksheet in writer.sheets.values():
                     for col_num in range(len(raw_df.columns) if worksheet.name == 'Данные' else 2):
                         worksheet.set_column(col_num, col_num, 20)
-            
+
             output.seek(0)
-            
+
             return StreamingResponse(
                 output,
                 media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 headers={"Content-Disposition": f"attachment; filename={filename}.xlsx"}
             )
-        
+
         elif format == "pdf":
             # PDF экспорт
             from reportlab.lib import colors
@@ -1493,7 +1512,7 @@ def export_analytics(
             from reportlab.lib.units import inch
             from reportlab.lib.enums import TA_CENTER, TA_LEFT
             from collections import Counter
-            
+
             output = BytesIO()
             doc = SimpleDocTemplate(
                 output,
@@ -1503,10 +1522,10 @@ def export_analytics(
                 topMargin=0.5*inch,
                 bottomMargin=0.5*inch
             )
-            
+
             elements = []
             styles = getSampleStyleSheet()
-            
+
             # Заголовок
             title_style = ParagraphStyle(
                 'CustomTitle',
@@ -1516,14 +1535,14 @@ def export_analytics(
                 spaceAfter=12,
                 alignment=TA_CENTER
             )
-            
+
             elements.append(Paragraph("HH.ru Analytics — Отчёт", title_style))
-            
+
             # Информация о фильтрах
             filter_info = f"Период: {period} | Вакансий: {len(df)} | Дата генерации: {datetime.now().strftime('%d.%m.%Y %H:%M')}"
             elements.append(Paragraph(filter_info, styles['Normal']))
             elements.append(Spacer(1, 0.3*inch))
-            
+
             # KPI таблица
             kpi_data = [
                 ['Метрика', 'Значение'],
@@ -1533,7 +1552,7 @@ def export_analytics(
                 ['Hard Skills (уникальных)', str(len(set(s for skills_str in df['hard_skills'].dropna() if isinstance(skills_str, str) for s in skills_str.split(','))))],
                 ['Soft Skills (уникальных)', str(len(set(s for skills_str in df['soft_skills'].dropna() if isinstance(skills_str, str) for s in skills_str.split(','))))]
             ]
-            
+
             kpi_table = Table(kpi_data, colWidths=[3*inch, 2*inch])
             kpi_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
@@ -1547,23 +1566,23 @@ def export_analytics(
             ]))
             elements.append(kpi_table)
             elements.append(Spacer(1, 0.3*inch))
-            
+
             # Топ Hard Skills
             elements.append(Paragraph("Топ-20 Hard Skills", styles['Heading2']))
             elements.append(Spacer(1, 0.2*inch))
-            
+
             if 'hard_skills' in df.columns:
                 hard_skills = []
                 for skills_str in df['hard_skills'].dropna():
                     if isinstance(skills_str, str):
                         hard_skills.extend([s.strip() for s in skills_str.split(',') if s.strip()])
                 hard_counts = Counter(hard_skills)
-                
+
                 hard_data = [['Навык', 'Количество', '%']]
                 total = len(df)
                 for skill, count in hard_counts.most_common(20):
                     hard_data.append([skill, str(count), f"{round(count/total*100, 1)}%"])
-                
+
                 hard_table = Table(hard_data, colWidths=[2.5*inch, 1.5*inch, 1*inch])
                 hard_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#059669')),
@@ -1574,24 +1593,24 @@ def export_analytics(
                     ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#ecfdf5')])
                 ]))
                 elements.append(hard_table)
-            
+
             # Топ Soft Skills
             elements.append(Spacer(1, 0.3*inch))
             elements.append(Paragraph("Топ-20 Soft Skills", styles['Heading2']))
             elements.append(Spacer(1, 0.2*inch))
-            
+
             if 'soft_skills' in df.columns:
                 soft_skills = []
                 for skills_str in df['soft_skills'].dropna():
                     if isinstance(skills_str, str):
                         soft_skills.extend([s.strip() for s in skills_str.split(',') if s.strip()])
                 soft_counts = Counter(soft_skills)
-                
+
                 soft_data = [['Навык', 'Количество', '%']]
                 total = len(df)
                 for skill, count in soft_counts.most_common(20):
                     soft_data.append([skill, str(count), f"{round(count/total*100, 1)}%"])
-                
+
                 soft_table = Table(soft_data, colWidths=[2.5*inch, 1.5*inch, 1*inch])
                 soft_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#7c3aed')),
@@ -1602,16 +1621,16 @@ def export_analytics(
                     ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f5f3ff')])
                 ]))
                 elements.append(soft_table)
-            
+
             doc.build(elements)
             output.seek(0)
-            
+
             return StreamingResponse(
                 output,
                 media_type="application/pdf",
                 headers={"Content-Disposition": f"attachment; filename={filename}.pdf"}
             )
-    
+
     finally:
         storage.close()
 
@@ -1621,7 +1640,7 @@ def export_analytics(
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     print("=" * 60)
     print("🚀 HH.ru Analytics — Веб-приложение")
     print("=" * 60)
@@ -1633,5 +1652,5 @@ if __name__ == "__main__":
     print("   http://localhost:8000")
     print("   http://localhost:8000/docs")
     print("=" * 60)
-    
+
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=False)
