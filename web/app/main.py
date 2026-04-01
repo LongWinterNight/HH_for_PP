@@ -11,6 +11,7 @@ import sys
 from datetime import datetime, timedelta
 from typing import Optional
 from collections import defaultdict
+import pandas as pd
 
 # Пути
 WEB_DIR = Path(__file__).parent  # web/app
@@ -917,7 +918,9 @@ def get_kpi_metrics(
         if period and period != "all_time":
             if 'published_at' in df.columns:
                 df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
-                now = datetime.now()
+                # Получаем часовой пояс из колонки published_at
+                tz = df['published_at'].dt.tz
+                now = pd.Timestamp.now(tz=tz) if tz else datetime.now()
                 if period == "today":
                     df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
                 elif period == "week":
@@ -1122,7 +1125,9 @@ def get_top_skills(
         if period and period != "all_time":
             if 'published_at' in df.columns:
                 df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
-                now = datetime.now()
+                # Получаем часовой пояс из колонки published_at
+                tz = df['published_at'].dt.tz
+                now = pd.Timestamp.now(tz=tz) if tz else datetime.now()
                 if period == "today":
                     df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
                 elif period == "week":
@@ -1331,7 +1336,9 @@ def export_analytics(
         if period and period != "all_time":
             if 'published_at' in df.columns:
                 df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
-                now = datetime.now()
+                # Получаем часовой пояс из колонки published_at
+                tz = df['published_at'].dt.tz
+                now = pd.Timestamp.now(tz=tz) if tz else datetime.now()
                 if period == "today":
                     df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
                 elif period == "week":
@@ -1342,7 +1349,7 @@ def export_analytics(
                     df = df[df['published_at'] >= now - timedelta(days=90)]
                 elif period == "year":
                     df = df[df['published_at'] >= now - timedelta(days=365)]
-        
+
         if domain:
             if 'domain' in df.columns:
                 df = df[df['domain'].str.contains(domain, case=False, na=False)]
