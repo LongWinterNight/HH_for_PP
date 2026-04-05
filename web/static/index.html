@@ -275,6 +275,22 @@
         @media (min-width: 1024px) {
             .lg\:grid-cols-8 > div { animation-delay: calc(var(--index, 0) * 0.05s); }
         }
+
+        /* Анимация масштабирования для модалки */
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -325,10 +341,225 @@
                         <span class="text-sm text-gray-600" v-if="dashboardData.total_vacancies">
                             <i class="fas fa-database"></i> {{ dashboardData.total_vacancies }} вакансий
                         </span>
+                        <button @click="showOnboarding = true"
+                                class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-gray-100"
+                                title="Помощь — пошаговый гайд">
+                            <i class="fas fa-question-circle text-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
         </nav>
+
+        <!-- Модальное окно Onboarding Wizard -->
+        <transition name="fade">
+            <div v-if="showOnboarding"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                 @click.self="showOnboarding = false">
+                <!-- Затемнение фона -->
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+                <!-- Модальное окно -->
+                <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-scale-in">
+                    <!-- Шапка -->
+                    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 text-white">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fas fa-graduation-cap text-xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-bold">Добро пожаловать!</h2>
+                                    <p class="text-blue-100 text-sm">Быстрый старт за 3 шага</p>
+                                </div>
+                            </div>
+                            <button @click="showOnboarding = false"
+                                    class="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2 transition">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <!-- Прогресс-бар шагов -->
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between text-xs mb-2">
+                                <span class="font-semibold">Шаг {{ onboardingStep }} из 3</span>
+                                <span class="text-blue-200">{{ Math.round((onboardingStep / 3) * 100) }}%</span>
+                            </div>
+                            <div class="w-full bg-white/20 rounded-full h-2 overflow-hidden">
+                                <div class="bg-white h-2 rounded-full transition-all duration-500 ease-out"
+                                     :style="{ width: (onboardingStep / 3) * 100 + '%' }"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Контент шагов -->
+                    <div class="p-6 overflow-y-auto max-h-[60vh]">
+                        <!-- Шаг 1: Укажите запрос -->
+                        <div v-if="onboardingStep === 1" class="space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-search text-blue-600 text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-2">Укажите ваш запрос</h3>
+                                    <p class="text-gray-600 text-sm mb-4">
+                                        Введите ключевые слова для поиска вакансий. Можно указать несколько запросов через запятую.
+                                    </p>
+
+                                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-key text-blue-600 mr-1"></i> Ключевые слова
+                                        </label>
+                                        <input v-model="onboardingKeywords"
+                                               type="text"
+                                               placeholder="Python Developer, Data Science, DevOps"
+                                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"
+                                               @keyup.enter="nextOnboardingStep">
+                                        <p class="text-xs text-gray-500 mt-2">
+                                            <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+                                            Совет: начните с 1-3 запросов для быстрого теста
+                                        </p>
+                                    </div>
+
+                                    <!-- Быстрые подсказки -->
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="text-xs text-gray-500 font-medium">Быстрый выбор:</span>
+                                        <button v-for="kw in ['Python Developer', 'Data Scientist', 'Frontend Developer', 'DevOps']"
+                                                :key="kw"
+                                                @click="addKeyword(kw)"
+                                                class="px-3 py-1.5 bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 rounded-full text-xs font-medium transition">
+                                            + {{ kw }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Шаг 2: Запустите парсер -->
+                        <div v-if="onboardingStep === 2" class="space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-robot text-green-600 text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-2">Запустите парсер</h3>
+                                    <p class="text-gray-600 text-sm mb-4">
+                                        Теперь нажмите кнопку запуска. Парсер соберёт свежие вакансии с HH.ru по вашим запросам.
+                                    </p>
+
+                                    <!-- Информация о процессе -->
+                                    <div class="grid grid-cols-2 gap-3 mb-4">
+                                        <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                                            <i class="far fa-clock text-green-600 text-xl mb-2"></i>
+                                            <p class="text-xs text-gray-600 font-medium">Среднее время</p>
+                                            <p class="text-lg font-bold text-green-700">3-5 мин</p>
+                                        </div>
+                                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center">
+                                            <i class="fas fa-layer-group text-blue-600 text-xl mb-2"></i>
+                                            <p class="text-xs text-gray-600 font-medium">Ожидаемый результат</p>
+                                            <p class="text-lg font-bold text-blue-700">~300+ вакансий</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Кнопка запуска -->
+                                    <button @click="startParserFromOnboarding"
+                                            :disabled="parserState.is_running"
+                                            class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02]">
+                                        <i class="fas fa-play-circle text-2xl" :class="{ 'animate-spin': parserState.is_running }"></i>
+                                        <span>{{ parserState.is_running ? 'Парсер работает...' : 'Запустить парсер' }}</span>
+                                    </button>
+
+                                    <div v-if="parserState.is_running" class="mt-4">
+                                        <div class="flex items-center justify-between text-xs mb-1">
+                                            <span class="text-gray-600">Прогресс</span>
+                                            <span class="font-bold text-green-600">{{ parserState.progress }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                            <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full transition-all duration-500"
+                                                 :style="{ width: parserState.progress + '%' }"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Шаг 3: Изучите результаты -->
+                        <div v-if="onboardingStep === 3" class="space-y-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-chart-line text-purple-600 text-2xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-2">Изучите результаты</h3>
+                                    <p class="text-gray-600 text-sm mb-4">
+                                        После завершения парсинга вам будут доступны все возможности аналитики:
+                                    </p>
+
+                                    <!-- Список возможностей -->
+                                    <div class="space-y-3 mb-4">
+                                        <div class="flex items-center gap-3 bg-purple-50 border border-purple-200 rounded-xl p-3">
+                                            <i class="fas fa-fire text-orange-500"></i>
+                                            <span class="text-sm font-medium text-gray-700">Топ навыков и компетенций</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                                            <i class="fas fa-ruble-sign text-blue-600"></i>
+                                            <span class="text-sm font-medium text-gray-700">Средняя зарплата по рынку</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
+                                            <i class="fas fa-map-marker-alt text-green-600"></i>
+                                            <span class="text-sm font-medium text-gray-700">Распределение по регионам</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+                                            <i class="fas fa-chart-bar text-indigo-600"></i>
+                                            <span class="text-sm font-medium text-gray-700">Тренды и аналитика</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 bg-orange-50 border border-orange-200 rounded-xl p-3">
+                                            <i class="fas fa-file-excel text-orange-600"></i>
+                                            <span class="text-sm font-medium text-gray-700">Экспорт в Excel/PDF</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Футер с кнопками -->
+                    <div class="border-t border-gray-200 p-4 bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <!-- Кнопка "Назад" -->
+                            <button v-if="onboardingStep > 1"
+                                    @click="onboardingStep--"
+                                    class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Назад</span>
+                            </button>
+                            <div v-else></div>
+
+                            <!-- Кнопка "Пропустить" -->
+                            <button @click="skipOnboarding"
+                                    class="px-4 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition text-sm">
+                                Пропустить
+                            </button>
+
+                            <!-- Кнопки "Далее" / "Начать работу" -->
+                            <button v-if="onboardingStep < 3"
+                                    @click="nextOnboardingStep"
+                                    :disabled="onboardingStep === 1 && !onboardingKeywords.trim()"
+                                    class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold shadow hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                                <span>Далее</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button v-else
+                                    @click="finishOnboarding"
+                                    class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold shadow hover:shadow-md transition-all transform hover:scale-105">
+                                <i class="fas fa-rocket"></i>
+                                <span>Начать работу!</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
 
         <!-- Основной контент -->
         <main class="container mx-auto px-4 py-6">
@@ -2420,6 +2651,11 @@
                     // Модальное окно
                     selectedVacancy: null,
 
+                    // Онбординг Wizard
+                    showOnboarding: false,
+                    onboardingStep: 1,
+                    onboardingKeywords: '',
+
                     // Загрузка
                     loading: false,
 
@@ -2578,6 +2814,84 @@
             },
 
             methods: {
+                // ==================== ONBOARDING WIZARD ====================
+
+                // Добавить ключевое слово из быстрых подсказок
+                addKeyword(keyword) {
+                    if (this.onboardingKeywords) {
+                        const keywords = this.onboardingKeywords.split(',').map(s => s.trim()).filter(s => s);
+                        if (!keywords.includes(keyword)) {
+                            keywords.push(keyword);
+                            this.onboardingKeywords = keywords.join(', ');
+                        }
+                    } else {
+                        this.onboardingKeywords = keyword;
+                    }
+                },
+
+                // Следующий шаг онбординга
+                nextOnboardingStep() {
+                    if (this.onboardingStep < 3) {
+                        this.onboardingStep++;
+                    }
+                },
+
+                // Запустить парсер из онбординга
+                async startParserFromOnboarding() {
+                    // Копируем ключевые слова в настройки парсера
+                    this.parserSettings.keywords = this.onboardingKeywords;
+
+                    // Запускаем парсер
+                    await this.startParser();
+
+                    // Если парсер успешно запущен, ждём немного и переходим к шагу 3
+                    if (this.parserState.is_running) {
+                        setTimeout(() => {
+                            this.onboardingStep = 3;
+                        }, 3000); // Через 3 секунды переходим к шагу 3
+                    }
+                },
+
+                // Завершить онбординг
+                finishOnboarding() {
+                    this.showOnboarding = false;
+                    this.onboardingStep = 1;
+                    // Запоминаем, что пользователь прошёл онбординг
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('hh_onboarding_completed', 'true');
+                    }
+                    // Переходим на вкладку аналитики
+                    this.currentTab = 'analytics';
+                },
+
+                // Пропустить онбординг
+                skipOnboarding() {
+                    this.showOnboarding = false;
+                    this.onboardingStep = 1;
+                    // Запоминаем, что пользователь пропустил онбординг
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('hh_onboarding_completed', 'true');
+                    }
+                },
+
+                // Проверить, нужно ли показать онбординг
+                checkOnboarding() {
+                    // Показываем онбординг если:
+                    // 1. Пользователь ещё не проходил его (нет в localStorage)
+                    // 2. ИЛИ вакансий = 0 (нет данных)
+                    if (typeof localStorage !== 'undefined') {
+                        const completed = localStorage.getItem('hh_onboarding_completed');
+                        if (!completed || this.dashboardData.total_vacancies === 0) {
+                            this.showOnboarding = true;
+                        }
+                    } else {
+                        // Если localStorage недоступен, показываем только при пустой базе
+                        if (this.dashboardData.total_vacancies === 0) {
+                            this.showOnboarding = true;
+                        }
+                    }
+                },
+
                 // ==================== AUTO COMPLETE ====================
 
                 // Поиск вакансий
@@ -3553,6 +3867,13 @@
                 // Добавляем Math в глобальную область видимости (для шаблона)
                 window.appMath = Math;
                 window.appWindow = window;
+
+                // Проверяем, нужно ли показать онбординг (после загрузки данных дашборда)
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        this.checkOnboarding();
+                    }, 500); // Небольшая задержка для загрузки данных
+                });
 
                 // Автообновление статуса парсера (каждые 2 секунды)
                 setInterval(() => {
