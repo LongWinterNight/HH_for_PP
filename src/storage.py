@@ -6,6 +6,7 @@
 - Сохраняет обработанные вакансии
 - Реализует историю изменений (upsert логика)
 - Предоставляет методы для выборки данных
+- Управляет журналом парсингов и настройками приложения
 
 Важно: SQLite подходит для локальной разработки и небольших объёмов.
 Для продакшена рассмотрите PostgreSQL или ClickHouse.
@@ -14,6 +15,7 @@
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any
+import json
 
 import pandas as pd
 from sqlalchemy import (
@@ -40,6 +42,10 @@ logger = get_logger(__name__)
 # Базовый класс для ORM моделей
 Base = declarative_base()
 
+
+# =============================================================================
+# Модели БД
+# =============================================================================
 
 class VacancyModel(Base):
     """
@@ -102,15 +108,91 @@ class VacancyModel(Base):
 
     # Индексы для ускорения поиска
     __table_args__ = (
+        Index("idx_vacancy_id", "vacancy_id"),
         Index("idx_employer", "employer_name"),
         Index("idx_area", "area"),
         Index("idx_published_at", "published_at"),
         Index("idx_experience", "experience"),
+        Index("idx_salary_from", "salary_from"),
+        Index("idx_created_at", "created_at"),
     )
 
     def __repr__(self) -> str:
         """Строковое представление для отладки."""
         return f"<Vacancy(id={self.vacancy_id}, name='{self.vacancy_name[:50]}...')>"
+
+
+class ParserRunModel(Base):
+    """
+    ORM модель для таблицы журнала парсингов.
+
+    Хранит историю всех запусков парсера с параметрами и результатами.
+    """
+
+    __tablename__ = "parser_runs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    # Время запуска и завершения
+    started_at = Column(DateTime, nullable=False)
+    completed_at = Column(DateTime)
+
+    # Статус: running, completed, error, stopped
+    status = Column(String(20), default="running")
+
+    # Параметры парсера
+    keywords = Column(Text)  # JSON массив ключевых слов
+    max_pages = Column(Integer, default=10)
+    days_back = Column(Integer, default=30)
+    is_incremental = Column(Boolean, default=True)
+    use_cache = Column(Boolean, default=True)
+
+    # Результаты
+    vacancies_collected = Column(Integer, default=0)
+    vacancies_new = Column(Integer, default=0)
+    vacancies_updated = Column(Integer, default=0)
+    errors_count = Column(Integer, default=0)
+    error_message = Column(Text)
+
+    # Метаданные
+    created_at = Column(DateTime, default=datetime.now)
+
+    def __repr__(self) -> str:
+        return f"<ParserRun(id={self.id}, status='{self.status}', collected={self.vacancies_collected})>"
+
+
+class AppSettingsModel(Base):
+    """
+    ORM модель для таблицы настроек приложения.
+
+    Синглтон-таблица (всегда одна запись с id=1).
+    Хранит глобальные метаданные приложения.
+    """
+
+    __tablename__ = "app_settings"
+
+    id = Column(Integer, primary_key=True)  # всегда 1
+
+    # Парсинг
+    last_parse_at = Column(DateTime)  # последний запуск (любой статус)
+    last_successful_parse_at = Column(DateTime)  # последний успешный
+    total_parses = Column(Integer, default=0)
+    total_vacancies_collected = Column(Integer, default=0)
+
+    # Версии
+    app_version = Column(String(20), default="2.0.0")
+    config_version = Column(String(20))
+
+    # Метаданные
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    def __repr__(self) -> str:
+        return f"<AppSettings(last_parse={self.last_successful_parse_at})>"
+
+
+# =============================================================================
+# Хранилище вакансий
+# =============================================================================
 
 
 class VacancyStorage:
@@ -162,6 +244,9 @@ class VacancyStorage:
 
         # Создаём схему БД (таблицы)
         self._create_tables()
+
+        # Инициализируем настройки (создаём запись если нет)
+        self.initialize_settings()
 
         logger.info(f"VacancyStorage инициализирован. БД: {self.db_path}")
 
@@ -480,6 +565,277 @@ class VacancyStorage:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Автоматическое закрытие при выходе из контекста."""
         self.close()
+
+    # =========================================================================
+    # Методы для работы с parser_runs (журнал парсингов)
+    # =========================================================================
+
+    def create_parser_run(
+        self,
+        keywords: List[str],
+        max_pages: int = 10,
+        days_back: int = 30,
+        is_incremental: bool = True,
+        use_cache: bool = True
+    ) -> int:
+        """
+        Создать запись о запуске парсера.
+
+        Args:
+            keywords: Список ключевых слов
+            max_pages: Макс. страниц на запрос
+            days_back: Дней назад
+            is_incremental: Инкрементальный режим
+            use_cache: Использовать кэш
+
+        Returns:
+            ID созданной записи
+        """
+        with Session(self.engine) as session:
+            try:
+                run = ParserRunModel(
+                    started_at=datetime.now(),
+                    status="running",
+                    keywords=json.dumps(keywords, ensure_ascii=False),
+                    max_pages=max_pages,
+                    days_back=days_back,
+                    is_incremental=is_incremental,
+                    use_cache=use_cache,
+                )
+                session.add(run)
+                session.commit()
+                run_id = run.id
+
+                # Обновим app_settings
+                self._update_settings(last_parse_at=datetime.now())
+
+                logger.info(f"Создана запись парсинга #{run_id}: keywords={keywords}")
+                return run_id
+
+            except SQLAlchemyError as e:
+                session.rollback()
+                logger.error(f"Ошибка создания записи парсинга: {e}")
+                raise
+
+    def complete_parser_run(
+        self,
+        run_id: int,
+        status: str,
+        vacancies_collected: int = 0,
+        vacancies_new: int = 0,
+        vacancies_updated: int = 0,
+        error_message: Optional[str] = None
+    ) -> None:
+        """
+        Завершить запись о парсинге.
+
+        Args:
+            run_id: ID записи парсинга
+            status: completed / error / stopped
+            vacancies_collected: Всего собрано
+            vacancies_new: Новых вакансий
+            vacancies_updated: Обновлено вакансий
+            error_message: Текст ошибки (если есть)
+        """
+        with Session(self.engine) as session:
+            try:
+                run = session.query(ParserRunModel).filter_by(id=run_id).first()
+                if not run:
+                    logger.error(f"Запись парсинга #{run_id} не найдена")
+                    return
+
+                run.completed_at = datetime.now()
+                run.status = status
+                run.vacancies_collected = vacancies_collected
+                run.vacancies_new = vacancies_new
+                run.vacancies_updated = vacancies_updated
+                if error_message:
+                    run.error_message = error_message
+
+                session.commit()
+
+                # Обновим app_settings
+                self._update_settings(
+                    last_successful_parse_at=datetime.now() if status == "completed" else None,
+                    total_parses_increment=1,
+                    total_vacancies_collected_increment=vacancies_collected
+                )
+
+                logger.info(
+                    f"Завершён парсинг #{run_id}: status={status}, "
+                    f"collected={vacancies_collected}, new={vacancies_new}"
+                )
+
+            except SQLAlchemyError as e:
+                session.rollback()
+                logger.error(f"Ошибка завершения парсинга: {e}")
+                raise
+
+    def get_last_parser_run(self, only_successful: bool = True) -> Optional[Dict]:
+        """
+        Получить последний запуск парсера.
+
+        Args:
+            only_successful: Только успешные запуски
+
+        Returns:
+            Словарь с данными или None
+        """
+        with Session(self.engine) as session:
+            try:
+                query = session.query(ParserRunModel)
+                if only_successful:
+                    query = query.filter_by(status="completed")
+                query = query.order_by(ParserRunModel.completed_at.desc())
+
+                run = query.first()
+                if not run:
+                    return None
+
+                return {
+                    "id": run.id,
+                    "started_at": run.started_at.isoformat() if run.started_at else None,
+                    "completed_at": run.completed_at.isoformat() if run.completed_at else None,
+                    "status": run.status,
+                    "keywords": json.loads(run.keywords) if run.keywords else [],
+                    "max_pages": run.max_pages,
+                    "days_back": run.days_back,
+                    "is_incremental": run.is_incremental,
+                    "use_cache": run.use_cache,
+                    "vacancies_collected": run.vacancies_collected,
+                    "vacancies_new": run.vacancies_new,
+                    "vacancies_updated": run.vacancies_updated,
+                    "errors_count": run.errors_count,
+                    "error_message": run.error_message,
+                }
+
+            except SQLAlchemyError as e:
+                logger.error(f"Ошибка получения последнего парсинга: {e}")
+                return None
+
+    def get_parser_runs_history(self, limit: int = 20) -> List[Dict]:
+        """
+        Получить историю запусков парсера.
+
+        Args:
+            limit: Макс. количество записей
+
+        Returns:
+            Список словарей с данными
+        """
+        with Session(self.engine) as session:
+            try:
+                runs = (
+                    session.query(ParserRunModel)
+                    .order_by(ParserRunModel.started_at.desc())
+                    .limit(limit)
+                    .all()
+                )
+
+                return [
+                    {
+                        "id": r.id,
+                        "started_at": r.started_at.isoformat() if r.started_at else None,
+                        "completed_at": r.completed_at.isoformat() if r.completed_at else None,
+                        "status": r.status,
+                        "keywords": json.loads(r.keywords) if r.keywords else [],
+                        "vacancies_collected": r.vacancies_collected,
+                        "vacancies_new": r.vacancies_new,
+                        "vacancies_updated": r.vacancies_updated,
+                        "is_incremental": r.is_incremental,
+                        "use_cache": r.use_cache,
+                        "error_message": r.error_message,
+                    }
+                    for r in runs
+                ]
+
+            except SQLAlchemyError as e:
+                logger.error(f"Ошибка получения истории парсингов: {e}")
+                return []
+
+    # =========================================================================
+    # Методы для работы с app_settings
+    # =========================================================================
+
+    def _update_settings(
+        self,
+        last_parse_at=None,
+        last_successful_parse_at=None,
+        total_parses_increment=0,
+        total_vacancies_collected_increment=0
+    ) -> None:
+        """
+        Внутренний метод обновления настроек приложения.
+
+        Args:
+            last_parse_at: Дата последнего запуска
+            last_successful_parse_at: Дата последнего успешного запуска
+            total_parses_increment: Увеличить счётчик парсингов
+            total_vacancies_collected_increment: Увеличить счётчик вакансий
+        """
+        with Session(self.engine) as session:
+            try:
+                settings_row = session.query(AppSettingsModel).filter_by(id=1).first()
+                if not settings_row:
+                    settings_row = AppSettingsModel(id=1)
+                    session.add(settings_row)
+
+                if last_parse_at:
+                    settings_row.last_parse_at = last_parse_at
+                if last_successful_parse_at:
+                    settings_row.last_successful_parse_at = last_successful_parse_at
+                if total_parses_increment > 0:
+                    settings_row.total_parses = (settings_row.total_parses or 0) + total_parses_increment
+                if total_vacancies_collected_increment > 0:
+                    settings_row.total_vacancies_collected = (
+                        (settings_row.total_vacancies_collected or 0) + total_vacancies_collected_increment
+                    )
+
+                settings_row.updated_at = datetime.now()
+                session.commit()
+
+            except SQLAlchemyError as e:
+                session.rollback()
+                logger.error(f"Ошибка обновления настроек: {e}")
+
+    def get_app_settings(self) -> Optional[Dict]:
+        """
+        Получить настройки приложения.
+
+        Returns:
+            Словарь с настройками или None
+        """
+        with Session(self.engine) as session:
+            try:
+                settings_row = session.query(AppSettingsModel).filter_by(id=1).first()
+                if not settings_row:
+                    return None
+
+                return {
+                    "last_parse_at": settings_row.last_parse_at.isoformat() if settings_row.last_parse_at else None,
+                    "last_successful_parse_at": settings_row.last_successful_parse_at.isoformat() if settings_row.last_successful_parse_at else None,
+                    "total_parses": settings_row.total_parses or 0,
+                    "total_vacancies_collected": settings_row.total_vacancies_collected or 0,
+                    "app_version": settings_row.app_version,
+                    "config_version": settings_row.config_version,
+                }
+
+            except SQLAlchemyError as e:
+                logger.error(f"Ошибка получения настроек: {e}")
+                return None
+
+    def initialize_settings(self) -> None:
+        """Инициализировать запись настроек (если ещё нет)."""
+        with Session(self.engine) as session:
+            try:
+                existing = session.query(AppSettingsModel).filter_by(id=1).first()
+                if not existing:
+                    session.add(AppSettingsModel(id=1))
+                    session.commit()
+                    logger.info("Инициализированы настройки приложения")
+            except SQLAlchemyError as e:
+                session.rollback()
+                logger.error(f"Ошибка инициализации настроек: {e}")
 
 
 # =============================================================================
