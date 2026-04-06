@@ -18,164 +18,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* CSS переменные для тёмной темы */
-        :root {
-            --bg-primary: #f3f4f6;
-            --bg-secondary: #ffffff;
-            --bg-secondary-hover: #f9fafb;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
-            --border-color: #e5e7eb;
-            --border-color-light: #f3f4f6;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --skeleton-base: #e5e7eb;
-            --skeleton-shine: #f3f4f6;
-            --table-header: #f9fafb;
-            --table-row-hover: #eff6ff;
-            --badge-bg: #f3f4f6;
-        }
-
-        .dark-mode {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-secondary-hover: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border-color: #334155;
-            --border-color-light: #1e293b;
-            --shadow-color: rgba(0, 0, 0, 0.3);
-            --skeleton-base: #334155;
-            --skeleton-shine: #475569;
-            --table-header: #1e293b;
-            --table-row-hover: #1e3a5f;
-            --badge-bg: #334155;
-        }
-
-        /* Применяем переменные */
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* Навигация в тёмной теме */
-        .dark-mode nav {
-            background-color: #1e293b !important;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
-        }
-
-        /* Hero-секция в тёмной теме */
-        .dark-mode .hero-section {
-            background: linear-gradient(135deg, #1e3a5f 0%, #4c1d95 100%) !important;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
-        }
-
-        /* Карточки в тёмной теме */
-        .dark-mode .card-white {
-            background-color: #1e293b !important;
-        }
-
-        .dark-mode .card-shadow {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-        }
-
-        /* Текст в тёмной теме */
-        .dark-mode .text-gray-800,
-        .dark-mode .text-gray-700 {
-            color: #f1f5f9 !important;
-        }
-
-        .dark-mode .text-gray-600 {
-            color: #94a3b8 !important;
-        }
-
-        .dark-mode .text-gray-500,
-        .dark-mode .text-gray-400 {
-            color: #64748b !important;
-        }
-
-        /* Фон элементов в тёмной теме */
-        .dark-mode .bg-white {
-            background-color: #1e293b !important;
-        }
-
-        .dark-mode .bg-gray-50 {
-            background-color: #334155 !important;
-        }
-
-        .dark-mode .bg-gray-100 {
-            background-color: #334155 !important;
-        }
-
-        .dark-mode .bg-gray-200 {
-            background-color: #475569 !important;
-        }
-
-        .dark-mode .bg-blue-50 {
-            background-color: rgba(59, 130, 246, 0.15) !important;
-        }
-
-        .dark-mode .bg-green-50 {
-            background-color: rgba(16, 185, 129, 0.15) !important;
-        }
-
-        .dark-mode .bg-purple-50 {
-            background-color: rgba(139, 92, 246, 0.15) !important;
-        }
-
-        .dark-mode .bg-orange-50 {
-            background-color: rgba(245, 158, 11, 0.15) !important;
-        }
-
-        /* Границы в тёмной теме */
-        .dark-mode .border-gray-200,
-        .dark-mode .border-gray-100 {
-            border-color: #334155 !important;
-        }
-
-        .dark-mode .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
-            border-color: #334155 !important;
-        }
-
-        /* Hover эффекты в тёмной теме */
-        .dark-mode .hover\:bg-blue-50:hover,
-        .dark-mode .hover\:bg-gray-100:hover {
-            background-color: #334155 !important;
-        }
-
-        /* Skeleton в тёмной теме */
-        .dark-mode .skeleton {
-            background: linear-gradient(
-                90deg,
-                var(--skeleton-base) 25%,
-                var(--skeleton-shine) 37%,
-                var(--skeleton-base) 63%
-            );
-            background-size: 200% 100%;
-        }
-
-        /* Топ навыков - названия */
-        .dark-mode .skill-name {
-            color: #e2e8f0 !important;
-        }
-
-        .dark-mode .skill-badge {
-            background-color: #334155 !important;
-            color: #93c5fd !important;
-        }
-
-        /* Кнопка переключения темы */
-        .dark-mode .theme-toggle {
-            color: #fbbf24 !important;
-        }
-
-        .dark-mode .theme-toggle:hover {
-            color: #f59e0b !important;
-            background-color: #334155 !important;
-        }
-
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
         .fade-enter-from, .fade-leave-to { opacity: 0; }
 
@@ -486,58 +328,53 @@
 <body class="bg-gray-100">
     <div id="app" class="min-h-screen">
         <!-- Навигация -->
-        <nav class="bg-white dark:bg-gray-800 shadow-lg transition-colors duration-300">
+        <nav class="bg-white shadow-lg">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center py-4">
                     <div class="flex items-center space-x-2">
-                        <i class="fas fa-chart-line text-blue-600 dark:text-blue-400 text-2xl"></i>
-                        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100 transition-colors">HH.ru Analytics</h1>
+                        <i class="fas fa-chart-line text-blue-600 text-2xl"></i>
+                        <h1 class="text-xl font-bold text-gray-800">HH.ru Analytics</h1>
                     </div>
 
                     <div class="hidden md:flex space-x-6">
                         <a href="#" @click.prevent="currentTab = 'dashboard'"
-                           :class="currentTab === 'dashboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'"
-                           class="hover:text-blue-600 dark:hover:text-blue-400 transition">
+                           :class="currentTab === 'dashboard' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
                             <i class="fas fa-home"></i> Дашборд
                         </a>
                         <a href="#" @click.prevent="currentTab = 'vacancies'"
-                           :class="currentTab === 'vacancies' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'"
-                           class="hover:text-blue-600 dark:hover:text-blue-400 transition">
+                           :class="currentTab === 'vacancies' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
                             <i class="fas fa-briefcase"></i> Вакансии
                         </a>
                         <a href="#" @click.prevent="currentTab = 'professions'"
-                           :class="currentTab === 'professions' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'"
-                           class="hover:text-blue-600 dark:hover:text-blue-400 transition">
+                           :class="currentTab === 'professions' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
                             <i class="fas fa-search"></i> Поиск профессий
                         </a>
                         <a href="#" @click.prevent="currentTab = 'analytics'"
-                           :class="currentTab === 'analytics' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'"
-                           class="hover:text-blue-600 dark:hover:text-blue-400 transition">
+                           :class="currentTab === 'analytics' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
                             <i class="fas fa-chart-bar"></i> Аналитика
                         </a>
                         <a href="#" @click.prevent="currentTab = 'parser'"
-                           :class="currentTab === 'parser' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'"
-                           class="hover:text-blue-600 dark:hover:text-blue-400 transition">
+                           :class="currentTab === 'parser' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
                             <i class="fas fa-robot"></i> Парсер
                         </a>
                         <a href="#" @click.prevent="currentTab = 'reports'"
-                           :class="currentTab === 'reports' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'"
-                           class="hover:text-blue-600 dark:hover:text-blue-400 transition">
+                           :class="currentTab === 'reports' ? 'text-blue-600' : 'text-gray-600'"
+                           class="hover:text-blue-600 transition">
                             <i class="fas fa-file-excel"></i> Отчёты
                         </a>
                     </div>
 
                     <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600 dark:text-gray-300" v-if="dashboardData.total_vacancies">
+                        <span class="text-sm text-gray-600" v-if="dashboardData.total_vacancies">
                             <i class="fas fa-database"></i> {{ dashboardData.total_vacancies }} вакансий
                         </span>
-                        <button @click="toggleDarkMode"
-                                class="theme-toggle transition p-2 rounded-lg"
-                                :title="isDarkMode ? 'Светлая тема' : 'Тёмная тема'">
-                            <i class="fas text-lg" :class="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
-                        </button>
                         <button @click="showOnboarding = true"
-                                class="text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-gray-100"
                                 title="Помощь — пошаговый гайд">
                             <i class="fas fa-question-circle text-lg"></i>
                         </button>
@@ -763,7 +600,7 @@
             <transition name="fade" mode="out-in">
                 <div v-if="currentTab === 'dashboard'" key="dashboard">
                     <!-- Hero-секция с призывом к действию -->
-                    <div class="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hero-section rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
+                    <div class="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
                         <!-- Декоративные элементы -->
                         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
                         <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
@@ -823,12 +660,12 @@
                     </div>
 
                     <!-- Раздел "Как это работает" -->
-                    <div class="mb-6 bg-white rounded-2xl shadow-lg p-8 card-white card-shadow transition-colors">
+                    <div class="mb-6 bg-white rounded-2xl shadow-lg p-8">
                         <div class="text-center mb-6">
-                            <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors">
-                                <i class="fas fa-cogs text-blue-600 dark:text-blue-400 mr-2"></i>Как это работает
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">
+                                <i class="fas fa-cogs text-blue-600 mr-2"></i>Как это работает
                             </h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm transition-colors">Три простых шага для получения аналитики рынка труда</p>
+                            <p class="text-gray-500 text-sm">Три простых шага для получения аналитики рынка труда</p>
                         </div>
 
                         <div class="flex flex-col md:flex-row items-stretch">
@@ -842,20 +679,20 @@
                                         <span class="text-xs font-bold text-blue-600">1</span>
                                     </div>
                                 </div>
-                                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors">Введите запрос</h4>
-                                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed transition-colors">
+                                <h4 class="text-lg font-bold text-gray-800 mb-2">Введите запрос</h4>
+                                <p class="text-gray-600 text-sm leading-relaxed">
                                     Укажите интересующую профессию или навыки. Можно добавить несколько запросов через запятую
                                 </p>
                                 <div class="mt-3 flex flex-wrap justify-center gap-1.5">
-                                    <span class="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-full font-medium transition-colors">Python</span>
-                                    <span class="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-full font-medium transition-colors">DevOps</span>
-                                    <span class="text-xs bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded-full font-medium transition-colors">Data Science</span>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-medium">Python</span>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-medium">DevOps</span>
+                                    <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-medium">Data Science</span>
                                 </div>
                             </div>
 
                             <!-- Стрелка 1→2 (только десктоп) -->
                             <div class="hidden md:flex items-center justify-center px-2">
-                                <i class="fas fa-chevron-right text-gray-300 dark:text-gray-600 text-2xl transition-colors"></i>
+                                <i class="fas fa-chevron-right text-gray-300 text-2xl"></i>
                             </div>
 
                             <!-- Шаг 2: Парсер -->
@@ -868,11 +705,11 @@
                                         <span class="text-xs font-bold text-green-600">2</span>
                                     </div>
                                 </div>
-                                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors">Запустите парсер</h4>
-                                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed transition-colors">
+                                <h4 class="text-lg font-bold text-gray-800 mb-2">Запустите парсер</h4>
+                                <p class="text-gray-600 text-sm leading-relaxed">
                                     Нажмите кнопку и подождите. Парсер соберёт свежие вакансии с HH.ru по вашим запросам
                                 </p>
-                                <div class="mt-3 flex items-center justify-center gap-2 text-xs text-green-600 dark:text-green-400 font-medium transition-colors">
+                                <div class="mt-3 flex items-center justify-center gap-2 text-xs text-green-600 font-medium">
                                     <i class="far fa-clock"></i>
                                     <span>3-5 минут</span>
                                     <i class="fas fa-arrow-right mx-1"></i>
@@ -895,27 +732,27 @@
                                         <span class="text-xs font-bold text-purple-600">3</span>
                                     </div>
                                 </div>
-                                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors">Изучите аналитику</h4>
-                                <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed transition-colors">
+                                <h4 class="text-lg font-bold text-gray-800 mb-2">Изучите аналитику</h4>
+                                <p class="text-gray-600 text-sm leading-relaxed">
                                     Получите полный анализ: топ навыков, зарплаты, тренды, регионы и экспорт в Excel
                                 </p>
                                 <div class="mt-3 flex flex-wrap justify-center gap-1.5">
-                                    <span class="text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2.5 py-1 rounded-full font-medium transition-colors">Навыки</span>
-                                    <span class="text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2.5 py-1 rounded-full font-medium transition-colors">Зарплаты</span>
-                                    <span class="text-xs bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2.5 py-1 rounded-full font-medium transition-colors">Тренды</span>
+                                    <span class="text-xs bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full font-medium">Навыки</span>
+                                    <span class="text-xs bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full font-medium">Зарплаты</span>
+                                    <span class="text-xs bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full font-medium">Тренды</span>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Быстрая кнопка запуска -->
-                        <div class="mt-8 pt-6 border-t border-gray-100 dark:border-gray-700 text-center transition-colors">
+                        <div class="mt-8 pt-6 border-t border-gray-100 text-center">
                             <button @click="currentTab = 'parser'"
                                     class="group inline-flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-3.5 rounded-xl font-semibold shadow-md hover:shadow-lg hover:from-green-700 hover:to-emerald-700 transition-all transform hover:scale-105">
                                 <i class="fas fa-play-circle text-xl group-hover:rotate-12 transition-transform"></i>
                                 <span>Перейти к парсеру</span>
                                 <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </button>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2 transition-colors">
+                            <p class="text-xs text-gray-400 mt-2">
                                 <i class="fas fa-info-circle mr-1"></i>
                                 Или откройте вкладку «Парсер» для расширенных настроек
                             </p>
@@ -925,7 +762,7 @@
                     <!-- KPI карточки — оптимизированный дизайн -->
                     <!-- Skeleton KPI -->
                     <div v-if="skeletonLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div v-for="i in 4" :key="'kpi-skeleton-' + i" class="bg-white rounded-2xl shadow-md p-5 card-white card-shadow transition-colors">
+                        <div v-for="i in 4" :key="'kpi-skeleton-' + i" class="bg-white rounded-2xl shadow-md p-5">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="skeleton w-10 h-10 rounded-xl"></div>
                                 <div class="skeleton w-16 h-6 rounded-lg"></div>
@@ -1059,12 +896,12 @@
                     <!-- Графики и таблицы -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Топ навыков с прогресс-барами -->
-                        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 card-white card-shadow transition-colors">
+                        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 transition-colors">
+                                <h3 class="text-lg font-bold text-gray-800">
                                     <i class="fas fa-star text-yellow-500 mr-2"></i>Топ навыков
                                 </h3>
-                                <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full transition-colors">
+                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                                     {{ dashboardData.top_skills.length }} навыков
                                 </span>
                             </div>
@@ -1085,10 +922,10 @@
                                 <div v-for="(skill, index) in dashboardData.top_skills" :key="index"
                                      class="group">
                                     <div class="flex items-center justify-between mb-1">
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition skill-name">{{ skill.name }}</span>
-                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700 px-2 py-1 rounded-full skill-badge">{{ skill.value }}</span>
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ skill.name }}</span>
+                                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{{ skill.value }}</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
                                         <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
                                              :style="{ width: Math.min((skill.value / (dashboardData.top_skills[0]?.value || 1)) * 100, 100) + '%' }"></div>
                                     </div>
@@ -1102,26 +939,26 @@
                         </div>
 
                         <!-- Недавние вакансии с валютами -->
-                        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 card-white card-shadow transition-colors">
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 transition-colors">
+                                <h3 class="text-lg font-bold text-gray-800">
                                     <i class="fas fa-clock text-blue-500 mr-2"></i>Недавние вакансии
                                 </h3>
                                 <button @click="currentTab = 'vacancies'"
-                                        class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition">
+                                        class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
                                     Все вакансии <i class="fas fa-arrow-right ml-1"></i>
                                 </button>
                             </div>
 
                             <!-- Skeleton таблицы -->
                             <div v-if="skeletonLoading" class="space-y-3">
-                                <div class="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700 transition-colors">
+                                <div class="flex items-center justify-between pb-3 border-b">
                                     <div class="skeleton w-20 h-4 rounded"></div>
                                     <div class="skeleton w-20 h-4 rounded"></div>
                                     <div class="skeleton w-16 h-4 rounded"></div>
                                     <div class="skeleton w-24 h-4 rounded"></div>
                                 </div>
-                                <div v-for="i in 5" :key="'vacancy-skeleton-' + i" class="flex items-center gap-4 py-3 border-b border-gray-200 dark:border-gray-700 transition-colors">
+                                <div v-for="i in 5" :key="'vacancy-skeleton-' + i" class="flex items-center gap-4 py-3 border-b">
                                     <div class="flex-1">
                                         <div class="skeleton w-48 h-4 rounded mb-1"></div>
                                     </div>
@@ -1140,35 +977,36 @@
                             <!-- Реальная таблица -->
                             <div v-else class="overflow-x-auto">
                                 <table class="min-w-full">
-                                    <thead class="bg-gray-50 dark:bg-gray-700 transition-colors">
+                                    <thead class="bg-gray-50">
                                         <tr>
-                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors">Вакансия</th>
-                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors">Компания</th>
-                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors">Регион</th>
-                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase transition-colors">Зарплата</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Вакансия</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Компания</th>
+                                            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Регион</th>
+                                            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Зарплата</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 transition-colors">
+                                    <tbody class="divide-y divide-gray-200">
                                         <tr v-for="(vacancy, index) in dashboardData.recent_vacancies" :key="index"
-                                            class="hover:bg-blue-50 dark:hover:bg-gray-700 transition cursor-pointer">
+                                            class="hover:bg-blue-50 transition cursor-pointer"
+                                            @click="window.open(vacancy.vacancy_url || '#', '_blank')">
                                             <td class="px-4 py-3">
-                                                <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate max-w-xs transition-colors">{{ vacancy.name }}</p>
+                                                <p class="text-sm font-semibold text-gray-800 truncate max-w-xs">{{ vacancy.name }}</p>
                                             </td>
                                             <td class="px-4 py-3">
-                                                <p class="text-sm text-gray-600 dark:text-gray-400 transition-colors">{{ vacancy.company }}</p>
+                                                <p class="text-sm text-gray-600">{{ vacancy.company }}</p>
                                             </td>
                                             <td class="px-4 py-3">
-                                                <span class="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded transition-colors">{{ vacancy.area }}</span>
+                                                <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{{ vacancy.area }}</span>
                                             </td>
                                             <td class="px-4 py-3 text-right">
-                                                <span v-if="vacancy.salary" class="text-sm font-bold text-green-600 dark:text-green-400 transition-colors">
+                                                <span v-if="vacancy.salary" class="text-sm font-bold text-green-600">
                                                     {{ formatNumber(vacancy.salary) }} {{ getCurrencySymbol(vacancy.currency) }}
                                                 </span>
-                                                <span v-else class="text-sm text-gray-400 dark:text-gray-500 transition-colors">Не указана</span>
+                                                <span v-else class="text-sm text-gray-400">Не указана</span>
                                             </td>
                                         </tr>
                                         <tr v-if="dashboardData.recent_vacancies.length === 0">
-                                            <td colspan="4" class="px-4 py-12 text-center text-gray-400 dark:text-gray-500 transition-colors">
+                                            <td colspan="4" class="px-4 py-12 text-center text-gray-400">
                                                 <i class="fas fa-inbox text-4xl mb-2"></i>
                                                 <p class="text-sm">Вакансий пока нет</p>
                                                 <p class="text-xs">Запустите парсер для сбора данных</p>
@@ -1192,30 +1030,30 @@
                     </div>
 
                     <!-- Быстрые действия -->
-                    <div class="mt-6 bg-white rounded-xl shadow-lg p-6 card-white card-shadow transition-colors">
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 transition-colors">
+                    <div class="mt-6 bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">
                             <i class="fas fa-bolt text-yellow-500 mr-2"></i>Быстрые действия
                         </h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <button @click="currentTab = 'parser'"
-                                    class="flex flex-col items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800/30 transition shadow-sm hover:shadow-md">
-                                <i class="fas fa-play-circle text-3xl text-blue-600 dark:text-blue-400 mb-2"></i>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Запустить парсер</span>
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg hover:from-blue-100 hover:to-blue-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-play-circle text-3xl text-blue-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Запустить парсер</span>
                             </button>
                             <button @click="currentTab = 'vacancies'"
-                                    class="flex flex-col items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-800/30 transition shadow-sm hover:shadow-md">
-                                <i class="fas fa-search text-3xl text-green-600 dark:text-green-400 mb-2"></i>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Поиск вакансий</span>
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg hover:from-green-100 hover:to-green-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-search text-3xl text-green-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Поиск вакансий</span>
                             </button>
                             <button @click="currentTab = 'analytics'"
-                                    class="flex flex-col items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-800/30 transition shadow-sm hover:shadow-md">
-                                <i class="fas fa-chart-bar text-3xl text-purple-600 dark:text-purple-400 mb-2"></i>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Аналитика</span>
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg hover:from-purple-100 hover:to-purple-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-chart-bar text-3xl text-purple-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Аналитика</span>
                             </button>
                             <button @click="exportData"
-                                    class="flex flex-col items-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-800/30 transition shadow-sm hover:shadow-md">
-                                <i class="fas fa-download text-3xl text-orange-600 dark:text-orange-400 mb-2"></i>
-                                <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Экспорт данных</span>
+                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg hover:from-orange-100 hover:to-orange-200 transition shadow-sm hover:shadow-md">
+                                <i class="fas fa-download text-3xl text-orange-600 mb-2"></i>
+                                <span class="text-sm font-medium text-gray-700">Экспорт данных</span>
                             </button>
                         </div>
                     </div>
@@ -2991,7 +2829,6 @@
                     // Загрузка
                     loading: false,
                     skeletonLoading: true, // Skeleton для дашборда
-                    isDarkMode: false, // Тёмная тема
 
                     // Тренд зарплат
                     salaryTrend: [],
@@ -3148,38 +2985,6 @@
             },
 
             methods: {
-                // ==================== ТЁМНАЯ ТЕМА ====================
-
-                // Переключить тёмную тему
-                toggleDarkMode() {
-                    this.isDarkMode = !this.isDarkMode;
-                    this.applyDarkMode();
-                    // Сохраняем выбор в localStorage
-                    if (typeof localStorage !== 'undefined') {
-                        localStorage.setItem('hh_dark_mode', this.isDarkMode);
-                    }
-                },
-
-                // Применить тёмную тему к body
-                applyDarkMode() {
-                    if (this.isDarkMode) {
-                        document.body.classList.add('dark-mode');
-                    } else {
-                        document.body.classList.remove('dark-mode');
-                    }
-                },
-
-                // Загрузить сохранённую тему
-                loadDarkModePreference() {
-                    if (typeof localStorage !== 'undefined') {
-                        const saved = localStorage.getItem('hh_dark_mode');
-                        if (saved === 'true') {
-                            this.isDarkMode = true;
-                            this.applyDarkMode();
-                        }
-                    }
-                },
-
                 // ==================== ONBOARDING WIZARD ====================
 
                 // Добавить ключевое слово из быстрых подсказок
@@ -4256,9 +4061,6 @@
             mounted() {
                 // Загружаем сохранённое состояние сортировки
                 this.loadSortState();
-
-                // Загружаем предпочтение тёмной темы
-                this.loadDarkModePreference();
 
                 this.fetchDashboard();
                 this.loadVacancies();
