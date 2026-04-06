@@ -323,6 +323,73 @@
             from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Toast уведомления */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .toast-enter {
+            animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast-exit {
+            animation: slideOutRight 0.3s ease-in forwards;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        }
+
+        .toast-notification {
+            pointer-events: auto;
+            min-width: 320px;
+            max-width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .toast-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .toast-error {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .toast-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .toast-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -382,6 +449,39 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Toast уведомления -->
+        <div class="toast-container">
+            <transition name="toast">
+                <div v-if="toast.visible"
+                     class="toast-notification toast-enter"
+                     :class="'toast-' + toast.type">
+                    <div class="p-4 text-white">
+                        <div class="flex items-start gap-3">
+                            <!-- Иконка -->
+                            <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                                <i :class="toastIcon" class="text-xl"></i>
+                            </div>
+                            <!-- Контент -->
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-sm mb-1">{{ toast.title }}</h4>
+                                <p class="text-xs text-white/90 leading-relaxed">{{ toast.message }}</p>
+                            </div>
+                            <!-- Кнопка закрытия -->
+                            <button @click="hideToast"
+                                    class="flex-shrink-0 text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-1 transition">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <!-- Прогресс-бар автозакрытия -->
+                        <div class="mt-3 w-full bg-white/20 rounded-full h-1 overflow-hidden">
+                            <div class="bg-white h-1 rounded-full transition-all duration-100"
+                                 :style="{ width: toastProgress + '%', transitionDuration: '100ms' }"></div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+        </div>
 
         <!-- Модальное окно Onboarding Wizard -->
         <transition name="fade">
@@ -2830,6 +2930,17 @@
                     loading: false,
                     skeletonLoading: true, // Skeleton для дашборда
 
+                    // Toast уведомления
+                    toast: {
+                        visible: false,
+                        type: 'success', // success, error, info, warning
+                        title: '',
+                        message: ''
+                    },
+                    toastTimer: null,
+                    toastProgress: 100,
+                    previousParserStatus: null, // Для отслеживания изменений
+
                     // Тренд зарплат
                     salaryTrend: [],
 
@@ -2853,6 +2964,17 @@
             },
 
             computed: {
+                // Иконка для toast-уведомления
+                toastIcon() {
+                    const icons = {
+                        'success': 'fas fa-check-circle',
+                        'error': 'fas fa-exclamation-circle',
+                        'info': 'fas fa-info-circle',
+                        'warning': 'fas fa-exclamation-triangle'
+                    };
+                    return icons[this.toast.type] || 'fas fa-bell';
+                },
+
                 parserStatusColor() {
                     const colors = {
                         'idle': 'text-gray-600',
@@ -2985,6 +3107,82 @@
             },
 
             methods: {
+                // ==================== TOAST УВЕДОМЛЕНИЯ ====================
+
+                // Показать toast-уведомление
+                showToast(type, title, message, duration = 5000) {
+                    // Скрыть текущее уведомление если есть
+                    if (this.toastTimer) {
+                        clearTimeout(this.toastTimer);
+                    }
+
+                    this.toast = {
+                        visible: true,
+                        type: type,
+                        title: title,
+                        message: message
+                    };
+                    this.toastProgress = 100;
+
+                    // Анимация прогресс-бара
+                    const step = 100 / (duration / 100);
+                    const progressInterval = setInterval(() => {
+                        this.toastProgress = Math.max(0, this.toastProgress - step);
+                    }, 100);
+
+                    // Автозакрытие
+                    this.toastTimer = setTimeout(() => {
+                        clearInterval(progressInterval);
+                        this.hideToast();
+                    }, duration);
+                },
+
+                // Скрыть toast-уведомление
+                hideToast() {
+                    this.toast.visible = false;
+                    this.toastProgress = 100;
+                    if (this.toastTimer) {
+                        clearTimeout(this.toastTimer);
+                        this.toastTimer = null;
+                    }
+                },
+
+                // Проверить статус парсера и показать уведомление при изменении
+                checkParserStatusChange() {
+                    const currentStatus = this.parserState.status;
+                    const previousStatus = this.previousParserStatus;
+
+                    // Если статус изменился с running на completed/error/stopped
+                    if (previousStatus === 'running' && currentStatus !== 'running') {
+                        if (currentStatus === 'completed') {
+                            const count = this.parserState.vacancies_collected || 0;
+                            this.showToast(
+                                'success',
+                                '✅ Парсинг завершён!',
+                                `Успешно собрано ${count} вакансий. Перейдите на вкладку «Аналитика» для просмотра результатов.`,
+                                6000
+                            );
+                        } else if (currentStatus === 'error') {
+                            this.showToast(
+                                'error',
+                                '❌ Ошибка парсинга',
+                                this.parserState.error_message || 'Произошла ошибка при сборе данных.',
+                                6000
+                            );
+                        } else if (currentStatus === 'stopped') {
+                            this.showToast(
+                                'warning',
+                                '⏹️ Парсинг остановлен',
+                                'Сбор данных был остановлен пользователем.',
+                                4000
+                            );
+                        }
+                    }
+
+                    // Обновить предыдущий статус
+                    this.previousParserStatus = currentStatus;
+                },
+
                 // ==================== ONBOARDING WIZARD ====================
 
                 // Добавить ключевое слово из быстрых подсказок
@@ -4081,7 +4279,16 @@
 
                 // Автообновление статуса парсера (каждые 2 секунды)
                 setInterval(() => {
+                    const oldStatus = this.parserState.status;
                     this.loadParserStatus();
+
+                    // Проверяем изменение статуса парсера для toast-уведомлений
+                    this.$nextTick(() => {
+                        if (this.parserState.status !== oldStatus) {
+                            this.checkParserStatusChange();
+                        }
+                    });
+
                     // Обновляем аналитику только если не загружено
                     if (Object.keys(this.analyticsData.experience || {}).length === 0) {
                         this.loadAnalytics();
