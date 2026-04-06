@@ -273,7 +273,8 @@ def get_dashboard():
             "top_skills": top_skills,
             "vacancies_by_currency": vacancies_by_currency,
             "vacancies_by_area": vacancies_by_area,
-            "salary_trend": salary_trend
+            "salary_trend": salary_trend,
+            "last_updated": storage.get_last_parser_run(only_successful=True)["completed_at"] if storage.get_last_parser_run(only_successful=True) else None
         }
     finally:
         storage.close()
@@ -523,6 +524,7 @@ def start_parser(
     use_cache: bool = Query(True)
 ):
     """Запуск парсера (поддерживает обычный и оптимизированный режим)."""
+    from src.storage import VacancyStorage
     global parser_state
     if parser_state["is_running"]:
         raise HTTPException(400, "Парсер уже запущен")
@@ -536,6 +538,17 @@ def start_parser(
         from src.config import config_loader
         keywords = config_loader.search_queries
 
+    # Создаём запись о запуске парсера в БД
+    storage = VacancyStorage()
+    parser_run_id = storage.create_parser_run(
+        keywords=keywords,
+        max_pages=max_pages or 10,
+        days_back=days_back or 30,
+        is_incremental=incremental,
+        use_cache=use_cache
+    )
+    storage.close()
+
     parser_state = {
         "is_running": True,
         "status": "running",
@@ -547,6 +560,7 @@ def start_parser(
         "keywords": keywords,
         "incremental": incremental,
         "use_cache": use_cache,
+        "parser_run_id": parser_run_id,  # ID записи в БД
         "error_message": None,
         "started_at": datetime.now().isoformat(),
         "completed_at": None
@@ -622,16 +636,85 @@ def start_parser(
             parser_state["completed_at"] = datetime.now().isoformat()
             parser_state["vacancies_collected"] = result.get("unique", 0)
             collector.close()
+
+            # Завершаем запись парсинга в БД (успех)
+            try:
+                storage = VacancyStorage()
+                storage.complete_parser_run(
+                    run_id=parser_state["parser_run_id"],
+                    status="completed",
+                    vacancies_collected=result.get("unique", 0),
+                    vacancies_new=result.get("new", 0),
+                    vacancies_updated=result.get("updated", 0)
+                )
+                storage.close()
+            except Exception as db_err:
+                logger.error(f"Ошибка записи завершения парсинга в БД: {db_err}")
+
         except Exception as e:
             parser_state["status"] = "error"
             parser_state["error_message"] = str(e)
             parser_state["completed_at"] = datetime.now().isoformat()
+
+            # Завершаем запись парсинга в БД (ошибка)
+            try:
+                storage = VacancyStorage()
+                storage.complete_parser_run(
+                    run_id=parser_state["parser_run_id"],
+                    status="error",
+                    error_message=str(e)
+                )
+                storage.close()
+            except Exception as db_err:
+                logger.error(f"Ошибка записи ошибки парсинга в БД: {db_err}")
+
         finally:
             parser_state["is_running"] = False
             parser_state["stop_requested"] = False
 
     background_tasks.add_task(run)
     return {"message": "Парсер запущен", "state": parser_state}
+
+# =============================================================================
+# API для последнего парсинга и настроек
+# =============================================================================
+
+@app.get("/api/parser/last-run")
+def get_last_parser_run():
+    """Получить данные о последнем запуске парсера."""
+    from src.storage import VacancyStorage
+    storage = VacancyStorage()
+    try:
+        last_run = storage.get_last_parser_run(only_successful=True)
+        return {"last_run": last_run}
+    finally:
+        storage.close()
+
+@app.get("/api/parser/history")
+def get_parser_history(limit: int = 20):
+    """Получить историю запусков парсера."""
+    from src.storage import VacancyStorage
+    storage = VacancyStorage()
+    try:
+        history = storage.get_parser_runs_history(limit=limit)
+        return {"history": history}
+    finally:
+        storage.close()
+
+@app.get("/api/app/settings")
+def get_app_settings():
+    """Получить настройки приложения."""
+    from src.storage import VacancyStorage
+    storage = VacancyStorage()
+    try:
+        app_settings = storage.get_app_settings()
+        return {"settings": app_settings}
+    finally:
+        storage.close()
+
+# =============================================================================
+# API для отчётов
+# =============================================================================
 
 @app.get("/api/reports/list")
 def list_reports():
