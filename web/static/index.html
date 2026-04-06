@@ -60,6 +60,91 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* Навигация в тёмной теме */
+        .dark-mode nav {
+            background-color: #1e293b !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Hero-секция в тёмной теме */
+        .dark-mode .hero-section {
+            background: linear-gradient(135deg, #1e3a5f 0%, #4c1d95 100%) !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        /* Карточки в тёмной теме */
+        .dark-mode .card-white {
+            background-color: #1e293b !important;
+        }
+
+        .dark-mode .card-shadow {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Текст в тёмной теме */
+        .dark-mode .text-gray-800,
+        .dark-mode .text-gray-700 {
+            color: #f1f5f9 !important;
+        }
+
+        .dark-mode .text-gray-600 {
+            color: #94a3b8 !important;
+        }
+
+        .dark-mode .text-gray-500,
+        .dark-mode .text-gray-400 {
+            color: #64748b !important;
+        }
+
+        /* Фон элементов в тёмной теме */
+        .dark-mode .bg-white {
+            background-color: #1e293b !important;
+        }
+
+        .dark-mode .bg-gray-50 {
+            background-color: #334155 !important;
+        }
+
+        .dark-mode .bg-gray-100 {
+            background-color: #334155 !important;
+        }
+
+        .dark-mode .bg-gray-200 {
+            background-color: #475569 !important;
+        }
+
+        .dark-mode .bg-blue-50 {
+            background-color: rgba(59, 130, 246, 0.15) !important;
+        }
+
+        .dark-mode .bg-green-50 {
+            background-color: rgba(16, 185, 129, 0.15) !important;
+        }
+
+        .dark-mode .bg-purple-50 {
+            background-color: rgba(139, 92, 246, 0.15) !important;
+        }
+
+        .dark-mode .bg-orange-50 {
+            background-color: rgba(245, 158, 11, 0.15) !important;
+        }
+
+        /* Границы в тёмной теме */
+        .dark-mode .border-gray-200,
+        .dark-mode .border-gray-100 {
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+            border-color: #334155 !important;
+        }
+
+        /* Hover эффекты в тёмной теме */
+        .dark-mode .hover\:bg-blue-50:hover,
+        .dark-mode .hover\:bg-gray-100:hover {
+            background-color: #334155 !important;
+        }
+
         /* Skeleton в тёмной теме */
         .dark-mode .skeleton {
             background: linear-gradient(
@@ -69,6 +154,26 @@
                 var(--skeleton-base) 63%
             );
             background-size: 200% 100%;
+        }
+
+        /* Топ навыков - названия */
+        .dark-mode .skill-name {
+            color: #e2e8f0 !important;
+        }
+
+        .dark-mode .skill-badge {
+            background-color: #334155 !important;
+            color: #93c5fd !important;
+        }
+
+        /* Кнопка переключения темы */
+        .dark-mode .theme-toggle {
+            color: #fbbf24 !important;
+        }
+
+        .dark-mode .theme-toggle:hover {
+            color: #f59e0b !important;
+            background-color: #334155 !important;
         }
 
         .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
@@ -427,7 +532,7 @@
                             <i class="fas fa-database"></i> {{ dashboardData.total_vacancies }} вакансий
                         </span>
                         <button @click="toggleDarkMode"
-                                class="text-gray-500 dark:text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                class="theme-toggle transition p-2 rounded-lg"
                                 :title="isDarkMode ? 'Светлая тема' : 'Тёмная тема'">
                             <i class="fas text-lg" :class="isDarkMode ? 'fa-sun' : 'fa-moon'"></i>
                         </button>
@@ -658,7 +763,7 @@
             <transition name="fade" mode="out-in">
                 <div v-if="currentTab === 'dashboard'" key="dashboard">
                     <!-- Hero-секция с призывом к действию -->
-                    <div class="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
+                    <div class="mb-6 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hero-section rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
                         <!-- Декоративные элементы -->
                         <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32"></div>
                         <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
@@ -718,7 +823,7 @@
                     </div>
 
                     <!-- Раздел "Как это работает" -->
-                    <div class="mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 transition-colors duration-300">
+                    <div class="mb-6 bg-white rounded-2xl shadow-lg p-8 card-white card-shadow transition-colors">
                         <div class="text-center mb-6">
                             <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2 transition-colors">
                                 <i class="fas fa-cogs text-blue-600 dark:text-blue-400 mr-2"></i>Как это работает
@@ -820,7 +925,7 @@
                     <!-- KPI карточки — оптимизированный дизайн -->
                     <!-- Skeleton KPI -->
                     <div v-if="skeletonLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div v-for="i in 4" :key="'kpi-skeleton-' + i" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-5 transition-colors">
+                        <div v-for="i in 4" :key="'kpi-skeleton-' + i" class="bg-white rounded-2xl shadow-md p-5 card-white card-shadow transition-colors">
                             <div class="flex items-start justify-between mb-3">
                                 <div class="skeleton w-10 h-10 rounded-xl"></div>
                                 <div class="skeleton w-16 h-6 rounded-lg"></div>
@@ -954,7 +1059,7 @@
                     <!-- Графики и таблицы -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Топ навыков с прогресс-барами -->
-                        <div class="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors">
+                        <div class="lg:col-span-1 bg-white rounded-xl shadow-lg p-6 card-white card-shadow transition-colors">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 transition-colors">
                                     <i class="fas fa-star text-yellow-500 mr-2"></i>Топ навыков
@@ -980,10 +1085,10 @@
                                 <div v-for="(skill, index) in dashboardData.top_skills" :key="index"
                                      class="group">
                                     <div class="flex items-center justify-between mb-1">
-                                        <span class="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{{ skill.name }}</span>
-                                        <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">{{ skill.value }}</span>
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition skill-name">{{ skill.name }}</span>
+                                        <span class="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-gray-700 px-2 py-1 rounded-full skill-badge">{{ skill.value }}</span>
                                     </div>
-                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                                         <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
                                              :style="{ width: Math.min((skill.value / (dashboardData.top_skills[0]?.value || 1)) * 100, 100) + '%' }"></div>
                                     </div>
@@ -997,7 +1102,7 @@
                         </div>
 
                         <!-- Недавние вакансии с валютами -->
-                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors">
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 card-white card-shadow transition-colors">
                             <div class="flex items-center justify-between mb-4">
                                 <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 transition-colors">
                                     <i class="fas fa-clock text-blue-500 mr-2"></i>Недавние вакансии
@@ -1087,28 +1192,28 @@
                     </div>
 
                     <!-- Быстрые действия -->
-                    <div class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors">
+                    <div class="mt-6 bg-white rounded-xl shadow-lg p-6 card-white card-shadow transition-colors">
                         <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 transition-colors">
                             <i class="fas fa-bolt text-yellow-500 mr-2"></i>Быстрые действия
                         </h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <button @click="currentTab = 'parser'"
-                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-lg hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/40 dark:hover:to-blue-700/40 transition shadow-sm hover:shadow-md">
+                                    class="flex flex-col items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-800/30 transition shadow-sm hover:shadow-md">
                                 <i class="fas fa-play-circle text-3xl text-blue-600 dark:text-blue-400 mb-2"></i>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Запустить парсер</span>
                             </button>
                             <button @click="currentTab = 'vacancies'"
-                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-lg hover:from-green-100 hover:to-green-200 dark:hover:from-green-800/40 dark:hover:to-green-700/40 transition shadow-sm hover:shadow-md">
+                                    class="flex flex-col items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-800/30 transition shadow-sm hover:shadow-md">
                                 <i class="fas fa-search text-3xl text-green-600 dark:text-green-400 mb-2"></i>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Поиск вакансий</span>
                             </button>
                             <button @click="currentTab = 'analytics'"
-                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-lg hover:from-purple-100 hover:to-purple-200 dark:hover:from-purple-800/40 dark:hover:to-purple-700/40 transition shadow-sm hover:shadow-md">
+                                    class="flex flex-col items-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-800/30 transition shadow-sm hover:shadow-md">
                                 <i class="fas fa-chart-bar text-3xl text-purple-600 dark:text-purple-400 mb-2"></i>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Аналитика</span>
                             </button>
                             <button @click="exportData"
-                                    class="flex flex-col items-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 rounded-lg hover:from-orange-100 hover:to-orange-200 dark:hover:from-orange-800/40 dark:hover:to-orange-700/40 transition shadow-sm hover:shadow-md">
+                                    class="flex flex-col items-center p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg hover:bg-orange-100 dark:hover:bg-orange-800/30 transition shadow-sm hover:shadow-md">
                                 <i class="fas fa-download text-3xl text-orange-600 dark:text-orange-400 mb-2"></i>
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Экспорт данных</span>
                             </button>
