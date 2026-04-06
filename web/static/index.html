@@ -3687,9 +3687,15 @@
 
                 async loadParserStatus() {
                     try {
+                        const oldStatus = this.parserState.status;
                         const response = await fetch(`${API_BASE}/parser/status`);
                         const data = await response.json();
                         this.parserState = data.state;
+
+                        // Проверяем изменение статуса сразу после загрузки
+                        if (oldStatus && this.parserState.status !== oldStatus) {
+                            this.checkParserStatusChange();
+                        }
                     } catch (error) {
                         console.error('Ошибка загрузки статуса парсера:', error);
                     }
@@ -4279,16 +4285,7 @@
 
                 // Автообновление статуса парсера (каждые 2 секунды)
                 setInterval(() => {
-                    const oldStatus = this.parserState.status;
                     this.loadParserStatus();
-
-                    // Проверяем изменение статуса парсера для toast-уведомлений
-                    this.$nextTick(() => {
-                        if (this.parserState.status !== oldStatus) {
-                            this.checkParserStatusChange();
-                        }
-                    });
-
                     // Обновляем аналитику только если не загружено
                     if (Object.keys(this.analyticsData.experience || {}).length === 0) {
                         this.loadAnalytics();
