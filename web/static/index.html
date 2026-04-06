@@ -760,22 +760,21 @@
                     </div>
 
                     <!-- KPI карточки — оптимизированный дизайн -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <!-- Skeleton KPI -->
-                        <template v-if="skeletonLoading">
-                            <div v-for="i in 4" :key="'kpi-skeleton-' + i" class="bg-white rounded-2xl shadow-md p-5">
-                                <div class="flex items-start justify-between mb-3">
-                                    <div class="skeleton w-10 h-10 rounded-xl"></div>
-                                    <div class="skeleton w-16 h-6 rounded-lg"></div>
-                                </div>
-                                <div class="skeleton w-24 h-3 rounded mb-2"></div>
-                                <div class="skeleton w-32 h-10 rounded mb-2"></div>
-                                <div class="skeleton w-20 h-3 rounded"></div>
+                    <!-- Skeleton KPI -->
+                    <div v-if="skeletonLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div v-for="i in 4" :key="'kpi-skeleton-' + i" class="bg-white rounded-2xl shadow-md p-5">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="skeleton w-10 h-10 rounded-xl"></div>
+                                <div class="skeleton w-16 h-6 rounded-lg"></div>
                             </div>
-                        </template>
+                            <div class="skeleton w-24 h-3 rounded mb-2"></div>
+                            <div class="skeleton w-32 h-10 rounded mb-2"></div>
+                            <div class="skeleton w-20 h-3 rounded"></div>
+                        </div>
+                    </div>
 
-                        <!-- Реальные KPI -->
-                        <template v-else class="fade-in-content">
+                    <!-- Реальные KPI -->
+                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-in-content">
                         <!-- Всего вакансий -->
                         <div class="group relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-md hover:shadow-xl p-5 text-white transition-all duration-300 hover:-translate-y-0.5">
                             <div class="flex items-start justify-between mb-3">
@@ -893,8 +892,6 @@
                             </div>
                         </div>
                     </div>
-                    </template>
-                    <!-- /KPI карточки -->
 
                     <!-- Графики и таблицы -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
