@@ -609,6 +609,24 @@
                         </div>
                     </div>
 
+                    <!-- Дата последнего обновления -->
+                    <div class="mb-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i class="fas fa-sync-alt" :class="{ 'animate-spin': dashboardData.loading }"></i>
+                            <span v-if="dashboardData.last_updated">
+                                Обновлено: <strong>{{ formatLastUpdate(dashboardData.last_updated) }}</strong>
+                            </span>
+                            <span v-else class="text-orange-600">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Парсинг ещё не выполнялся
+                            </span>
+                        </div>
+                        <button @click="refreshDashboard"
+                                class="text-sm text-blue-600 hover:text-blue-800 font-medium transition">
+                            <i class="fas fa-sync-alt mr-1"></i>Обновить
+                        </button>
+                    </div>
+
                     <!-- Раздел "Как это работает" -->
                     <div class="mb-6 bg-white rounded-2xl shadow-lg p-8">
                         <div class="text-center mb-6">
@@ -3586,6 +3604,33 @@
                 formatDate(dateStr) {
                     if (!dateStr) return 'N/A';
                     return new Date(dateStr).toLocaleString('ru-RU');
+                },
+
+                formatLastUpdate(dateStr) {
+                    if (!dateStr) return 'Никогда';
+                    const date = new Date(dateStr);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    if (diffMins < 1) return 'Только что';
+                    if (diffMins < 60) return `${diffMins} мин. назад`;
+                    if (diffHours < 24) return `${diffHours} ч. назад`;
+                    if (diffDays < 7) return `${diffDays} дн. назад`;
+                    return date.toLocaleDateString('ru-RU', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+                refreshDashboard() {
+                    this.fetchDashboard();
+                    this.loadAnalytics();
                 },
 
                 formatDateShort(dateStr) {
