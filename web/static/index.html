@@ -373,6 +373,12 @@
                         <span class="text-sm text-gray-600" v-if="dashboardData.total_vacancies">
                             <i class="fas fa-database"></i> {{ dashboardData.total_vacancies }} вакансий
                         </span>
+                        <button @click="openEmailModal"
+                                class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-gray-100"
+                                :title="userEmailConfigured ? 'Настройки email' : '⚠️ Настройте email для парсера'">
+                            <i class="fas text-lg" :class="userEmailConfigured ? 'fa-cog' : 'fa-exclamation-triangle'"
+                               :style="userEmailConfigured ? '' : 'color: #f59e0b;'"></i>
+                        </button>
                         <button @click="showOnboarding = true"
                                 class="text-gray-500 hover:text-blue-600 transition p-2 rounded-lg hover:bg-gray-100"
                                 title="Помощь — пошаговый гайд">
@@ -382,6 +388,78 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Модальное окно настройки Email -->
+        <transition name="fade">
+            <div v-if="showEmailModal"
+                 class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                 @click.self="showEmailModal = false">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+                <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full animate-scale-in">
+                    <!-- Шапка -->
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white rounded-t-2xl">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <i class="fas fa-envelope text-xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-bold">Настройка HH.ru API</h2>
+                                    <p class="text-blue-100 text-xs">Укажите ваш email от HH.ru</p>
+                                </div>
+                            </div>
+                            <button @click="showEmailModal = false"
+                                    class="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2 transition">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Контент -->
+                    <div class="p-6">
+                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                            <div class="flex items-start gap-3">
+                                <i class="fas fa-exclamation-triangle text-amber-500 mt-0.5"></i>
+                                <div>
+                                    <p class="text-sm font-semibold text-amber-800">Зачем это нужно?</p>
+                                    <p class="text-xs text-amber-700 mt-1">
+                                        HH.ru требует email для идентифика пользователя. Без него парсер не запустится.
+                                        Укажите тот email, на который зарегистрирован аккаунт на hh.ru.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-user text-blue-600 mr-1"></i> Email HH.ru
+                        </label>
+                        <input v-model="emailInput"
+                               type="email"
+                               placeholder="your_email@example.com"
+                               class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition text-sm"
+                               @keyup.enter="saveEmail">
+
+                        <p v-if="emailError" class="text-red-500 text-xs mt-2 flex items-center gap-1">
+                            <i class="fas fa-times-circle"></i>
+                            {{ emailError }}
+                        </p>
+                    </div>
+
+                    <!-- Футер -->
+                    <div class="border-t border-gray-200 p-4 bg-gray-50 flex justify-end gap-3">
+                        <button @click="showEmailModal = false"
+                                class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition">
+                            Отмена
+                        </button>
+                        <button @click="saveEmail"
+                                :disabled="!emailInput.trim() || emailError"
+                                class="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold shadow hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            <i class="fas fa-check mr-1"></i>Сохранить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
 
         <!-- Модальное окно Onboarding Wizard -->
         <transition name="fade">
@@ -2814,6 +2892,12 @@
                     onboardingStep: 1,
                     onboardingKeywords: '',
 
+                    // Настройка Email
+                    showEmailModal: false,
+                    emailInput: '',
+                    emailError: '',
+                    userEmailConfigured: false,
+
                     // Загрузка
                     loading: false,
                     skeletonLoading: true, // Skeleton для дашборда
@@ -2973,6 +3057,83 @@
             },
 
             methods: {
+                // ==================== НАСТРОЙКА EMAIL ====================
+
+                // Открыть модалку email
+                openEmailModal() {
+                    this.showEmailModal = true;
+                    this.emailError = '';
+                },
+
+                // Валидация email
+                validateEmail(email) {
+                    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    return re.test(email.trim());
+                },
+
+                // Сохранить email
+                async saveEmail() {
+                    const email = this.emailInput.trim();
+
+                    if (!email) {
+                        this.emailError = 'Email не может быть пустым';
+                        return;
+                    }
+
+                    if (!this.validateEmail(email)) {
+                        this.emailError = 'Неверный формат email';
+                        return;
+                    }
+
+                    this.emailError = '';
+
+                    try {
+                        const response = await fetch(`${API_BASE}/user/email`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: email })
+                        });
+
+                        if (response.ok) {
+                            this.userEmailConfigured = true;
+                            this.showEmailModal = false;
+                            if (typeof localStorage !== 'undefined') {
+                                localStorage.setItem('hh_user_email', email);
+                            }
+                        } else {
+                            const error = await response.json();
+                            this.emailError = error.detail || 'Ошибка сохранения';
+                        }
+                    } catch (error) {
+                        this.emailError = 'Ошибка сети: ' + error.message;
+                    }
+                },
+
+                // Загрузить статус email
+                async loadUserEmail() {
+                    try {
+                        if (typeof localStorage !== 'undefined') {
+                            const saved = localStorage.getItem('hh_user_email');
+                            if (saved) {
+                                this.emailInput = saved;
+                                this.userEmailConfigured = true;
+                                return;
+                            }
+                        }
+
+                        const response = await fetch(`${API_BASE}/user/email`);
+                        const data = await response.json();
+                        if (data.is_configured) {
+                            this.userEmailConfigured = true;
+                            this.emailInput = data.email || '';
+                        } else {
+                            this.userEmailConfigured = false;
+                        }
+                    } catch (error) {
+                        console.error('Ошибка загрузки email:', error);
+                    }
+                },
+
                 // ==================== ONBOARDING WIZARD ====================
 
                 // Добавить ключевое слово из быстрых подсказок
@@ -4108,6 +4269,9 @@
             mounted() {
                 // Загружаем сохранённое состояние сортировки
                 this.loadSortState();
+
+                // Загружаем email пользователя
+                this.loadUserEmail();
 
                 this.fetchDashboard();
                 this.loadVacancies();

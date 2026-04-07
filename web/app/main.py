@@ -39,6 +39,11 @@ app.add_middleware(
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
+# Настройки пользователя (in-memory)
+user_settings = {
+    "hh_user_email": None,  # Email пользователя для HH API
+}
+
 # Состояние парсера
 parser_state = {
     "is_running": False,
@@ -574,6 +579,16 @@ def start_parser(
     """Запуск парсера (поддерживает обычный и оптимизированный режим)."""
     from src.storage import VacancyStorage
     global parser_state
+
+    # Проверка: email пользователя настроен?
+    user_email = user_settings.get("hh_user_email")
+    if not user_email:
+        raise HTTPException(
+            403,
+            "Для запуска парсера необходимо настроить email. "
+            "Укажите ваш email от HH.ru в настройках (иконка ⚙️ в навигации)."
+        )
+
     if parser_state["is_running"]:
         raise HTTPException(400, "Парсер уже запущен")
 
@@ -759,6 +774,55 @@ def get_app_settings():
         return {"settings": app_settings}
     finally:
         storage.close()
+
+# =============================================================================
+# API для настроек пользователя (email для HH API)
+# =============================================================================
+
+import re
+
+EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+
+@app.get("/api/user/email")
+def get_user_email():
+    """Получить сохранённый email пользователя."""
+    return {
+        "email": user_settings.get("hh_user_email"),
+        "is_configured": user_settings.get("hh_user_email") is not None
+    }
+
+@app.post("/api/user/email")
+def set_user_email(email_data: dict):
+    """Сохранить email пользователя для HH API."""
+    email = email_data.get("email", "").strip()
+
+    if not email:
+        raise HTTPException(400, "Email не может быть пустым")
+
+    if not EMAIL_REGEX.match(email):
+        raise HTTPException(400, "Неверный формат email")
+
+    user_settings["hh_user_email"] = email
+
+    # Также обновим .env если существует
+    try:
+        from src.config import settings
+        env_path = settings._env_path if hasattr(settings, '_env_path') else PROJECT_ROOT / ".env"
+        if env_path.exists():
+            content = env_path.read_text(encoding="utf-8")
+            if "HH_USER_EMAIL=" in content:
+                # Заменим существующий email
+                content = re.sub(r'HH_USER_EMAIL=.*', f'HH_USER_EMAIL={email}', content)
+            else:
+                # Добавим новый
+                content += f"\nHH_USER_EMAIL={email}\n"
+            env_path.write_text(content, encoding="utf-8")
+            logger.info(f"Email обновлён в .env: {email}")
+    except Exception as e:
+        logger.warning(f"Не удалось обновить .env: {e}")
+
+    logger.info(f"Email пользователя установлен: {email}")
+    return {"message": "Email сохранён", "email": email}
 
 # =============================================================================
 # API для отчётов
