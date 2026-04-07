@@ -1,0 +1,103 @@
+# ============================================================
+# HH.ru Analytics — Docker Compose (Production)
+# ============================================================
+# Сервисы:
+#   app       — FastAPI приложение (uvicorn, 4 workers)
+#   postgres  — PostgreSQL 16 (основная БД)
+#   caddy     — Reverse proxy + автоматический SSL (Let's Encrypt)
+# ============================================================
+
+services:
+  # ─────────────────────────────────────────────────────────
+  # PostgreSQL — основная база данных
+  # ─────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: hh_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hh_analytics
+      POSTGRES_USER: hh_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe_InProduction_2026!}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --lc-collate=ru_RU.UTF-8 --lc-ctype=ru_RU.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "5432:5432"  # Убрать для продакшена (без внешнего доступа)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hh_user -d hh_analytics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - hh_internal
+
+  # ─────────────────────────────────────────────────────────
+  # FastAPI — основное приложение
+  # ─────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hh_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://hh_user:${POSTGRES_PASSWORD:-ChangeMe_InProduction_2026!}@postgres:5432/hh_analytics
+    volumes:
+      - app_data:/app/data
+      - app_logs:/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - hh_internal
+      - hh_external
+
+  # ─────────────────────────────────────────────────────────
+  # Caddy — Reverse Proxy + автоматический SSL
+  # ─────────────────────────────────────────────────────────
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: hh_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks:
+      - hh_external
+
+# ─────────────────────────────────────────────────────────
+# Volumes (персистентные данные)
+# ─────────────────────────────────────────────────────────
+volumes:
+  postgres_data:    # Данные PostgreSQL
+  app_data:         # Данные приложения (БД SQLite если fallback, raw/processed)
+  app_logs:         # Логи приложения
+  caddy_data:       # SSL сертификаты
+  caddy_config:     # Конфигурация Caddy
+
+# ─────────────────────────────────────────────────────────
+# Networks
+# ─────────────────────────────────────────────────────────
+networks:
+  hh_internal:     # Внутренняя сеть (app ↔ postgres)
+    driver: bridge
+  hh_external:     # Внешняя сеть (caddy ↔ интернет)
+    driver: bridge

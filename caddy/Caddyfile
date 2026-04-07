@@ -1,0 +1,33 @@
+# ============================================================
+# Caddyfile — Reverse Proxy + Автоматический SSL
+# ============================================================
+# Замените hh-analytics.example.com на ваш реальный домен
+# Caddy автоматически получит и обновит SSL от Let's Encrypt
+# ============================================================
+
+hh-analytics.example.com {
+    # Обратный прокси к FastAPI
+    reverse_proxy app:8000
+
+    # Заголовки для бэкенда
+    header {
+        X-Real-IP {remote_host}
+        X-Forwarded-For {remote_host}
+        X-Forwarded-Proto {scheme}
+        Host {host}
+    }
+
+    # Сжатие
+    encode gzip zstd
+
+    # Логи
+    log {
+        output stdout
+        format json
+    }
+}
+
+# HTTP → HTTPS редирект (автоматический)
+http://hh-analytics.example.com {
+    redir https://{host}{uri} permanent
+}
