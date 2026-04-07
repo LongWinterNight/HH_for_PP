@@ -770,6 +770,8 @@
                             <div class="mt-2">
                                 <p class="text-blue-100 text-xs font-medium uppercase tracking-wide">Всего вакансий</p>
                                 <p class="text-4xl font-bold mt-0.5 tracking-tight">{{ dashboardData.total_vacancies || 0 }}</p>
+                                <!-- Sparkline -->
+                                <canvas id="sparkVacancies" class="mt-3 w-full h-10" height="40"></canvas>
                                 <div class="flex items-center mt-2 text-blue-100/80 text-[11px]">
                                     <i class="fas fa-database mr-1.5"></i>
                                     <span>В базе данных</span>
@@ -791,6 +793,8 @@
                             <div class="mt-2">
                                 <p class="text-green-100 text-xs font-medium uppercase tracking-wide">Всего навыков</p>
                                 <p class="text-4xl font-bold mt-0.5 tracking-tight">{{ dashboardData.total_skills || 0 }}</p>
+                                <!-- Sparkline -->
+                                <canvas id="sparkSkills" class="mt-3 w-full h-10" height="40"></canvas>
                                 <div class="flex items-center mt-2 text-green-100/80 text-[11px]">
                                     <i class="fas fa-brain mr-1.5"></i>
                                     <span>Уникальных компетенций</span>
@@ -818,6 +822,8 @@
                                     {{ primaryAvgSalary ? formatNumber(primaryAvgSalary) : 'N/A' }}
                                     <span class="text-lg font-semibold">{{ getCurrencySymbol(primaryCurrency) }}</span>
                                 </p>
+                                <!-- Sparkline -->
+                                <canvas id="sparkSalary" class="mt-3 w-full h-10" height="40"></canvas>
                                 <!-- Компактные валюты -->
                                 <div class="mt-2 flex flex-wrap gap-1">
                                     <span v-for="(data, currency) in dashboardData.vacancies_by_currency"
@@ -3270,6 +3276,15 @@
                     try {
                         const response = await fetch(`${API_BASE}/dashboard`);
                         this.dashboardData = await response.json();
+
+                        // Рисуем sparklines после загрузки данных
+                        this.$nextTick(() => {
+                            setTimeout(() => {
+                                this.drawSparkline('sparkVacancies', this.dashboardData.sparklines?.vacancies || [], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.2)');
+                                this.drawSparkline('sparkSkills', this.dashboardData.sparklines?.skills || [], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.2)');
+                                this.drawSparkline('sparkSalary', this.dashboardData.sparklines?.salaries || [], 'rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.2)');
+                            }, 700);
+                        });
                     } catch (error) {
                         console.error('Ошибка загрузки дашборда:', error);
                     } finally {
@@ -3278,6 +3293,56 @@
                             this.skeletonLoading = false;
                         }, 600);
                     }
+                },
+
+                // Рисование sparkline на canvas
+                drawSparkline(canvasId, data, lineColor, fillColor) {
+                    const canvas = document.getElementById(canvasId);
+                    if (!canvas || !data.length || data.every(v => v === 0)) return;
+
+                    const ctx = canvas.getContext('2d');
+                    const dpr = window.devicePixelRatio || 1;
+
+                    // Устанавливаем размер canvas
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * dpr;
+                    canvas.height = rect.height * dpr;
+                    ctx.scale(dpr, dpr);
+
+                    const width = rect.width;
+                    const height = rect.height;
+                    const padding = 2;
+
+                    // Нормализуем данные
+                    const max = Math.max(...data);
+                    const min = Math.min(...data);
+                    const range = max - min || 1;
+
+                    // Рисуем линию
+                    ctx.beginPath();
+                    ctx.strokeStyle = lineColor;
+                    ctx.lineWidth = 2;
+                    ctx.lineJoin = 'round';
+                    ctx.lineCap = 'round';
+
+                    data.forEach((value, index) => {
+                        const x = padding + (index / (data.length - 1)) * (width - padding * 2);
+                        const y = height - padding - ((value - min) / range) * (height - padding * 2);
+
+                        if (index === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    });
+                    ctx.stroke();
+
+                    // Рисуем заполненную область под линией
+                    ctx.lineTo(width - padding, height);
+                    ctx.lineTo(padding, height);
+                    ctx.closePath();
+                    ctx.fillStyle = fillColor;
+                    ctx.fill();
                 },
 
                 async loadVacancies() {

@@ -265,6 +265,49 @@ def get_dashboard():
                         "avg_salary": float(row["salary_from"])
                     })
 
+        # Sparklines данные для KPI карточек
+        # Вакансии по дням (последние 14 дней)
+        vacancies_sparkline = []
+        if "published_at" in df.columns and "created_at" in df.columns:
+            df_with_dates = df[df["published_at"].notna()].copy()
+            if not df_with_dates.empty:
+                df_with_dates["published_at"] = pd.to_datetime(df_with_dates["published_at"])
+                df_with_dates["published_at"] = df_with_dates["published_at"].dt.tz_localize(None)
+                daily_counts = df_with_dates.groupby(df_with_dates["published_at"].dt.date).size()
+                last_14_days = pd.date_range(end=pd.Timestamp.now(), periods=14, freq='D')
+                for day in last_14_days:
+                    date_only = day.date()
+                    count = int(daily_counts.get(date_only, 0))
+                    vacancies_sparkline.append(count)
+
+        # Навыки по дням (последние 14 дней)
+        skills_sparkline = []
+        if "published_at" in df.columns and "skill_count" in df.columns:
+            df_with_dates = df[df["published_at"].notna() & df["skill_count"].notna()].copy()
+            if not df_with_dates.empty:
+                df_with_dates["published_at"] = pd.to_datetime(df_with_dates["published_at"])
+                df_with_dates["published_at"] = df_with_dates["published_at"].dt.tz_localize(None)
+                daily_skills = df_with_dates.groupby(df_with_dates["published_at"].dt.date)["skill_count"].sum()
+                last_14_days = pd.date_range(end=pd.Timestamp.now(), periods=14, freq='D')
+                for day in last_14_days:
+                    date_only = day.date()
+                    count = int(daily_skills.get(date_only, 0))
+                    skills_sparkline.append(count)
+
+        # Зарплаты по дням (последние 14 дней)
+        salary_sparkline = []
+        if "published_at" in df.columns and "salary_from" in df.columns:
+            df_with_dates = df[df["published_at"].notna() & df["salary_from"].notna()].copy()
+            if not df_with_dates.empty:
+                df_with_dates["published_at"] = pd.to_datetime(df_with_dates["published_at"])
+                df_with_dates["published_at"] = df_with_dates["published_at"].dt.tz_localize(None)
+                daily_salaries = df_with_dates.groupby(df_with_dates["published_at"].dt.date)["salary_from"].mean()
+                last_14_days = pd.date_range(end=pd.Timestamp.now(), periods=14, freq='D')
+                for day in last_14_days:
+                    date_only = day.date()
+                    avg = daily_salaries.get(date_only, None)
+                    salary_sparkline.append(float(avg) if avg is not None else 0)
+
         return {
             "total_vacancies": len(df),
             "total_skills": int(df["skill_count"].sum()) if "skill_count" in df.columns and pd.notna(df["skill_count"].sum()) else 0,
@@ -274,6 +317,11 @@ def get_dashboard():
             "vacancies_by_currency": vacancies_by_currency,
             "vacancies_by_area": vacancies_by_area,
             "salary_trend": salary_trend,
+            "sparklines": {
+                "vacancies": vacancies_sparkline,
+                "skills": skills_sparkline,
+                "salaries": salary_sparkline
+            },
             "last_updated": storage.get_last_parser_run(only_successful=True)["completed_at"] if storage.get_last_parser_run(only_successful=True) else None
         }
     finally:
