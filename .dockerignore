@@ -1,0 +1,73 @@
+# ============================================================
+# Docker Ignore — исключает ненужные файлы из образа
+# ============================================================
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Виртуальные окружения
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Данные (не включаем в образ — монтируем volume)
+data/raw/*.json
+data/processed/*.csv
+data/processed/*.parquet
+data/reports/*.xlsx
+data/reports/*.pdf
+data/*.db
+logs/*.log
+
+# Секреты
+.env
+.env.*
+*.pem
+*.key
+*.crt
+secrets/
+
+# Документация (не нужна в образе)
+docs/
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+DEMO_CHECKLIST.md
+DEPLOYMENT.md
+GITHUB_INSTRUCTIONS.md
+GITHUB_SETUP.md
+PROJECT_READY.md
+QUICKSTART.md
+ROADMAP.md
+
+# ОС
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
