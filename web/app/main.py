@@ -25,6 +25,12 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.utils import get_logger
 logger = get_logger(__name__)
 
+# Конфиг (читает .env при импорте через load_dotenv)
+from src.config import settings as _app_settings
+
+# Путь к .env для записи
+_ENV_PATH = PROJECT_ROOT / ".env"
+
 # Приложение
 app = FastAPI(title="HH.ru Analytics", version="2.0.0")
 
@@ -39,9 +45,9 @@ app.add_middleware(
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
-# Настройки пользователя (in-memory)
+# Настройки пользователя — инициализируем из .env при старте
 user_settings = {
-    "hh_user_email": None,  # Email пользователя для HH API
+    "hh_user_email": _app_settings.hh_user_email or None,
 }
 
 # Состояние парсера
@@ -632,10 +638,15 @@ def start_parser(
     def run():
         global parser_state
         try:
+            # Создаём API-клиент с email из user_settings (не из settings модуля)
+            from src.api_client import HHAPIClient
+            api_client = HHAPIClient(email=user_email)
+
             # Используем оптимизированный парсер если включены соответствующие режимы
             if incremental or use_cache:
                 from optimized_parser import OptimizedVacancyCollector
                 collector = OptimizedVacancyCollector(
+                    client=api_client,
                     max_pages=max_pages,
                     days_back=days_back,
                     use_cache=use_cache,
@@ -643,7 +654,7 @@ def start_parser(
                 )
             else:
                 from src.collector import VacancyCollector
-                collector = VacancyCollector(max_pages=max_pages, days_back=days_back)
+                collector = VacancyCollector(client=api_client, max_pages=max_pages, days_back=days_back)
 
             # Передаём флаг остановки в collector
             collector.stop_requested = False
@@ -804,22 +815,22 @@ def set_user_email(email_data: dict):
 
     user_settings["hh_user_email"] = email
 
-    # Также обновим .env если существует
+    # Сохраняем email в .env для сохранения между перезапусками сервера
     try:
-        from src.config import settings
-        env_path = settings._env_path if hasattr(settings, '_env_path') else PROJECT_ROOT / ".env"
-        if env_path.exists():
-            content = env_path.read_text(encoding="utf-8")
-            if "HH_USER_EMAIL=" in content:
-                # Заменим существующий email
-                content = re.sub(r'HH_USER_EMAIL=.*', f'HH_USER_EMAIL={email}', content)
-            else:
-                # Добавим новый
-                content += f"\nHH_USER_EMAIL={email}\n"
-            env_path.write_text(content, encoding="utf-8")
-            logger.info(f"Email обновлён в .env: {email}")
+        if _ENV_PATH.exists():
+            content = _ENV_PATH.read_text(encoding="utf-8")
+        else:
+            content = ""
+
+        if "HH_USER_EMAIL=" in content:
+            content = re.sub(r'HH_USER_EMAIL=.*', f'HH_USER_EMAIL={email}', content)
+        else:
+            content += f"\nHH_USER_EMAIL={email}\n"
+
+        _ENV_PATH.write_text(content, encoding="utf-8")
+        logger.info(f"Email сохранён в .env: {email}")
     except Exception as e:
-        logger.warning(f"Не удалось обновить .env: {e}")
+        logger.warning(f"Не удалось записать email в .env: {e}")
 
     logger.info(f"Email пользователя установлен: {email}")
     return {"message": "Email сохранён", "email": email}
@@ -1288,7 +1299,7 @@ def get_kpi_metrics(
 
 @app.get("/api/analytics/top-skills")
 def get_top_skills(
-    type: str = Query("hard", regex="^(hard|soft|tools)$"),
+    type: str = Query("hard", pattern="^(hard|soft|tools)$"),
     limit: int = Query(20, ge=1, le=100),
     period: Optional[str] = Query("all_time", description="Период: today|week|month|quarter|year|all_time"),
     domain: Optional[str] = Query(None, description="Домен профессии"),
@@ -1440,7 +1451,7 @@ _cache_ttl = 300  # 5 минут
 
 @app.get("/api/autocomplete/cached")
 def autocomplete_cached(
-    type: str = Query(..., regex="^(vacancies|areas|skills)$"),
+    type: str = Query(..., pattern="^(vacancies|areas|skills)$"),
     q: str = Query(..., min_length=2)
 ):
     """
@@ -1511,7 +1522,7 @@ def get_profession_vacancies(name: str):
 
 @app.post("/api/export/analytics")
 def export_analytics(
-    format: str = Query("xlsx", regex="^(pdf|xlsx|csv)$"),
+    format: str = Query("xlsx", pattern="^(pdf|xlsx|csv)$"),
     period: Optional[str] = Query("all_time"),
     domain: Optional[str] = Query(None),
     regions: Optional[str] = Query(None),

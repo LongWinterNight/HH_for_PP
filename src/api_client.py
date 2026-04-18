@@ -73,11 +73,15 @@ class HHAPIClient:
         # Это ускоряет работу при множественных запросах
         self.session = requests.Session()
 
-        # Устанавливаем обязательный заголовок User-Agent
-        # HH.ru блокирует запросы без этого заголовка
+        # HH.ru требует два заголовка идентификации начиная с 2024 года:
+        # User-Agent — стандартный HTTP-заголовок
+        # HH-User-Agent — специфичный заголовок API HH.ru (без него 403)
+        ua = f"HHAnalytics/1.0 ({self.email})"
         self.session.headers.update({
-            "User-Agent": f"HHAnalyticsBot/1.0 ({self.email})"
+            "User-Agent": ua,
+            "HH-User-Agent": ua,
         })
+
 
         logger.info(f"HHAPIClient инициализирован с email: {self.email}, delay: {delay}s")
 
