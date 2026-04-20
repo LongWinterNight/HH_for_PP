@@ -30,7 +30,6 @@ class Settings(BaseModel):
         default="",
         description="Email для заголовка User-Agent"
     )
-
     # Rate Limiting
     api_request_delay: float = Field(
         default=1.0,
@@ -186,6 +185,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 # Создаём объект настроек из переменных окружения
 settings = Settings(
     hh_user_email=os.getenv("HH_USER_EMAIL", ""),
+    hh_proxy=os.getenv("HH_PROXY", ""),
     api_request_delay=float(os.getenv("API_REQUEST_DELAY", "1.0")),
     max_pages=int(os.getenv("MAX_PAGES", "10")),
     days_back=int(os.getenv("DAYS_BACK", "30")),
