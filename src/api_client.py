@@ -70,7 +70,6 @@ class HHAPIClient:
         self.delay = delay
 
         # Создаём сессию для переиспользования TCP-соединений
-        # Это ускоряет работу при множественных запросах
         self.session = requests.Session()
 
         # HH.ru требует два заголовка идентификации начиная с 2024 года:
@@ -80,6 +79,9 @@ class HHAPIClient:
         self.session.headers.update({
             "User-Agent": ua,
             "HH-User-Agent": ua,
+            "Accept": "application/json, text/html, */*",
+            "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
+            "Referer": "https://hh.ru/",
         })
 
 

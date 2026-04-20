@@ -1,59 +1,36 @@
-# HH.ru Analytics — Система анализа вакансий
+# HH.ru Analytics
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-green.svg)](https://fastapi.tiangolo.com)
-[![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green.svg)](https://vuejs.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI/CD](https://github.com/LongWinterNight/HH_for_PP/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/LongWinterNight/HH_for_PP/actions/workflows/ci-cd.yml)
-[![Last Commit](https://img.shields.io/github/last-commit/LongWinterNight/HH_for_PP/main)](https://github.com/LongWinterNight/HH_for_PP/commits/main)
-[![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-blue)](https://www.python.org/downloads/)
 
-**HH.ru Analytics** — self-hosted ETL-система для сбора, обработки и анализа вакансий с HH.ru.  
-Автоматически извлекает Hard Skills, Soft Skills и Tools из описаний вакансий, строит аналитику и формирует отчёты в PDF/Excel/CSV.
+Система для сбора и анализа вакансий с HH.ru. Парсит вакансии через публичный API, извлекает Hard Skills, Soft Skills и Tools, строит аналитику и формирует отчёты.
 
 ---
 
 ## Возможности
 
-### Аналитика
-- **8 KPI метрик** — средняя и медианная зарплата, количество вакансий, навыков, компаний, регионов, Hard/Soft Skills
-- **Топ-20 навыков** по трём категориям: Hard Skills, Soft Skills, Tools
-- **Фильтры**: период, регион, опыт работы, только с зарплатой
-- **Sparkline-тренды** на KPI карточках
-- **Распределение** по зарплате, опыту, регионам и валютам
-
-### Парсер
-- Сбор по ключевым словам через публичный API HH.ru (без OAuth, анонимно)
-- Поддержка 59 профессий из коробки — от IT до строительства и юриспруденции
-- Инкрементальное обновление — не дублирует уже собранные вакансии
-- Кэширование запросов
-- Прогресс в реальном времени
-
-### Экспорт
-- **PDF** — отчёт с KPI и топ навыков
-- **Excel** — 5 листов (KPI, Hard Skills, Soft Skills, Tools, Данные)
-- **CSV** — сырые данные
-
-### Поиск
-- Автодополнение по названию вакансии, региону, навыку
-- Расширенные фильтры, сортировка, пагинация
+- Сбор вакансий по ключевым словам (59 профессий из коробки)
+- 8 KPI метрик: зарплаты, количество вакансий, навыков, компаний, регионов
+- Топ-20 навыков по трём категориям: Hard Skills, Soft Skills, Tools
+- Фильтры: период, регион, опыт, только с зарплатой
+- Экспорт в PDF, Excel, CSV
+- Поиск с автодополнением и фильтрами
 
 ---
 
 ## Требования
 
-| Компонент | Версия | Обязательно |
-|-----------|--------|-------------|
-| Python | 3.10+ | Да |
-| pip | 23.0+ | Да |
-| Git | 2.30+ | Да |
-| Node.js | — | Нет (Vue через CDN) |
-
-**ОС:** Windows 10/11, Linux (Ubuntu 20.04+), macOS 11+
+| | |
+|---|---|
+| Python | 3.10 или новее |
+| Git | любая версия |
+| ОС | Windows 10/11, Linux, macOS |
+| Аккаунт | HH.ru (нужен email) |
 
 ---
 
-## Быстрый старт
+## Установка
 
 ### 1. Клонировать репозиторий
 
@@ -68,34 +45,49 @@ cd HH_for_PP
 pip install -r requirements.txt
 ```
 
-### 3. Создать файл окружения
+> Если `pip` не найден — используй `pip3` или `python -m pip install -r requirements.txt`
 
-```bash
-# Windows
+### 3. Создать файл конфигурации
+
+**Windows:**
+```cmd
 copy .env.example .env
+```
 
-# Linux/macOS
+**Linux / macOS:**
+```bash
 cp .env.example .env
 ```
 
-Отредактировать `.env` — указать email от аккаунта на HH.ru:
+### 4. Указать email
+
+Открой файл `.env` в текстовом редакторе и замени значение:
 
 ```env
-HH_USER_EMAIL=your_email@example.com
+HH_USER_EMAIL=твой_email@example.com
 ```
 
-> Это стандартное требование API HH.ru — email идентифицирует запросы.  
-> OAuth-токен не нужен. Данные хранятся только локально.
+Это стандартное требование API HH.ru — email идентифицирует запросы. OAuth-токен не нужен. Данные хранятся только локально на твоём компьютере.
 
-### 4. Запустить
+> Можно пропустить этот шаг — email можно ввести прямо в интерфейсе при первом запуске.
+
+### 5. Запустить
 
 ```bash
 python web/app/main.py
 ```
 
-Открыть в браузере: **http://localhost:8000**
+Открой в браузере: **http://localhost:8000**
 
-При первом запуске можно указать email прямо в интерфейсе — он сохранится в `.env` автоматически.
+---
+
+## Первый запуск
+
+1. Если email не был указан в `.env` — появится окно для его ввода. Введи email от аккаунта HH.ru.
+2. Перейди во вкладку **Парсер**.
+3. Выбери профессию из каталога или введи ключевое слово вручную.
+4. Нажми **Запустить** и дождись завершения (прогресс отображается в реальном времени).
+5. Перейди в **Аналитику** — данные появятся автоматически.
 
 ---
 
@@ -104,41 +96,35 @@ python web/app/main.py
 ```
 HH_for_PP/
 ├── src/
-│   ├── api_client.py       # HTTP-клиент HH.ru API (rate limiting, retry)
-│   ├── collector.py        # Сборщик вакансий (пагинация, дедупликация)
-│   ├── analyzer.py         # Excel-отчёты
-│   ├── advanced_analyzer.py# Расширенная аналитика по навыкам
-│   ├── storage.py          # SQLite хранилище
-│   ├── config.py           # Загрузка .env и config.yaml
-│   └── utils.py            # Логгер и утилиты
+│   ├── api_client.py        # HTTP-клиент HH.ru API
+│   ├── collector.py         # Сборщик вакансий
+│   ├── storage.py           # SQLite база данных
+│   ├── analyzer.py          # Excel-отчёты
+│   ├── advanced_analyzer.py # Расширенная аналитика
+│   ├── config.py            # Загрузка .env
+│   └── utils.py
 │
 ├── web/
-│   ├── app/main.py         # FastAPI сервер (20+ эндпоинтов)
+│   ├── app/main.py          # FastAPI сервер (20+ эндпоинтов)
 │   └── static/
-│       ├── index.html      # Vue.js 3 SPA (~4300 строк)
-│       └── analytics.html  # Страница аналитики
+│       ├── index.html       # Главная страница (Vue.js)
+│       └── analytics.html   # Страница аналитики
 │
 ├── data/
-│   ├── hh_vacancies.db     # SQLite база данных
-│   ├── professions_catalog.json
-│   ├── raw/                # Сырые JSON от парсера
-│   └── reports/            # Сгенерированные отчёты
+│   ├── hh_vacancies.db      # База данных (создаётся автоматически)
+│   └── reports/             # Сгенерированные отчёты
 │
-├── tests/                  # Unit-тесты (35 тестов)
-├── optimized_parser.py     # Оптимизированный парсер с кэшем
-├── config.yaml             # Ключевые слова и словари навыков
-├── .env.example            # Пример конфигурации
-├── docker-compose.yml      # Docker для продакшена
-└── Dockerfile
+├── tests/                   # Тесты (35 штук)
+├── config.yaml              # Словари навыков и ключевые слова
+├── .env.example             # Пример конфигурации
+└── requirements.txt
 ```
 
 ---
 
 ## API
 
-После запуска доступна Swagger-документация: **http://localhost:8000/docs**
-
-### Основные эндпоинты
+После запуска доступна автодокументация: **http://localhost:8000/docs**
 
 | Метод | Endpoint | Описание |
 |-------|----------|----------|
@@ -157,58 +143,47 @@ HH_for_PP/
 | GET | `/api/professions/list` | Каталог профессий |
 | GET | `/api/autocomplete/skills` | Автодополнение навыков |
 
-### Параметры фильтров аналитики
-
-```
-GET /api/analytics/kpi?period=month&regions=Москва&experience=1-3 года&salary_only=true
-```
-
-| Параметр | Значения |
-|----------|----------|
-| `period` | today, week, month, quarter, year, all_time |
-| `regions` | Москва, Санкт-Петербург, Казань, ... |
-| `experience` | Без опыта, 1-3 года, 3-6 лет, Более 6 лет |
-| `salary_only` | true / false |
-
 ---
 
-## Docker (продакшен)
-
-```bash
-docker compose up -d
-```
-
-Приложение поднимается на http://localhost:8000. Конфигурация в `.env.production.example`.
-
----
-
-## Troubleshooting
+## Устранение проблем
 
 ### `ModuleNotFoundError`
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Порт 8000 занят
-```bash
-# Windows
+
+**Windows:**
+```cmd
 netstat -ano | findstr :8000
 taskkill /F /PID <PID>
+```
 
-# Linux/macOS
-lsof -i :8000 | kill -9 <PID>
+**Linux / macOS:**
+```bash
+kill -9 $(lsof -t -i:8000)
 ```
 
 ### Парсер возвращает 403
-HH.ru использует DDoS Guard. Возможные причины:
-- Слишком много запросов за короткое время — подождите 1–2 часа
-- Запросы идут через общий прокси/VPN с заблокированным IP — отключите прокси для запросов к api.hh.ru
+
+HH.ru временно блокирует IP при слишком частых запросах — это защита от DDoS.  
+Подожди 1–2 часа и попробуй снова. Если используешь VPN или прокси — попробуй отключить.
 
 ### Данные не отображаются
-Запустите парсер через интерфейс или проверьте БД:
+
+Убедись что парсер завершил работу и нашёл хотя бы несколько вакансий. Проверь консоль на ошибки.
+
+---
+
+## Docker
+
 ```bash
-python check_functionality.py
+docker compose up -d
 ```
+
+Приложение запустится на **http://localhost:8000**. Конфигурация берётся из `.env`.
 
 ---
 
@@ -220,10 +195,4 @@ python check_functionality.py
 
 ---
 
-## Лицензия
-
-MIT License — см. файл [LICENSE](LICENSE)
-
----
-
-**Версия:** 1.2.0 | **Статус:** Активная разработка
+**Версия:** 1.2.0
