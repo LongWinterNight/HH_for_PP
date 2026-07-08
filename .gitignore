@@ -58,11 +58,10 @@ htmlcov/
 # data/processed/*.csv
 # data/processed/*.parquet
 data/reports/*.xlsx
-# data/*.db  # Разкомментировать для продакшена
+data/*.db
 logs/*.log
 
 # Demo mode - коммитим базу для демонстрации
-!data/hh_analytics.db
 !data/professions_catalog.json
 
 # ═══════════════════════════════════════════════════
