@@ -47,13 +47,24 @@ class HHAPIClient:
         >>> print(f"Найдено вакансий: {len(vacancies)}")
     """
 
-    def __init__(self, email: Optional[str] = None, delay: float = 1.0) -> None:
+    def __init__(
+        self,
+        email: Optional[str] = None,
+        delay: float = 1.0,
+        access_token: Optional[str] = None,
+        proxy: Optional[str] = None,
+    ) -> None:
         """
         Инициализация клиента.
 
         Args:
             email: Email для заголовка User-Agent. Если None, берётся из .env
             delay: Задержка между запросами в секундах (по умолчанию 1.0)
+            access_token: OAuth access_token приложения HH.ru. Если None,
+                берётся из .env (HH_ACCESS_TOKEN). Обязателен с 2025 года —
+                без него endpoint /vacancies возвращает 403 forbidden.
+            proxy: URL прокси (http/socks) для запросов. Если None, берётся
+                из .env (HH_PROXY). Пусто — прямое соединение.
 
         Raises:
             ValueError: Если email не передан и не найден в окружении
@@ -66,26 +77,47 @@ class HHAPIClient:
                 "Передайте его в конструктор или задайте HH_USER_EMAIL в .env"
             )
 
+        # OAuth-токен: с 2025 года HH.ru закрыл анонимный доступ к /vacancies
+        self.access_token = access_token if access_token is not None else settings.hh_access_token
+        if not self.access_token:
+            logger.warning(
+                "HH_ACCESS_TOKEN не задан. Endpoint /vacancies закрыт для "
+                "анонимных запросов (403 forbidden). Зарегистрируйте приложение "
+                "на https://dev.hh.ru/admin и укажите токен в .env"
+            )
+
         self.base_url = "https://api.hh.ru/"
         self.delay = delay
 
         # Создаём сессию для переиспользования TCP-соединений
         self.session = requests.Session()
 
+        # Прокси для обхода региональных ограничений сайта hh.ru
+        proxy = proxy if proxy is not None else settings.hh_proxy
+        if proxy:
+            self.session.proxies.update({"http": proxy, "https": proxy})
+            logger.info(f"HHAPIClient использует прокси: {proxy}")
+
         # HH.ru требует два заголовка идентификации начиная с 2024 года:
         # User-Agent — стандартный HTTP-заголовок
         # HH-User-Agent — специфичный заголовок API HH.ru (без него 403)
         ua = f"HHAnalytics/1.0 ({self.email})"
-        self.session.headers.update({
+        headers = {
             "User-Agent": ua,
             "HH-User-Agent": ua,
             "Accept": "application/json, text/html, */*",
             "Accept-Language": "ru-RU,ru;q=0.9,en;q=0.8",
             "Referer": "https://hh.ru/",
-        })
+        }
+        # OAuth 2.0: авторизуем запросы токеном приложения
+        if self.access_token:
+            headers["Authorization"] = f"Bearer {self.access_token}"
+        self.session.headers.update(headers)
 
-
-        logger.info(f"HHAPIClient инициализирован с email: {self.email}, delay: {delay}s")
+        logger.info(
+            f"HHAPIClient инициализирован с email: {self.email}, delay: {delay}s, "
+            f"токен: {'да' if self.access_token else 'нет'}"
+        )
 
     def _make_request(self, url: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
         """
@@ -151,7 +183,18 @@ class HHAPIClient:
 
             # Для 4xx ошибок (кроме 429) — не повторяем, просто логируем
             if 400 <= response.status_code < 500:
-                logger.error(f"Ошибка клиента: {response.status_code}, {response.text}")
+                # 403 на /vacancies почти всегда = отсутствие/протухший OAuth-токен
+                if response.status_code == 403:
+                    hint = (
+                        " Проверьте HH_ACCESS_TOKEN в .env — с 2025 г. поиск "
+                        "вакансий требует токен приложения (dev.hh.ru/admin)."
+                        if not self.access_token
+                        else " Токен задан, но отклонён — возможно, протух; "
+                             "обновите access_token на dev.hh.ru/admin."
+                    )
+                    logger.error(f"HTTP 403 forbidden от {url}.{hint} Ответ: {response.text[:200]}")
+                else:
+                    logger.error(f"Ошибка клиента: {response.status_code}, {response.text[:200]}")
                 return response
 
             # Для 5xx — выбрасываем исключение для retry

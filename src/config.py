@@ -30,6 +30,16 @@ class Settings(BaseModel):
         default="",
         description="Email для заголовка User-Agent"
     )
+    hh_access_token: str = Field(
+        default="",
+        description="OAuth access_token приложения HH.ru (dev.hh.ru/admin). "
+                    "Обязателен: с 2025 г. endpoint /vacancies закрыт для анонимов"
+    )
+    hh_proxy: str = Field(
+        default="",
+        description="HTTP/SOCKS-прокси для запросов к HH.ru, например "
+                    "http://127.0.0.1:7899 (пусто — прямое соединение)"
+    )
     # Rate Limiting
     api_request_delay: float = Field(
         default=1.0,
@@ -185,6 +195,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 # Создаём объект настроек из переменных окружения
 settings = Settings(
     hh_user_email=os.getenv("HH_USER_EMAIL", ""),
+    hh_access_token=os.getenv("HH_ACCESS_TOKEN", ""),
     hh_proxy=os.getenv("HH_PROXY", ""),
     api_request_delay=float(os.getenv("API_REQUEST_DELAY", "1.0")),
     max_pages=int(os.getenv("MAX_PAGES", "10")),
