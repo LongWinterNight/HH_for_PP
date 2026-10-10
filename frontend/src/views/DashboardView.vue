@@ -12,6 +12,7 @@ import OnboardingDialog from '@/components/domain/OnboardingDialog.vue'
 import BvChartFrame from '@/components/charts/BvChartFrame.vue'
 import { analytics, dashboard } from '@/api/endpoints'
 import { useApi } from '@/composables/useApi'
+import { useHeaderMeta } from '@/composables/useHeaderMeta'
 import { money, num, timeAgo, vacancies as vacanciesCount } from '@/utils/format'
 import { MIN_SAMPLE } from '@/utils/dataRules'
 import { useRouter } from 'vue-router'
@@ -92,6 +93,13 @@ watch(period, () => {
 })
 
 watch(skillType, () => skills.load())
+
+// Сводка базы — та же, что в шапке: всего вакансий и сколько скрыто
+// как найденные не по запросу. Скрытое названо числом, чтобы не
+// выглядело потерянным.
+const { состояниеБазы } = useHeaderMeta()
+const всегоВБазе = computed(() => состояниеБазы.value?.vacancies ?? 0)
+const скрыто = computed(() => состояниеБазы.value?.off_query ?? 0)
 
 const byMonth = useApi((options) => analytics.newByMonth({}, options))
 
@@ -258,7 +266,12 @@ const topSkills = computed(() => {
         <p class="dash__meta">
           <template v-if="summary.loading.value">Данные загружаются…</template>
           <template v-else-if="totals.vacancies !== null">
-            {{ vacanciesCount(totals.vacancies) }} в базе<template v-if="lastRun">, последний сбор {{ timeAgo(lastRun) }}</template>
+            <!-- Числа названы тем, что они считают. Прежде здесь стояло
+                 «3 493 вакансии в базе», а в шапке — «10 294»: одно слово
+                 на два разных числа. Экран считает по активным. -->
+            {{ num(totals.vacancies) }} активных<template v-if="всегоВБазе"> из {{ vacanciesCount(всегоВБазе) }} в базе</template><template
+              v-if="lastRun">, последний сбор {{ timeAgo(lastRun) }}</template><template
+              v-if="скрыто"> · {{ num(скрыто) }} найденных не по запросу скрыты</template>
           </template>
           <template v-else>Сбор ещё не запускался</template>
         </p>

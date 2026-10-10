@@ -695,6 +695,9 @@ def получить_состояние_базы():
         последний = storage.get_last_parser_run(only_successful=True)
         return {
             "vacancies": storage.get_vacancy_count(),
+            # Сколько вакансий скрыто как найденные не по запросу. Число
+            # названо, чтобы скрытое не выглядело потерянным.
+            "off_query": storage.get_off_query_count(),
             "last_collected_at": последний["completed_at"] if последний else None,
         }
     finally:

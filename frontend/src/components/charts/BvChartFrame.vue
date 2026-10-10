@@ -125,6 +125,9 @@ const note = computed(() => (props.sample === null ? null : sampleNote(props.sam
 .chart__body {
   position: relative;
   min-width: 0;
+  /* Вторая страховка от холста шире контейнера: что бы ни нарисовал
+     график, наружу карточки оно не выходит. */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }

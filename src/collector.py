@@ -347,7 +347,10 @@ class VacancyCollector:
         logger.info("Загрузка известных вакансий для инкрементального режима…")
         try:
             storage = VacancyStorage()
-            df = storage.get_all_vacancies(include_inactive=True)
+            # Известной считается любая вакансия базы, включая снятые и
+            # найденные не по запросу: иначе сбор примет их за новые и
+            # потратит запрос на карточку, которая уже есть.
+            df = storage.get_all_vacancies(include_inactive=True, include_off_query=True)
             self.existing_ids = set(df["vacancy_id"].astype(str)) if not df.empty else set()
             storage.close()
             logger.info(f"Известных вакансий: {len(self.existing_ids)}")
@@ -1383,6 +1386,14 @@ class VacancyCollector:
             # и этот отбор уходил в запись, заменявшую таблицу целиком, —
             # то есть каждый сбор оставлял в базе ровно то, что нашёл
             # сейчас, стирая всё собранное раньше.
+            # Найденное этим сбором — по запросу: поиск идёт только по
+            # названию и описанию. Вакансия, помеченная раньше как
+            # найденная не по запросу, пометку теряет, если источник
+            # теперь отдал её законно — по другому запросу или после
+            # правки описания.
+            if not df.empty:
+                df["off_query"] = 0
+
             stats = storage.save_vacancies_incremental(df)
 
             # Вакансии записаны, а тексты описаний — нет: сбор удался,

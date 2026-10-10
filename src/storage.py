@@ -202,6 +202,12 @@ class VacancyModel(Base):
     # архив нужен для истории, но в текущих числах ему делать нечего.
     is_active = Column(Boolean, default=True)
 
+    # Найдена не по запросу: слов запроса нет ни в названии, ни в
+    # описании, ни в навыках — источник нашёл их в названии компании.
+    # Такая вакансия не удаляется, а пропускается аналитикой и списком:
+    # правило, по которому она узнаётся, приближённое (src/relevance.py).
+    off_query = Column(Integer, default=0, index=True)
+
     # Каким запросом найдена. Запросов может быть несколько: одна
     # вакансия попадает и в «Python», и в «Backend developer».
     source_keyword = Column(String(500))
@@ -1196,7 +1202,9 @@ class VacancyStorage:
         logger.info(f"Запрос «{keyword}»: погашено {len(missing)} вакансий, которых больше нет в выдаче")
         return len(missing)
 
-    def get_all_vacancies(self, include_inactive: bool = False) -> pd.DataFrame:
+    def get_all_vacancies(
+        self, include_inactive: bool = False, include_off_query: bool = False
+    ) -> pd.DataFrame:
         """
         Получение вакансий из базы.
 
@@ -1206,6 +1214,10 @@ class VacancyStorage:
                 рынок, и закрытая вакансия в медиане зарплат — это
                 ответ на вопрос, которого никто не задавал. Архив нужен
                 истории и сбору, они просят его явно.
+            include_off_query: Включать ли вакансии, найденные не по
+                запросу. По умолчанию нет: рестораны «АРТ РЕСТ» в
+                медиане арт-директора — та же ошибка, что закрытая
+                вакансия в текущем рынке. Нужны они только обслуживанию.
 
         Returns:
             DataFrame с вакансиями
@@ -1214,11 +1226,17 @@ class VacancyStorage:
             Для больших баз данных используйте get_vacancies_filtered
             с параметрами фильтрации.
         """
-        query = "SELECT * FROM vacancies"
+        условия = []
         if not include_inactive:
             # COALESCE, потому что до миграции 002 колонки не было:
             # записи без признака считаются активными.
-            query += " WHERE COALESCE(is_active, 1) = 1"
+            условия.append("COALESCE(is_active, 1) = 1")
+        if not include_off_query:
+            условия.append("COALESCE(off_query, 0) = 0")
+
+        query = "SELECT * FROM vacancies"
+        if условия:
+            query += " WHERE " + " AND ".join(условия)
 
         try:
             df = pd.read_sql_query(query, self.engine)
@@ -1355,6 +1373,18 @@ class VacancyStorage:
             logger.error(f"Ошибка получения статистики зарплат: {e}")
             return pd.DataFrame()
 
+    def get_off_query_count(self) -> int:
+        """Сколько вакансий помечено найденными не по запросу."""
+        try:
+            result = pd.read_sql_query(
+                "SELECT COUNT(*) as count FROM vacancies WHERE COALESCE(off_query, 0) = 1",
+                self.engine,
+            )
+            return int(result["count"].iloc[0])
+        except SQLAlchemyError as e:
+            logger.error(f"Ошибка получения количества: {e}")
+            return 0
+
     def get_vacancy_count(self) -> int:
         """
         Получение общего количества вакансий в базе.
@@ -1362,7 +1392,9 @@ class VacancyStorage:
         Returns:
             Количество записей
         """
-        query = "SELECT COUNT(*) as count FROM vacancies"
+        # Найденные не по запросу в счёт не идут: число в шапке должно
+        # сходиться с тем, по чему считается всё остальное на экране.
+        query = "SELECT COUNT(*) as count FROM vacancies WHERE COALESCE(off_query, 0) = 0"
 
         try:
             result = pd.read_sql_query(query, self.engine)
