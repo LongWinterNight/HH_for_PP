@@ -1,0 +1,156 @@
+{
+  "id": "100000001",
+  "premium": false,
+  "billing_type": {
+    "id": "standard_plus",
+    "name": "Стандарт плюс"
+  },
+  "relations": [],
+  "name": "Тестовая вакансия 001",
+  "insider_interview": null,
+  "response_letter_required": false,
+  "area": {
+    "id": "78",
+    "name": "Самара",
+    "url": "https://api.hh.ru/areas/78"
+  },
+  "salary": {
+    "from": 62100,
+    "to": 120000,
+    "currency": "RUR",
+    "gross": true
+  },
+  "salary_range": {
+    "from": 62100,
+    "to": 120000,
+    "currency": "RUR",
+    "gross": true,
+    "mode": {
+      "id": "MONTH",
+      "name": "За месяц"
+    },
+    "frequency": {
+      "id": "TWICE_PER_MONTH",
+      "name": "Два раза в месяц"
+    }
+  },
+  "type": {
+    "id": "open",
+    "name": "Открытая"
+  },
+  "address": null,
+  "allow_messages": true,
+  "experience": {
+    "id": "noExperience",
+    "name": "Нет опыта"
+  },
+  "department": null,
+  "show_contacts": true,
+  "contacts": null,
+  "description": "<p><strong>Обязанности:</strong></p><ul><li>вести учёт заявок и отчётность</li><li>работать с клиентами по телефону и почте</li></ul><p><strong>Требования:</strong></p><ul><li>опыт работы с Excel и CRM</li><li>грамотная речь, внимательность</li></ul><p><strong>Условия:</strong></p><ul><li>оформление по ТК РФ</li></ul>",
+  "inclusiveness_description": null,
+  "inclusiveness_types": [],
+  "branded_description": null,
+  "vacancy_constructor_template": null,
+  "key_skills": [
+    {
+      "name": "Excel"
+    },
+    {
+      "name": "CRM"
+    },
+    {
+      "name": "Деловая переписка"
+    }
+  ],
+  "auto_response": {
+    "accept_auto_response": true
+  },
+  "accept_handicapped": false,
+  "accept_kids": false,
+  "age_restriction": null,
+  "archived": false,
+  "response_url": null,
+  "specializations": [],
+  "professional_roles": [
+    {
+      "id": "118",
+      "name": "Специалист по подбору персонала"
+    }
+  ],
+  "code": null,
+  "hidden": false,
+  "quick_responses_allowed": false,
+  "driver_license_types": [],
+  "accept_incomplete_resumes": true,
+  "employer": {
+    "id": "9000001",
+    "name": "Компания-пример 001",
+    "url": "https://api.hh.ru/employers/9000001",
+    "alternate_url": "https://hh.ru/employer/9000001",
+    "logo_urls": null,
+    "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9000001",
+    "country_id": 1,
+    "accredited_it_employer": true,
+    "trusted": true,
+    "is_identified_by_esia": false,
+    "employer_on_additional_check": false
+  },
+  "published_at": "2026-09-09T20:16:42+0300",
+  "created_at": "2026-09-09T20:16:42+0300",
+  "initial_created_at": "2026-09-09T20:16:42+0300",
+  "negotiations_url": null,
+  "suitable_resumes_url": null,
+  "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=100000001",
+  "has_test": false,
+  "test": null,
+  "alternate_url": "https://hh.ru/vacancy/100000001",
+  "accept_temporary": true,
+  "languages": [],
+  "approved": true,
+  "employment_form": {
+    "id": "FULL",
+    "name": "Полная"
+  },
+  "fly_in_fly_out_duration": [],
+  "accept_labor_contract": true,
+  "civil_law_contracts": [
+    {
+      "id": "SELF_EMPLOYED",
+      "name": "с самозанятым"
+    },
+    {
+      "id": "INDIVIDUAL_PERSON",
+      "name": "с физлицом"
+    }
+  ],
+  "internship": false,
+  "night_shifts": false,
+  "work_format": [
+    {
+      "id": "ON_SITE",
+      "name": "На месте работодателя"
+    },
+    {
+      "id": "HYBRID",
+      "name": "Гибрид"
+    }
+  ],
+  "work_schedule_by_days": [
+    {
+      "id": "FIVE_ON_TWO_OFF",
+      "name": "5/2"
+    },
+    {
+      "id": "OTHER",
+      "name": "Другое"
+    }
+  ],
+  "working_hours": [
+    {
+      "id": "HOURS_8",
+      "name": "8 часов"
+    }
+  ],
+  "closed_for_applicants": false
+}

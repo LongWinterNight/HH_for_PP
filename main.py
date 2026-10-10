@@ -2,16 +2,14 @@
 """
 HH.ru Analytics — Главная точка входа (ETL Pipeline).
 
-Этот скрипт запускает полный цикл обработки данных:
-1. Extract — сбор вакансий с HH.ru API
-2. Transform — обработка и извлечение навыков
-3. Load — сохранение в SQLite
-4. Analyze — формирование отчётов
+Два этапа:
+1. Сбор — вакансии с HH.ru API; разбор навыков и запись в SQLite идут
+   внутри сбора, тем же кодом, что и сбор с экрана
+2. Анализ — формирование отчётов
 
 Использование:
-    python main.py              # Полный пайплайн
+    python main.py              # Сбор и анализ
     python main.py --collect    # Только сбор
-    python main.py --process    # Только обработка
     python main.py --analyze    # Только анализ
 
 Важно: Перед запуском убедитесь, что:
@@ -33,7 +31,6 @@ from src.config import settings
 from src.utils import get_logger, ensure_dir
 from src.api_client import HHAPIClient
 from src.collector import VacancyCollector
-from src.processor import VacancyProcessor
 from src.storage import VacancyStorage
 from src.analyzer import VacancyAnalyzer
 from src.advanced_analyzer import AdvancedAnalytics
@@ -45,7 +42,9 @@ logger = get_logger(__name__)
 def run_collection(
     keywords: list[str] | None = None,
     max_pages: int | None = None,
-    days_back: int | None = None
+    days_back: int | None = None,
+    incremental: bool = False,
+    use_cache: bool = False
 ) -> dict:
     """
     Этап 1: Сбор вакансий с HH.ru (Extract).
@@ -54,6 +53,8 @@ def run_collection(
         keywords: Список поисковых запросов (или из конфига)
         max_pages: Максимум страниц (или из конфига)
         days_back: За сколько дней собирать (или из конфига)
+        incremental: Не запрашивать карточки известных вакансий
+        use_cache: Брать ответы поиска из кэша
 
     Returns:
         Словарь со статистикой сбора
@@ -62,10 +63,29 @@ def run_collection(
     logger.info("ЭТАП 1: Сбор вакансий (Extract)")
     logger.info("=" * 60)
 
+    def показать_ход(event):
+        """
+        Ход сбора в консоли. Строится на тех же событиях, что и прогресс
+        в веб-интерфейсе: один механизм на оба способа запуска, а не
+        прогресс-бар в одном месте и подмена методов в другом.
+        """
+        if event.stage == "keyword_started":
+            print(f"\n[{event.keyword_index}/{event.keywords_total}] {event.keyword}")
+        elif event.stage == "page_fetched":
+            ожидалось = f" из ~{event.found}" if event.found else ""
+            print(f"\r  собрано {event.collected}{ожидалось}", end="", flush=True)
+        elif event.stage == "keyword_saved":
+            print(f"\r  собрано {event.collected} — сохранено")
+        elif event.stage == "finished":
+            print(f"\nВсего собрано: {event.collected}")
+
     # Создаём сборщик с параметрами
     collector = VacancyCollector(
         max_pages=max_pages,
-        days_back=days_back
+        days_back=days_back,
+        incremental=incremental,
+        use_cache=use_cache,
+        on_progress=показать_ход
     )
 
     try:
@@ -93,105 +113,46 @@ def run_collection(
         collector.close()
 
 
-def run_processing() -> dict:
+def _этап_упразднён(флаг: str) -> None:
     """
-    Этап 2: Обработка вакансий (Transform).
+    Сказать, почему этапа больше нет, вместо падения или молчания.
 
-    Returns:
-        Словарь со статистикой обработки
+    Обработка и загрузка были отдельными шагами, пока сбор клал сырые
+    файлы, а в базу их переносил второй проход через CSV. Теперь сбор
+    сам разбирает вакансии и пишет их в базу — тем же кодом, что и сбор
+    с экрана. Второй путь разбора удалён 11.09.2026 (S11), а загрузка
+    из CSV заменяла таблицу целиком: вместе с ней исчезло бы всё
+    собранное после последней выгрузки.
     """
-    logger.info("=" * 60)
-    logger.info("ЭТАП 2: Обработка данных (Transform)")
-    logger.info("=" * 60)
-
-    # Создаём процессор
-    processor = VacancyProcessor()
-
-    # Обрабатываем все JSON файлы
-    df = processor.process_all(
-        save_csv=True,
-        save_parquet=True
+    logger.warning(
+        f"{флаг} больше не нужен: сбор сам разбирает вакансии и пишет их в базу. "
+        f"Этап пропущен, база не тронута."
     )
-
-    if df.empty:
-        logger.warning("Нет данных для обработки")
-        return {"processed": 0}
-
-    # Получаем статистику по навыкам
-    skills_stats = processor.get_skills_statistics(df)
-
-    logger.info(f"✅ Обработка завершена")
-    logger.info(f"   Обработано вакансий: {len(df)}")
-    logger.info(f"   Уникальных навыков: {len(skills_stats.get('top_hard_skills', {})) + len(skills_stats.get('top_tools', {}))}")
-
-    return {
-        "processed": len(df),
-        "skills_stats": skills_stats
-    }
-
-
-def run_loading() -> dict:
-    """
-    Этап 3: Загрузка в базу данных (Load).
-
-    Returns:
-        Словарь со статистикой загрузки
-    """
-    logger.info("=" * 60)
-    logger.info("ЭТАП 3: Загрузка в БД (Load)")
-    logger.info("=" * 60)
-
-    # Проверяем наличие CSV файла
-    csv_path = settings.processed_data_dir / "vacancies_processed.csv"
-
-    if not csv_path.exists():
-        logger.warning("CSV файл не найден. Сначала запустите обработку (--process)")
-        return {"loaded": 0}
-
-    # Загружаем CSV
-    import pandas as pd
-    df = pd.read_csv(csv_path)
-
-    # Создаём хранилище
-    storage = VacancyStorage()
-
-    try:
-        # Сохраняем в БД
-        count = storage.save_dataframe(df)
-
-        logger.info(f"✅ Загрузка завершена")
-        logger.info(f"   Сохранено записей: {count}")
-
-        return {"loaded": count}
-
-    except Exception as e:
-        logger.error(f"Ошибка при загрузке: {type(e).__name__} - {e}")
-        raise
-    finally:
-        storage.close()
 
 
 def run_analysis() -> dict:
     """
-    Этап 4: Анализ и отчёты (Analyze).
+    Этап 2: Анализ и отчёты (Analyze).
 
     Returns:
         Словарь с путями к отчётам
     """
     logger.info("=" * 60)
-    logger.info("ЭТАП 4: Анализ и отчёты (Analyze)")
+    logger.info("ЭТАП 2: Анализ и отчёты (Analyze)")
     logger.info("=" * 60)
 
-    # Проверяем наличие CSV файла
-    csv_path = settings.processed_data_dir / "vacancies_processed.csv"
+    # Данные — из базы, а не из CSV: файл выгружал удалённый путь
+    # обработки, и анализ по нему считал бы вакансии на день последней
+    # выгрузки, не замечая ни одного сбора после неё.
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+    finally:
+        storage.close()
 
-    if not csv_path.exists():
-        logger.warning("CSV файл не найден. Сначала запустите обработку (--process)")
+    if df.empty:
+        logger.warning("В базе нет вакансий. Сначала запустите сбор (--collect)")
         return {}
-
-    # Загружаем данные
-    import pandas as pd
-    df = pd.read_csv(csv_path)
 
     # Создаём анализатор
     analyzer = VacancyAnalyzer(df)
@@ -199,8 +160,10 @@ def run_analysis() -> dict:
     # Выводим сводку в консоль
     analyzer.print_summary()
 
-    # Генерируем Excel-отчёт
-    report_path = analyzer.generate_excel_report()
+    # Собираем Excel-отчёт по правилам дизайн-системы: четыре листа,
+    # девять колонок, срез выборки первым листом.
+    from src.report_xlsx import описать_срез, собрать_отчёт
+    report_path = собрать_отчёт(df, срез=описать_срез(df))
     logger.info(f"✅ Excel-отчёт: {report_path}")
 
     # Экспорт в CSV
@@ -260,13 +223,8 @@ def run_full_pipeline(
         days_back=days_back
     )
 
-    # Этап 2: Обработка
-    results["processing"] = run_processing()
-
-    # Этап 3: Загрузка
-    results["loading"] = run_loading()
-
-    # Этап 4: Анализ
+    # Обработки и загрузки отдельными этапами нет: сбор разбирает
+    # вакансии и пишет их в базу сам.
     results["analysis"] = run_analysis()
 
     # Итоговая статистика
@@ -277,8 +235,8 @@ def run_full_pipeline(
     logger.info("📊 ИТОГОВАЯ СТАТИСТИКА")
     logger.info("=" * 60)
     logger.info(f"Собрано вакансий: {results['collection'].get('unique', 0)}")
-    logger.info(f"Обработано вакансий: {results['processing'].get('processed', 0)}")
-    logger.info(f"Загружено в БД: {results['loading'].get('loaded', 0)}")
+    logger.info(f"Новых в базе: {results['collection'].get('new', 0)}")
+    logger.info(f"Обновлено в базе: {results['collection'].get('updated', 0)}")
     logger.info(f"Время выполнения: {duration:.2f} сек ({duration/60:.2f} мин)")
     logger.info("=" * 60)
 
@@ -298,9 +256,8 @@ def main() -> int:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Примеры использования:
-  python main.py                      # Полный пайплайн
+  python main.py                      # Сбор и анализ
   python main.py --collect            # Только сбор вакансий
-  python main.py --process            # Только обработка
   python main.py --analyze            # Только анализ
   python main.py --collect --analyze  # Сбор и анализ
   python main.py --keywords "Python" "LLM"  # Сбор по конкретным запросам
@@ -316,12 +273,12 @@ def main() -> int:
     parser.add_argument(
         "--process",
         action="store_true",
-        help="Только обработка данных (Transform)"
+        help="Упразднён: сбор разбирает вакансии сам"
     )
     parser.add_argument(
         "--load",
         action="store_true",
-        help="Только загрузка в БД (Load)"
+        help="Упразднён: сбор пишет в базу сам"
     )
     parser.add_argument(
         "--analyze",
@@ -349,6 +306,17 @@ def main() -> int:
         help="За сколько дней собирать (по умолчанию из конфига)"
     )
 
+    parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help="Не запрашивать карточки вакансий, уже лежащих в базе (сами вакансии обновляются)"
+    )
+    parser.add_argument(
+        "--cache",
+        action="store_true",
+        help="Брать ответы поиска из кэша, если они там есть"
+    )
+
     # Настройки
     parser.add_argument(
         "--dry-run",
@@ -372,14 +340,16 @@ def main() -> int:
             run_collection(
                 keywords=args.keywords,
                 max_pages=args.max_pages,
-                days_back=args.days_back
+                days_back=args.days_back,
+                incremental=args.incremental,
+                use_cache=args.cache
             )
 
         if args.process:
-            run_processing()
+            _этап_упразднён("--process")
 
         if args.load:
-            run_loading()
+            _этап_упразднён("--load")
 
         if args.analyze:
             run_analysis()

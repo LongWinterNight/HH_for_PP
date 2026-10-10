@@ -41,11 +41,26 @@ class TestHHAPIClientInit:
         pytest.skip("Требует изоляции переменных окружения")
 
     def test_user_agent_header(self):
-        """Проверка заголовка User-Agent."""
+        """
+        Проверка заголовков, которыми клиент представляется источнику.
+
+        В имени нет слова «Bot» намеренно: с ним запросы отбивала защита
+        hh.ru от автоматических обращений. Тест закрепляет это решение —
+        вернуть «Bot» значит снова получить блокировку.
+        """
         client = HHAPIClient(email="test@example.com")
 
-        expected_ua = "HHAnalyticsBot/1.0 (test@example.com)"
+        expected_ua = "HHAnalytics/1.0 (test@example.com)"
         assert client.session.headers["User-Agent"] == expected_ua
+
+    def test_hh_user_agent_header(self):
+        """
+        Собственный заголовок hh.ru обязателен с 2024 года: без него
+        поиск вакансий отвечает 403, и сбор останавливается целиком.
+        """
+        client = HHAPIClient(email="test@example.com")
+
+        assert client.session.headers["HH-User-Agent"] == "HHAnalytics/1.0 (test@example.com)"
 
 
 class TestHHAPIClientMethods:

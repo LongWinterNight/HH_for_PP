@@ -2,12 +2,14 @@
 Минимальная версия веб-приложения HH.ru Analytics.
 """
 
-from fastapi import FastAPI, Query, BackgroundTasks, HTTPException
+from fastapi import FastAPI, Query, BackgroundTasks, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pathlib import Path
+import os
 import sys
+import time
 from datetime import datetime, timedelta
 from typing import Optional
 from collections import defaultdict
@@ -17,11 +19,18 @@ import pandas as pd
 WEB_DIR = Path(__file__).parent  # web/app
 WEB_ROOT = WEB_DIR.parent  # web
 PROJECT_ROOT = WEB_ROOT.parent  # hh_analytics
-STATIC_DIR = WEB_ROOT / "static"  # web/static
+# Интерфейс живёт в отдельном дереве frontend/ и собирается Vite.
+# Раздаётся собранный результат — исходники в продукт не попадают.
+FRONTEND_DIST = WEB_ROOT.parent / "frontend" / "dist"  # frontend/dist
 
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Логгер
+from src.copies import без_копий, размеры_групп, сколько_копий
+from src.budget import оценка
+from src.выборка import Фильтры, отобрать, словами
+from src.coverage import сводка_недобора
+from src.salary_sanity import только_правдоподобные
 from src.utils import get_logger
 logger = get_logger(__name__)
 
@@ -34,6 +43,38 @@ _ENV_PATH = PROJECT_ROOT / ".env"
 # Приложение
 app = FastAPI(title="HH.ru Analytics", version="2.0.0")
 
+
+@app.on_event("startup")
+def разобрать_оборвавшиеся_сборы():
+    """
+    Пометить сборы, чьи процессы не пережили перезапуск.
+
+    Фоновая задача сбора умирает вместе с процессом, а запись о запуске
+    остаётся со статусом «running». Без этой уборки интерфейс ждёт сбор,
+    которого нет, а история копит вечно идущие запуски.
+    """
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        # Порог ноль: на старте любая запись «running» — след прошлого
+        # процесса. Наш сбор ещё не начинался, а тот, что вёл запись,
+        # умер вместе со своим приложением. Ждать здесь пять минут значит
+        # оставить окно, в котором интерфейс ждёт мёртвый сбор.
+        #
+        # Ограничение: при двух экземплярах приложения на одной базе
+        # старт второго пометит сбор первого прерванным. Продукт
+        # рассчитан на один процесс; если экземпляров станет несколько,
+        # признак принадлежности процессу нужно хранить в самой записи.
+        помечено = storage.mark_interrupted_runs(stale_after_minutes=0)
+        if помечено:
+            logger.info(f"При старте помечено прерванных сборов: {помечено}")
+    except Exception as e:
+        # Уборка не должна мешать приложению подняться.
+        logger.warning(f"Не удалось разобрать прерванные сборы: {e}")
+    finally:
+        storage.close()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -41,14 +82,99 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Статика
-if STATIC_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
+# Статика собранного интерфейса. Имена файлов в сборке содержат хеш
+# содержимого, поэтому их можно кешировать надолго — в отличие от
+# index.html, который отдаётся ниже и меняется при каждом развёртывании.
+if (FRONTEND_DIST / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
 
 # Настройки пользователя — инициализируем из .env при старте
+def _настройки_сбора() -> dict:
+    """Настройки сбора из базы, с первичными значениями из окружения."""
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        return storage.get_collection_settings()
+    except Exception as e:
+        logger.warning(f"Не удалось прочитать настройки сбора: {e}")
+        return {"email": user_settings.get("hh_user_email") or "", "request_delay": 1.0}
+    finally:
+        storage.close()
+
+
+# Идущий сейчас сбор. Нужен, чтобы просьба об остановке дошла до него
+# напрямую: сбор работает в фоновой задаче, а просьба приходит из
+# обработчика HTTP.
+active_collector = None
+
 user_settings = {
     "hh_user_email": _app_settings.hh_user_email or None,
 }
+
+# Сколько последних вакансий держит лента «только что найдено».
+ЛЕНТА_ВАКАНСИЙ = 6
+
+
+def _учесть_ход(состояние: dict, event, страниц: int) -> None:
+    """
+    Перенести событие сбора в состояние, которое опрашивает экран.
+
+    Отдельной функцией, а не внутри обработчика: обработчик живёт в
+    замыкании запуска и снаружи недоступен, а считать здесь есть что —
+    процент, ожидаемые страницы, оставшееся время, разбивку по запросам.
+    """
+    from src.progress import осталось_секунд, процент, страниц_ожидается
+
+    if event.keywords_total:
+        состояние["keywords_total"] = event.keywords_total
+    if event.keyword_index:
+        состояние["keyword_index"] = event.keyword_index
+
+    пройден = event.stage == "keyword_saved"
+    if event.stage == "keyword_started":
+        # Новый запрос: счётчики прежнего к нему не относятся.
+        состояние["keyword_done"] = 0
+        состояние["keyword_total"] = 0
+        состояние["pages_expected"] = 0
+    if event.keyword_total:
+        состояние["keyword_done"] = event.keyword_done
+        состояние["keyword_total"] = event.keyword_total
+        состояние["pages_expected"] = страниц_ожидается(event.found, страниц)
+
+    if event.stage != "finished":
+        новый = процент(
+            состояние.get("keyword_index", 0),
+            состояние.get("keywords_total", 0),
+            состояние.get("keyword_done", 0),
+            состояние.get("keyword_total", 0),
+            запрос_пройден=пройден,
+        )
+        # Назад полоса не ходит: при резке на срезы доля внутри запроса
+        # считается по срезу и бывает меньше уже показанной.
+        состояние["progress"] = max(состояние.get("progress", 0), новый)
+
+    начат = состояние.get("started_at")
+    if начат:
+        прошло = (datetime.now() - datetime.fromisoformat(начат)).total_seconds()
+        состояние["eta_seconds"] = осталось_секунд(прошло, состояние["progress"])
+
+    for строка in состояние.get("queries", []):
+        if строка["keyword"] != event.keyword:
+            continue
+        if event.found:
+            строка["found"] = event.found
+        if пройден:
+            строка.update(status="done", new=event.new, updated=event.updated)
+        elif строка["status"] != "done":
+            строка["status"] = "running"
+
+    if event.vacancy and event.vacancy.get("name"):
+        лента = состояние.setdefault("recent", [])
+        if not лента or лента[0] != event.vacancy:
+            лента.insert(0, event.vacancy)
+            del лента[ЛЕНТА_ВАКАНСИЙ:]
+
 
 # Состояние парсера
 parser_state = {
@@ -67,19 +193,472 @@ parser_state = {
 }
 
 # =============================================================================
+# Доступ по логину и паролю
+#
+# У продукта нет слоя аккаунтов: ни пользователей, ни сессий. Пока его
+# нет, а приложение выставлено наружу, единственная защита — одна пара
+# логин/пароль на всех, кто тестирует.
+#
+# Защита включается наличием переменных в .env. Без них приложение
+# работает как раньше: локальная разработка не должна требовать пароля,
+# иначе его начнут отключать правкой кода.
+#
+# Что именно защищается: всё, кроме проверки здоровья. Открытым остаётся
+# только /api/health — по нему туннель и мониторинг понимают, что
+# приложение живо, и никаких данных он не отдаёт.
+# =============================================================================
+
+import base64
+import secrets
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
+
+AUTH_USER = os.getenv("BASIC_AUTH_USER", "")
+AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD", "")
+AUTH_ENABLED = bool(AUTH_USER and AUTH_PASSWORD)
+
+PUBLIC_PATHS = {"/api/health"}
+
+
+class BasicAuthMiddleware(BaseHTTPMiddleware):
+    """Проверка логина и пароля перед всем остальным."""
+
+    async def dispatch(self, request, call_next):
+        if not AUTH_ENABLED or request.url.path in PUBLIC_PATHS:
+            return await call_next(request)
+
+        header = request.headers.get("Authorization", "")
+
+        if header.startswith("Basic "):
+            try:
+                decoded = base64.b64decode(header[6:]).decode("utf-8")
+                user, _, password = decoded.partition(":")
+            except Exception:
+                user = password = ""
+
+            # Сравнение постоянного времени: обычное == подсказывает
+            # длину и первые символы по времени ответа.
+            user_ok = secrets.compare_digest(user, AUTH_USER)
+            password_ok = secrets.compare_digest(password, AUTH_PASSWORD)
+
+            if user_ok and password_ok:
+                return await call_next(request)
+
+        return Response(
+            status_code=401,
+            content="Требуется вход",
+            headers={"WWW-Authenticate": 'Basic realm="BaseVacancy", charset="UTF-8"'},
+        )
+
+
+if AUTH_ENABLED:
+    app.add_middleware(BasicAuthMiddleware)
+    logger.info("Доступ защищён логином и паролем (BASIC_AUTH_USER задан)")
+else:
+    logger.warning(
+        "Доступ открыт без пароля. Для публичного адреса задайте "
+        "BASIC_AUTH_USER и BASIC_AUTH_PASSWORD в .env"
+    )
+
+
+# =============================================================================
+# Занятость процесса
+#
+# Нужна надзорному процессу (`scripts/serve.py`), который перезапускает
+# сервер при правке кода. Перезапускать вслепую нельзя: сбор данных идёт
+# фоновым потоком внутри этого же процесса и живёт десятки минут, а
+# пользователь на открытой странице получил бы ошибку сети на ровном
+# месте. Поэтому сервер сам отвечает, занят ли он.
+# =============================================================================
+
+# Момент последнего запроса от кого-либо, кроме самого надзора. Хранится
+# в памяти: писать на диск на каждый запрос — это тысячи записей за день
+# ради значения, которое не нужно переживать перезапуск.
+_последний_запрос = time.monotonic()
+
+ПУТЬ_ЗАНЯТОСТИ = "/api/health/idle"
+
+
+class ОтметкаАктивности(BaseHTTPMiddleware):
+    """Запоминает, когда сервер в последний раз о чём-то просили."""
+
+    async def dispatch(self, request, call_next):
+        global _последний_запрос
+        # Опрос самого надзора активностью не считается: иначе тишина не
+        # наступит никогда и перезапуск не случится вовсе.
+        if request.url.path != ПУТЬ_ЗАНЯТОСТИ:
+            _последний_запрос = time.monotonic()
+        return await call_next(request)
+
+
+app.add_middleware(ОтметкаАктивности)
+PUBLIC_PATHS.add(ПУТЬ_ЗАНЯТОСТИ)
+
+
+@app.get(ПУТЬ_ЗАНЯТОСТИ)
+def занятость(request: Request):
+    """
+    Занят ли сервер: идёт ли сбор и давно ли его о чём-то просили.
+
+    Отвечает только на локальные запросы. Пароль здесь неуместен —
+    надзорный процесс не должен знать учётные данные, — а состояние
+    сбора снаружи знать незачем.
+    """
+    хост = request.client.host if request.client else ""
+    if хост not in ("127.0.0.1", "::1", "localhost"):
+        raise HTTPException(404, "Не найдено")
+
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        активный = storage.get_active_run()
+    finally:
+        storage.close()
+
+    # Память процесса и база вместе: запись в базе переживает перезапуск,
+    # а флаг в памяти успевает подняться раньше, чем появится запись.
+    сбор_идёт = bool(активный) or bool(parser_state.get("is_running"))
+
+    return {
+        "сбор_идёт": сбор_идёт,
+        "секунд_тишины": round(time.monotonic() - _последний_запрос, 1),
+    }
+
+
+# =============================================================================
+# Достоверность агрегатов
+#
+# Ниже пяти вакансий агрегат не показывается: медиана по трём выглядит
+# как факт и читается как факт, не значив ничего. Тренд считается только
+# сравнением с предыдущим периодом такой же длины — до этого здесь стоял
+# random.uniform «для демо», и дашборд показывал выдуманные проценты
+# роста, неотличимые от настоящих.
+# =============================================================================
+
+MIN_SAMPLE = 5
+
+PERIOD_DAYS = {
+    "today": 1,
+    "week": 7,
+    "month": 30,
+    "quarter": 90,
+    "year": 365,
+}
+
+
+def apply_vacancy_filters(df, domain=None, regions=None, experience=None, salary_only=False):
+    """Фильтры среза, общие для KPI и графиков. Период применяется отдельно:
+    предыдущий период фильтруется теми же условиями, но другими датами."""
+    if domain:
+        if "domain" in df.columns:
+            df = df[df["domain"].str.contains(domain, case=False, na=False)]
+        elif "profession" in df.columns:
+            df = df[df["profession"].str.contains(domain, case=False, na=False)]
+
+    if regions:
+        region_list = [r.strip() for r in regions.split(",") if r.strip()]
+        if region_list and "area" in df.columns:
+            df = df[df["area"].str.contains("|".join(region_list), case=False, na=False)]
+
+    if experience and "experience" in df.columns:
+        df = df[df["experience"] == experience]
+
+    if salary_only and "salary_from" in df.columns:
+        df = df[df["salary_from"].notna()]
+
+    return df
+
+
+def period_windows(df, period):
+    """Границы текущего и предыдущего окна одинаковой длины.
+
+    Возвращает (current_start, current_end, previous_start) или None,
+    если период не ограничен: у «всего времени» предыдущего периода нет,
+    и тренд для него не существует, а не равен нулю.
+    """
+    days = PERIOD_DAYS.get(period)
+    if not days or "published_at" not in df.columns:
+        return None
+
+    tz = df["published_at"].dt.tz if hasattr(df["published_at"], "dt") else None
+    now = pd.Timestamp.now(tz=tz) if tz is not None else pd.Timestamp.now()
+    start = now - pd.Timedelta(days=days)
+    return start, now, start - pd.Timedelta(days=days)
+
+
+def trend_reliability(df, previous_start):
+    """Можно ли сравнивать текущий период с предыдущим.
+
+    Сейчас — нельзя, и это свойство данных, а не недоделка.
+
+    База хранит срез активных вакансий на момент сбора, а не историю
+    рынка: hh.ru отдаёт только открытые вакансии, закрытые в выборку не
+    попадают. Чем старше день, тем меньше его вакансий дожило до сбора.
+    На реальных данных это выглядит так: 20 августа — 2 вакансии,
+    3 сентября — 166. Разделив одно на другое, получаем «рост рынка
+    в восемьдесят раз» вместо затухания архива.
+
+    Раньше на этом месте стоял random.uniform «для демо» — выдуманные
+    проценты, неотличимые от настоящих. Сравнение по дате публикации
+    выглядит достовернее, но врёт так же уверенно, поэтому тренд не
+    показывается до появления снимков метрик: сравнивать нужно два
+    сбора между собой, а не два куска одного снимка.
+
+    Возвращает причину отказа словами, которые не стыдно показать
+    на экране, или None, когда сравнение станет возможным.
+    """
+    if "published_at" not in df.columns or df["published_at"].isna().all():
+        return "у вакансий нет даты публикации"
+
+    return (
+        "база хранит срез активных вакансий на момент сбора, а не историю: "
+        "сравнение периодов внутри одного снимка завышает свежие дни"
+    )
+
+
+def slice_period(df, start, end):
+    if "published_at" not in df.columns:
+        return df
+    return df[(df["published_at"] >= start) & (df["published_at"] < end)]
+
+
+def _курс_для_ответа():
+    """Дата курса ЦБ, по которому посчитан эквивалент.
+
+    Эквивалент без даты ничем не подтверждён: «≈ 80 000 ₽» по какому
+    курсу и на когда — вопрос, на который ответ должен приезжать тем же
+    ответом, что и число.
+    """
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        курсы = storage.get_currency_rates()
+    except Exception as e:
+        logger.warning(f"Не удалось прочитать курсы: {e}")
+        return None
+    finally:
+        storage.close()
+
+    return курсы.на_дату.isoformat() if курсы else None
+
+
+def _тренды_по_снимкам() -> dict:
+    """
+    Тренды из точек истории: разница между двумя последними снимками.
+
+    Возвращает только те метрики, по которым обе точки заполнены. У
+    восстановленных снимков нет зарплатных метрик — в базе лежит
+    последнее известное значение зарплаты, а не историческое, — поэтому
+    зарплатный тренд по ним не строится.
+    """
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        точки = storage.get_metrics_snapshots(limit=2)
+    except Exception as e:
+        logger.warning(f"Не удалось прочитать снимки метрик: {e}")
+        return {}
+    finally:
+        storage.close()
+
+    if len(точки) < 2:
+        return {}
+
+    новая, прежняя = точки[0], точки[1]
+
+    # Зарплатный тренд считается по исходной валюте — по медиане
+    # рублёвых вакансий, а не по рублёвому эквиваленту всей выборки.
+    #
+    # Эквивалент пересчитывается по курсу дня, и разница двух снимков
+    # смешала бы два движения: рынок и курс. Если рубль за месяц упал на
+    # десять процентов, эквивалент сумовых зарплат вырастет на те же
+    # десять — и график покажет рост зарплат там, где выросла только
+    # цена валюты. Пока снимок не хранит курс своего дня (К4‑4), тренда
+    # по эквиваленту быть не может; когда начнёт — считать его надо
+    # курсом того снимка, а не сегодняшним.
+    соответствие = {
+        "total_vacancies": "active_vacancies",
+        "unique_companies": "unique_companies",
+        "unique_regions": "unique_regions",
+        "median_salary": "median_salary_rub",
+    }
+
+    тренды = {}
+    for метрика, поле in соответствие.items():
+        сейчас, было = новая.get(поле), прежняя.get(поле)
+        if сейчас is None or было is None:
+            continue
+        тренды[метрика] = trend_of(сейчас, было)
+
+    return тренды
+
+
+def collect_kpi_values(df):
+    """Значения метрик без трендов.
+
+    Средней здесь нет и не будет. Одна вакансия на 800 000 сдвигает её
+    так, что число перестаёт описывать рынок, — поэтому она не считается
+    и не попадает в ответ ни одного эндпоинта. Зарплату описывают медиана
+    и квартили. Рядом с зарплатными метриками всегда идёт объём выборки:
+    без n надёжность числа оценить нельзя."""
+    salary_df = только_правдоподобные(df) if "salary_from" in df.columns else pd.DataFrame()
+
+    # Зарплатных метрик две, и складывать их в одну нельзя.
+    #
+    # `median_salary` — по вакансиям в рублях. Раньше она считалась по
+    # всем валютам разом: 6 000 000 сум входили в неё числом 6 000 000,
+    # и плитка «Медиана зарплаты · RUB» показывала 90 000 там, где по
+    # рублёвым вакансиям было 82 000. Подпись называла валюту, которой
+    # число не соответствовало.
+    #
+    # `median_salary_rub` — по рублёвому эквиваленту всей выборки: он
+    # приводит семь валют к общему знаменателю по курсу ЦБ на дату
+    # сбора, и только он описывает базу целиком.
+    # Копии одной вакансии по городам схлопываются: работодатель
+    # размещает её в десятках городов, и в медиане она весила как
+    # тридцать. На живой базе это давало 81 500 вместо 90 000 (S5).
+    рублёвые = (salary_df[salary_df["salary_currency"] == "RUB"]
+                if "salary_currency" in salary_df.columns else salary_df)
+    рублёвые = без_копий(рублёвые, "salary_from")
+    salary_n = len(рублёвые)
+    enough = salary_n >= MIN_SAMPLE
+
+    эквивалент = (без_копий(salary_df, "salary_from_rub")["salary_from_rub"].dropna()
+                  if "salary_from_rub" in salary_df.columns else pd.Series(dtype=float))
+    эквивалент_n = len(эквивалент)
+    эквивалент_хватает = эквивалент_n >= MIN_SAMPLE
+
+    hard_skills_set = set()
+    if "hard_skills" in df.columns:
+        for skills_str in df["hard_skills"].dropna():
+            if isinstance(skills_str, str):
+                hard_skills_set.update(s.strip() for s in skills_str.split(",") if s.strip())
+
+    soft_skills_set = set()
+    if "soft_skills" in df.columns:
+        for skills_str in df["soft_skills"].dropna():
+            if isinstance(skills_str, str):
+                soft_skills_set.update(s.strip() for s in skills_str.split(",") if s.strip())
+
+    return {
+        "median_salary": float(рублёвые["salary_from"].median()) if enough else None,
+        "salary_sample": salary_n,
+        "median_salary_rub": float(эквивалент.median()) if эквивалент_хватает else None,
+        "salary_sample_rub": эквивалент_n,
+        "total_vacancies": len(df),
+        "total_skills": int(df["skill_count"].sum()) if "skill_count" in df.columns else 0,
+        "unique_companies": int(df["employer_name"].nunique()) if "employer_name" in df.columns else 0,
+        "unique_regions": int(df["area"].nunique()) if "area" in df.columns else 0,
+        "hard_skills_count": len(hard_skills_set),
+        "soft_skills_count": len(soft_skills_set),
+    }
+
+
+def trend_of(current, previous):
+    """Процент изменения к предыдущему периоду.
+
+    Возвращает пустой тренд, если сравнивать не с чем: отсутствие тренда
+    честнее нуля, потому что ноль означает «не изменилось».
+    """
+    if current is None or previous is None or not previous:
+        return {"trend_percent": None, "trend_direction": None}
+
+    change = (current - previous) / previous * 100
+    direction = "up" if change > 0 else "down" if change < 0 else "same"
+    return {"trend_percent": round(abs(change), 1), "trend_direction": direction}
+
+
+def salary_histogram(values, bins=7):
+    """Корзины зарплат внутри одной валюты.
+
+    Границы считаются по самим данным, а не задаются словами «50k-100k»:
+    те же корзины для узбекских сумов бессмысленны — там вся выборка
+    попадёт в последнюю. Верхняя граница обрезается 95-м перцентилем,
+    иначе одна вакансия с опечаткой растягивает шкалу на весь график,
+    и остальные корзины схлопываются в первый столбец.
+    """
+    clean = values.dropna()
+    if len(clean) < MIN_SAMPLE:
+        return []
+
+    low = float(clean.min())
+    high = float(clean.quantile(0.95))
+    if high <= low:
+        high = float(clean.max())
+    if high <= low:
+        return [{"label": format_short(low), "count": int(len(clean)), "from": low, "to": low}]
+
+    step = (high - low) / bins
+    result = []
+    for i in range(bins):
+        start = low + step * i
+        end = low + step * (i + 1)
+        last = i == bins - 1
+        count = int(((clean >= start) & (clean <= end)).sum()) if last else int(((clean >= start) & (clean < end)).sum())
+        result.append({
+            "label": format_short(start) + ("+" if last else ""),
+            "count": count,
+            "from": start,
+            "to": end
+        })
+
+    # Всё, что выше 95-го перцентиля, досыпается в последнюю корзину:
+    # эти вакансии существуют, и терять их нельзя.
+    tail = int((clean > high).sum())
+    if tail and result:
+        result[-1]["count"] += tail
+        result[-1]["label"] = format_short(result[-1]["from"]) + "+"
+
+    return result
+
+
+def format_short(value):
+    """Короткая подпись оси: 120 000 -> «120 тыс», 8 000 000 -> «8 млн».
+    Ось графика — единственное место системы, где число сокращается."""
+    value = float(value)
+    if abs(value) >= 1_000_000:
+        return f"{value / 1_000_000:.1f}".replace(".0", "") + " млн"
+    if abs(value) >= 1_000:
+        return f"{value / 1_000:.0f} тыс"
+    return f"{value:.0f}"
+
+
+# =============================================================================
 # Endpoints
 # =============================================================================
 
+def index_response():
+    """Точка входа интерфейса.
+
+    Если сборки нет, честно говорим, что делать: пустая страница или
+    500 заставили бы искать причину в бэкенде, которого она не касается.
+    """
+    index = FRONTEND_DIST / "index.html"
+    if index.exists():
+        return FileResponse(index)
+
+    from fastapi.responses import HTMLResponse
+    return HTMLResponse(
+        "<h1>Интерфейс не собран</h1>"
+        "<p>Выполните <code>npm install &amp;&amp; npm run build</code> в папке <code>frontend/</code>.</p>",
+        status_code=503
+    )
+
+
 @app.get("/")
 def root():
-    return FileResponse(STATIC_DIR / "index.html")
+    return index_response()
 
 @app.get("/favicon.ico")
 def favicon():
     """Возвращает favicon.ico или заглушку."""
-    favicon_path = STATIC_DIR / "favicon.ico"
+    favicon_path = FRONTEND_DIST / "favicon.svg"
     if favicon_path.exists():
-        return FileResponse(favicon_path)
+        return FileResponse(favicon_path, media_type="image/svg+xml")
     # Возвращаем пустую заглушку если favicon нет
     from fastapi.responses import Response
     return Response(content="", status_code=204)
@@ -92,12 +671,35 @@ def chrome_devtools():
 
 @app.get("/analytics")
 def analytics_page():
-    """Отдельная страница аналитики."""
-    return FileResponse(STATIC_DIR / "analytics.html")
+    """Аналитика — маршрут внутри интерфейса, а не отдельная страница."""
+    return index_response()
 
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/api/overview")
+def получить_состояние_базы():
+    """
+    Сколько вакансий в базе и когда собирали в последний раз.
+
+    Отдельно от «/api/dashboard»: тот считает спарклайны за две недели и
+    топ навыков, а шапка стоит на всех шести экранах и запрашивает это
+    при каждом переходе. Здесь два счётчика — COUNT и одна строка
+    журнала запусков, без чтения базы в pandas.
+    """
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        последний = storage.get_last_parser_run(only_successful=True)
+        return {
+            "vacancies": storage.get_vacancy_count(),
+            "last_collected_at": последний["completed_at"] if последний else None,
+        }
+    finally:
+        storage.close()
+
 
 @app.get("/api/vacancies")
 def get_vacancies(
@@ -108,46 +710,69 @@ def get_vacancies(
     experience: str = "",
     skill: str = "",
     salary_only: bool = False,
+    currency: str = "",
     sort_by: str = "salary",  # salary | date | none
-    sort_order: str = "desc"  # asc | desc
+    sort_order: str = "desc",  # asc | desc
+    include_inactive: bool = False,
+    source: str = ""
 ):
     from src.storage import VacancyStorage
     import pandas as pd
 
     storage = VacancyStorage()
     try:
-        df = storage.get_all_vacancies()
+        # Снятые с публикации вакансии по умолчанию не показываются:
+        # список описывает текущий рынок. Архив доступен явным
+        # include_inactive — он нужен истории, а не работе с выборкой.
+        df = storage.get_all_vacancies(include_inactive=include_inactive)
         if df.empty:
-            return {"total": 0, "page": page, "items": []}
+            return {"total": 0, "page": page, "items": [], "источники": {}}
 
-        # Применяем фильтры
-        if search:
-            df = df[df["vacancy_name"].str.contains(search, case=False, na=False)]
+        # Какие источники есть в базе — считается до фильтров: иначе
+        # выбор источника исчезал бы, стоило его применить.
+        источники = {}
+        if "source" in df.columns:
+            источники = {
+                str(имя): int(сколько)
+                for имя, сколько in df["source"].value_counts().items()
+            }
 
-        if area:
-            df = df[df["area"].str.contains(area, case=False, na=False)]
-
-        if experience:
-            df = df[df["experience"] == experience]
-
-        if skill:
-            # Поиск по навыкам (hard_skills, tools, soft_skills)
-            skill_lower = skill.lower()
-            mask = (
-                df["hard_skills"].str.contains(skill_lower, case=False, na=False) |
-                df["tools"].str.contains(skill_lower, case=False, na=False) |
-                df["soft_skills"].str.contains(skill_lower, case=False, na=False)
-            )
-            df = df[mask]
-
-        if salary_only:
-            df = df[df["salary_from"].notna()]
+        # Отбор — общей функцией, той же, по которой собирается отчёт.
+        # Держать здесь свою копию условий значило бы получить экран и
+        # файл, показывающие разные числа по одному и тому же фильтру.
+        #
+        # Про источник: пока он один, фильтр на экране не показывается —
+        # но параметр есть, чтобы ссылка на срез по источнику работала с
+        # первого дня второго. Про валюту: она сужает выборку до одного
+        # рынка, а порядок между валютами держит рублёвый эквивалент по
+        # курсу ЦБ (К1, К2).
+        df = отобрать(df, Фильтры(
+            поиск=search, регион=area, опыт=experience, навык=skill,
+            валюта=currency, источник=source,
+            только_с_зарплатой=salary_only, включая_снятые=include_inactive,
+        ))
 
         # Сортировка
         if sort_by == "salary" and "salary_from" in df.columns:
-            # Мульти-сортировка: сначала по зарплате, потом по дате
+            # По чему сравнивать суммы, решает выбранная валюта.
+            #
+            # Валюта выбрана — рынок один, и сравнивать надо исходные
+            # суммы: эквивалент пересчитан по курсу и округлён, внутри
+            # одной валюты он только теряет точность.
+            #
+            # Валюты нет — в списке лежат рубли, сумы и тенге вперемешку,
+            # и сравнивать их номиналы бессмысленно: 19 000 000 сум
+            # всегда оказались бы выше 300 000 рублей. Общий знаменатель
+            # даёт рублёвый эквивалент по курсу ЦБ.
+            по_эквиваленту = not currency and "salary_from_rub" in df.columns
+            колонка = "salary_from_rub" if по_эквиваленту else "salary_from"
+
+            # na_position="last" при любом порядке: запись без суммы (или
+            # без эквивалента — валюты, которой нет в курсах ЦБ) уходит в
+            # конец. При возрастании она иначе встала бы первой и читалась
+            # бы как самая дешёвая, хотя про неё просто ничего не известно.
             df = df.sort_values(
-                by=["salary_from", "published_at"],
+                by=[колонка, "published_at"],
                 ascending=[sort_order == "asc", False],  # ЗП по порядку, дата всегда по убыванию
                 na_position="last"
             )
@@ -164,6 +789,15 @@ def get_vacancies(
         start = (page - 1) * per_page
         df_page = df.iloc[start:start + per_page]
 
+        # Сколько объявлений у этой же вакансии в других городах.
+        #
+        # Работодатель размещает одну вакансию в десятках городов, и в
+        # списке она занимает десятки строк. Скрывать их нельзя —
+        # человеку, который ищет работу в Самаре, нужна именно его
+        # строка, — но сказать, что строка не одинока, стоит: иначе
+        # список выглядит как повтор одного и того же по ошибке.
+        размеры = размеры_групп(df)
+
         items = []
         for _, row in df_page.iterrows():
             item = {}
@@ -176,9 +810,27 @@ def get_vacancies(
                 else:
                     val = val
                 item[col] = val
+            if not размеры.empty:
+                ключ = (row.get("vacancy_name"), row.get("employer_name"))
+                item["копий"] = int(размеры.get(ключ, 1))
+
             items.append(item)
 
-        return {"total": total, "page": page, "items": items}
+        # Дата курса отдаётся вместе с данными, а не отдельным запросом:
+        # эквивалент без даты ничем не подтверждён, и подпись должна
+        # приезжать тем же ответом, что и числа, которые она объясняет.
+        курсы = storage.get_currency_rates()
+
+        # Источники посчитаны выше, до фильтров: экран по этому числу
+        # решает, показывать ли выбор источника. Один источник — фильтр
+        # без выбора, лишний элемент на экране.
+        return {
+            "total": total,
+            "page": page,
+            "items": items,
+            "источники": источники,
+            "rate_date": курсы.на_дату.isoformat() if курсы else None,
+        }
     finally:
         storage.close()
 
@@ -196,12 +848,10 @@ def get_dashboard():
             return {
                 "total_vacancies": 0,
                 "total_skills": 0,
-                "avg_salary": None,
                 "recent_vacancies": [],
                 "top_skills": [],
                 "vacancies_by_currency": {},
                 "vacancies_by_area": {},
-                "salary_trend": []
             }
 
         def get_top_skills(column, limit=10):
@@ -237,22 +887,38 @@ def get_dashboard():
             })
 
         # Статистика по зарплате
-        salary_df = df[df["salary_from"].notna()] if "salary_from" in df.columns else pd.DataFrame()
-        avg_salary = None
-        if not salary_df.empty:
-            mean_val = salary_df["salary_from"].mean()
-            avg_salary = safe_value(mean_val)
+        salary_df = только_правдоподобные(df) if "salary_from" in df.columns else pd.DataFrame()
 
         # Распределение по валютам
         vacancies_by_currency = {}
         if "salary_currency" in df.columns:
             currency_counts = df["salary_currency"].value_counts().to_dict()
             for currency, count in currency_counts.items():
-                curr_df = df[(df["salary_currency"] == currency) & (df["salary_from"].notna())]
-                if not curr_df.empty:
+                curr_df = без_копий(
+                    только_правдоподобные(df[df["salary_currency"] == currency]),
+                    "salary_from",
+                )
+                # Медиана и объём выборки — то, что показывается на экране.
+                # Средней в ответе нет: её тянут выбросы, и одна вакансия
+                # на 600 000 сдвигает число так, что оно перестаёт
+                # описывать рынок.
+                salary_n = len(curr_df)
+                if salary_n:
+                    enough = salary_n >= MIN_SAMPLE
+                    salaries = curr_df["salary_from"]
                     vacancies_by_currency[currency] = {
-                        "count": count,
-                        "avg_salary": float(curr_df["salary_from"].mean())
+                        "count": int(count),
+                        "sample": salary_n,
+                        "median_salary": float(salaries.median()) if enough else None,
+                        # Квартили вместо крайних значений. В объявлениях
+                        # попадаются «50 ₽» и «400 сум» — оператор ошибся
+                        # разрядом, а минимум показывает эту опечатку как
+                        # границу рынка. Между Q1 и Q3 лежит половина
+                        # вакансий, и одна ошибка её не сдвигает.
+                        "q1_salary": float(salaries.quantile(0.25)) if enough else None,
+                        "q3_salary": float(salaries.quantile(0.75)) if enough else None,
+                        "min_salary": float(salaries.min()) if enough else None,
+                        "max_salary": float(salaries.max()) if enough else None,
                     }
 
         # Топ регионов
@@ -260,21 +926,14 @@ def get_dashboard():
         if "area" in df.columns:
             vacancies_by_area = df["area"].value_counts().head(5).to_dict()
 
-        # Тренд зарплат по датам (по неделям)
-        salary_trend = []
-        if "published_at" in df.columns and "salary_from" in df.columns:
-            df_with_dates = df[df["published_at"].notna() & df["salary_from"].notna()].copy()
-            if not df_with_dates.empty:
-                df_with_dates["published_at"] = pd.to_datetime(df_with_dates["published_at"])
-                # Исправляем warning - убираем timezone перед конвертацией
-                df_with_dates["published_at"] = df_with_dates["published_at"].dt.tz_localize(None)
-                df_with_dates["week"] = df_with_dates["published_at"].dt.to_period("W").apply(lambda r: r.start_time)
-                weekly = df_with_dates.groupby("week")["salary_from"].mean().reset_index()
-                for _, row in weekly.tail(8).iterrows():
-                    salary_trend.append({
-                        "date": str(row["week"].date()),
-                        "avg_salary": float(row["salary_from"])
-                    })
+        # Динамики зарплат здесь нет намеренно.
+        #
+        # Недельный ряд считался средней и складывал все валюты в одно
+        # число: 6 000 000 сум и 350 000 тенге ложились в ту же точку,
+        # что и рубли. Медиана по такой смеси врёт не меньше средней,
+        # поэтому ряд удалён, а не исправлен. Динамику зарплат строит
+        # экран аналитики (E4): помесячная медиана внутри одной валюты,
+        # с объёмом выборки и пометкой при выборке меньше пяти.
 
         # Sparklines данные для KPI карточек
         # Вакансии по дням (последние 14 дней)
@@ -305,33 +964,16 @@ def get_dashboard():
                     count = int(daily_skills.get(date_only, 0))
                     skills_sparkline.append(count)
 
-        # Зарплаты по дням (последние 14 дней)
-        salary_sparkline = []
-        if "published_at" in df.columns and "salary_from" in df.columns:
-            df_with_dates = df[df["published_at"].notna() & df["salary_from"].notna()].copy()
-            if not df_with_dates.empty:
-                df_with_dates["published_at"] = pd.to_datetime(df_with_dates["published_at"])
-                df_with_dates["published_at"] = df_with_dates["published_at"].dt.tz_localize(None)
-                daily_salaries = df_with_dates.groupby(df_with_dates["published_at"].dt.date)["salary_from"].mean()
-                last_14_days = pd.date_range(end=pd.Timestamp.now(), periods=14, freq='D')
-                for day in last_14_days:
-                    date_only = day.date()
-                    avg = daily_salaries.get(date_only, None)
-                    salary_sparkline.append(float(avg) if avg is not None else 0)
-
         return {
             "total_vacancies": len(df),
             "total_skills": int(df["skill_count"].sum()) if "skill_count" in df.columns and pd.notna(df["skill_count"].sum()) else 0,
-            "avg_salary": avg_salary,
             "recent_vacancies": recent_vacancies,
             "top_skills": top_skills,
             "vacancies_by_currency": vacancies_by_currency,
             "vacancies_by_area": vacancies_by_area,
-            "salary_trend": salary_trend,
             "sparklines": {
                 "vacancies": vacancies_sparkline,
-                "skills": skills_sparkline,
-                "salaries": salary_sparkline
+                "skills": skills_sparkline
             },
             "last_updated": storage.get_last_parser_run(only_successful=True)["completed_at"] if storage.get_last_parser_run(only_successful=True) else None
         }
@@ -381,13 +1023,12 @@ def get_analytics():
         # Статистика по зарплате
         salary_stats = {}
         if "salary_from" in df.columns:
-            salary_df = df[df["salary_from"].notna()]
+            salary_df = без_копий(только_правдоподобные(df), "salary_from")
             if not salary_df.empty:
                 salary_stats = {
                     "min": float(salary_df["salary_from"].min()),
                     "max": float(salary_df["salary_from"].max()),
                     "median": float(salary_df["salary_from"].median()),
-                    "avg": float(salary_df["salary_from"].mean())
                 }
 
         return {
@@ -400,9 +1041,107 @@ def get_analytics():
     finally:
         storage.close()
 
+def медиана_по_месяцам(df, колонка_суммы: str, месяцев: int = 12):
+    """
+    Помесячная медиана зарплаты одной величины.
+
+    Группировка идёт по дате публикации: вопрос «сколько платят» —
+    про момент, когда работодатель это предлагал, а не про день, когда
+    вакансию увидел сбор.
+
+    Месяц с выборкой меньше `MIN_SAMPLE` отдаётся пустым значением, но со
+    своим объёмом: медиана по трём вакансиям — не медиана рынка, а линия,
+    проведённая через такую точку, выглядит так же уверенно, как через
+    восемьдесят. Пустое значение линия не соединяет (`spanGaps: false`) —
+    разрыв в данных остаётся разрывом.
+    """
+    сейчас = pd.Timestamp.now()
+    сетка = pd.period_range(end=сейчас.to_period("M"), periods=месяцев, freq="M")
+
+    ряд = []
+    группы = {}
+
+    if df is not None and not df.empty and "published_at" in df.columns:
+        даты = pd.to_datetime(df["published_at"], errors="coerce", utc=True, format="mixed")
+        рабочая = df.assign(_месяц=даты.dt.tz_localize(None).dt.to_period("M"))
+        рабочая = рабочая[рабочая["_месяц"].notna() & рабочая[колонка_суммы].notna()]
+        группы = {месяц: группа[колонка_суммы] for месяц, группа in рабочая.groupby("_месяц")}
+
+    for месяц in сетка:
+        значения = группы.get(месяц)
+        объём = int(len(значения)) if значения is not None else 0
+        достаточно = объём >= MIN_SAMPLE
+        ряд.append({
+            "month": str(месяц),
+            "label": месяц.strftime("%m.%Y"),
+            "median": float(значения.median()) if достаточно else None,
+            "sample": объём,
+        })
+
+    return ряд
+
+
+def _регионы_в_ответ(результат):
+    """Пара «список, счётчики» — в один объект ответа."""
+    регионы, счётчики = результат
+    если_пусто = {"small": 0, "beyond": 0}
+    return {"items": регионы, **(счётчики if isinstance(счётчики, dict) else если_пусто)}
+
+
+def медиана_по_регионам(df, колонка_суммы: str, предел: int = 10):
+    """
+    Медиана зарплаты по регионам, от больших выборок к малым.
+
+    Рынок в Москве и в Ташкенте — разные рынки, и общая медиана их
+    смешивает. Разрез по регионам отвечает на вопрос «сколько платят
+    здесь», ради которого продукт и нужен.
+
+    Регион с выборкой меньше `MIN_SAMPLE` в список не попадает: медиана
+    по трём вакансиям — не зарплата региона, а случайность, и показывать
+    её рядом с медианой по шестистам значило бы уравнять их в правах.
+    Сколько таких регионов осталось за списком — считается отдельно и
+    говорится вслух.
+
+    Порядок — по объёму выборки, а не по величине медианы: список
+    отвечает на вопрос «где данных достаточно», а сортировка по деньгам
+    поставила бы первым регион с пятью вакансиями.
+    """
+    if df is None or df.empty or "area" not in df.columns:
+        return [], 0
+
+    рабочая = df[df[колонка_суммы].notna() & df["area"].notna()]
+    if рабочая.empty:
+        return [], 0
+
+    группы = рабочая.groupby("area")[колонка_суммы]
+    сводка = pd.DataFrame({"median": группы.median(), "sample": группы.size()})
+
+    достаточные = сводка[сводка["sample"] >= MIN_SAMPLE].sort_values(
+        "sample", ascending=False
+    )
+    малых = int((сводка["sample"] < MIN_SAMPLE).sum())
+
+    регионы = [
+        {"area": str(область), "median": float(строка["median"]), "sample": int(строка["sample"])}
+        for область, строка in достаточные.head(предел).iterrows()
+    ]
+
+    # Длинный хвост не забивает экран: регионов бывает две сотни, а
+    # сравнить взглядом можно десяток.
+    за_пределом = max(0, len(достаточные) - предел)
+
+    return регионы, {"small": малых, "beyond": за_пределом}
+
+
 @app.get("/api/analytics/distribution")
-def get_distribution():
-    """Распределение вакансий по категориям для графиков с конвертацией валют."""
+def get_distribution(currency: str = "RUB"):
+    """Распределение вакансий по категориям.
+
+    Зарплатные графики строятся внутри одной валюты. Раньше здесь стояла
+    конвертация по захардкоженным курсам (USD = 92 руб), из-за которой
+    «распределение зарплат» смешивало рубли, сумы и тенге, а точность
+    выглядела настоящей, хотя курс на дату сбора неизвестен.
+    """
     from src.storage import VacancyStorage
     import pandas as pd
 
@@ -431,76 +1170,92 @@ def get_distribution():
         if "employment" in df.columns:
             employment_counts = df["employment"].value_counts().to_dict()
 
-        # Курсы валют (примерные)
-        EXCHANGE_RATES = {
-            "RUB": 1.0,
-            "KZT": 0.18,      # 1 KZT = 0.18 RUB
-            "UZS": 0.0072,    # 1 UZS = 0.0072 RUB
-            "BYN": 28.0,      # 1 BYN = 28 RUB
-            "USD": 92.0,      # 1 USD = 92 RUB
-            "EUR": 100.0,     # 1 EUR = 100 RUB
-        }
+        # Зашитых курсов здесь нет и быть не должно.
+        #
+        # Раньше на этом месте лежал словарь «примерных» курсов: доллар
+        # по 92 при настоящих 86,47, сум по 0,0072 при 0,00733485, а
+        # неизвестной валюте молча ставился курс 1.0 — сом считался бы
+        # рублём. Словарь выглядел рабочим, и следующий, кому понадобился
+        # бы рублёвый вид, взял бы готовое. Пересчёт живёт в
+        # `src/cbr_rates.py` и делается по курсу ЦБ на дату сбора:
+        # эквивалент лежит в `salary_from_rub` вместе с `rate_date`,
+        # которая его подтверждает.
 
-        def convert_to_rub(row):
-            salary = row.get("salary_from")
-            currency = row.get("salary_currency", "RUB")
-            if pd.isna(salary):
-                return None
-            rate = EXCHANGE_RATES.get(currency, 1.0)
-            return salary * rate
+        # Распределение зарплат внутри выбранной валюты, без пересчёта.
+        currency_df = df[df["salary_currency"] == currency] if "salary_currency" in df.columns else df
+        # Без сомнительных: одна «18 EUR» растягивает шкалу гистограммы
+        # так, что вся настоящая масса схлопывается в первый столбик.
+        # Гистограмма и медиана считают вакансии, а не объявления по
+        # городам: иначе одна вакансия в тридцати городах формирует
+        # столбик, которого на рынке нет.
+        currency_df = без_копий(только_правдоподобные(currency_df), "salary_from")
+        salary_values = currency_df["salary_from"] if "salary_from" in currency_df.columns else pd.Series(dtype=float)
+        salary_histogram_bins = salary_histogram(salary_values)
+        salary_sample = int(salary_values.notna().sum())
 
-        # Создаем копию с конвертированными зарплатами
-        df_rub = df.copy()
-        df_rub["salary_from_rub"] = df_rub.apply(convert_to_rub, axis=1)
+        # Рублёвый вид: та же гистограмма, но по эквиваленту и по всей
+        # выборке сразу. Внутри одной валюты человеку приходится смотреть
+        # семь гистограмм и держать в голове, что 6 000 000 сум и
+        # 300 000 рублей — соседние величины. Границы корзин и здесь
+        # считаются по данным: та же функция, другие числа.
+        все_правдоподобные = (
+            без_копий(только_правдоподобные(df), "salary_from_rub")
+            if "salary_from" in df.columns else pd.DataFrame()
+        )
+        эквивалент = (все_правдоподобные["salary_from_rub"]
+                      if "salary_from_rub" in все_правдоподобные.columns
+                      else pd.Series(dtype=float))
+        эквивалент_чистый = эквивалент.dropna()
 
-        # Распределение по зарплате в RUB (конвертированное)
-        salary_distribution = {"< 50k": 0, "50k-100k": 0, "100k-150k": 0, "150k-200k": 0, "200k+": 0}
-        if "salary_from_rub" in df_rub.columns:
-            salary_df = df_rub[df_rub["salary_from_rub"].notna()]
-            for salary in salary_df["salary_from_rub"]:
-                if salary < 50000:
-                    salary_distribution["< 50k"] += 1
-                elif salary < 100000:
-                    salary_distribution["50k-100k"] += 1
-                elif salary < 150000:
-                    salary_distribution["100k-150k"] += 1
-                elif salary < 200000:
-                    salary_distribution["150k-200k"] += 1
-                else:
-                    salary_distribution["200k+"] += 1
+        # Валюты, которых нет в курсах ЦБ, эквивалента не получают.
+        # Молча выбросить их нельзя: число «по 1 234 вакансиям» должно
+        # сходиться с тем, что человек видит в списке.
+        без_курса = int(len(все_правдоподобные) - len(эквивалент_чистый))
+
+        histogram_rub = salary_histogram(эквивалент_чистый)
+        stats_rub = {}
+        if len(эквивалент_чистый) >= MIN_SAMPLE:
+            stats_rub = {
+                "currency": "RUB",
+                "basis": "equivalent",
+                "sample": int(len(эквивалент_чистый)),
+                "median": float(эквивалент_чистый.median()),
+                "q1": float(эквивалент_чистый.quantile(0.25)),
+                "q3": float(эквивалент_чистый.quantile(0.75)),
+            }
 
         # Топ регионов
         top_areas = {}
         if "area" in df.columns:
             top_areas = df["area"].value_counts().head(10).to_dict()
 
-        # Статистика по зарплате в RUB
+        # Статистика по выбранной валюте. Средняя не отдаётся: её тянут
+        # выбросы, и правило системы допускает только медиану.
         salary_stats = {}
-        if "salary_from_rub" in df_rub.columns:
-            salary_df = df_rub[df_rub["salary_from_rub"].notna()]
-            if not salary_df.empty:
-                salary_stats = {
-                    "min": float(salary_df["salary_from_rub"].min()),
-                    "max": float(salary_df["salary_from_rub"].max()),
-                    "median": float(salary_df["salary_from_rub"].median()),
-                    "avg": float(salary_df["salary_from_rub"].mean())
-                }
+        clean = salary_values.dropna()
+        if len(clean) >= MIN_SAMPLE:
+            salary_stats = {
+                "currency": currency,
+                "sample": int(len(clean)),
+                "median": float(clean.median()),
+                "q1": float(clean.quantile(0.25)),
+                "q3": float(clean.quantile(0.75))
+            }
 
         # Статистика по валютам
         salary_stats_by_currency = {}
         if "salary_currency" in df.columns:
-            for currency in df["salary_currency"].unique():
-                if pd.isna(currency):
+            for code in df["salary_currency"].unique():
+                if pd.isna(code):
                     continue
-                df_curr = df[df["salary_currency"] == currency]
+                df_curr = df[df["salary_currency"] == code]
                 if "salary_from" in df_curr.columns:
-                    salary_df_curr = df_curr[df_curr["salary_from"].notna()]
+                    salary_df_curr = без_копий(только_правдоподобные(df_curr), "salary_from")
                     if not salary_df_curr.empty:
-                        salary_stats_by_currency[currency] = {
+                        salary_stats_by_currency[code] = {
                             "min": float(salary_df_curr["salary_from"].min()),
                             "max": float(salary_df_curr["salary_from"].max()),
                             "median": float(salary_df_curr["salary_from"].median()),
-                            "avg": float(salary_df_curr["salary_from"].mean()),
                             "count": len(salary_df_curr)
                         }
 
@@ -512,10 +1267,30 @@ def get_distribution():
         return {
             "experience": experience_counts,
             "employment": employment_counts,
-            "salary_distribution": salary_distribution,
+            # Корзины зарплат по выбранной валюте: список, а не словарь,
+            # потому что порядок корзин — часть смысла.
+            "salary_histogram": salary_histogram_bins,
+            "salary_currency": currency,
+            "salary_sample": salary_sample,
             "top_areas": top_areas,
             "salary_stats": salary_stats,
             "salary_stats_by_currency": salary_stats_by_currency,
+            # Рублёвый вид приезжает тем же ответом: это вид, а не срез,
+            # и переключение не должно ходить на сервер.
+            # Помесячная медиана: в выбранной валюте и в эквиваленте.
+            # Оба ряда едут одним ответом — переключение вида не должно
+            # ходить на сервер.
+            "median_by_region": _регионы_в_ответ(медиана_по_регионам(currency_df, "salary_from")),
+            "median_by_region_rub": _регионы_в_ответ(
+                медиана_по_регионам(все_правдоподобные, "salary_from_rub")
+            ),
+            "median_by_month": медиана_по_месяцам(currency_df, "salary_from"),
+            "median_by_month_rub": медиана_по_месяцам(все_правдоподобные, "salary_from_rub"),
+            "salary_histogram_rub": histogram_rub,
+            "salary_sample_rub": int(len(эквивалент_чистый)),
+            "salary_stats_rub": stats_rub,
+            "without_rate": без_курса,
+            "rate_date": _курс_для_ответа(),
             "currencies": currencies
         }
     finally:
@@ -523,7 +1298,40 @@ def get_distribution():
 
 @app.get("/api/parser/status")
 def parser_status():
-    return {"state": parser_state}
+    """
+    Состояние сбора.
+
+    Источник истины — база: состояние в памяти не переживает перезапуск
+    приложения, и после него интерфейс показывал «сбора нет», пока запись
+    висела в статусе «running».
+    """
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        активный = storage.get_active_run()
+    finally:
+        storage.close()
+
+    if not активный:
+        # Ничего не идёт — отдаём последнее известное состояние процесса,
+        # чтобы интерфейс увидел итог только что закончившегося сбора.
+        return {"state": parser_state}
+
+    state = dict(parser_state)
+    state.update({
+        "is_running": True,
+        "status": "running",
+        "parser_run_id": активный["id"],
+        "keywords": активный["keywords"],
+        "current_keyword": активный["current_keyword"],
+        "current_page": активный["current_page"],
+        "vacancies_collected": активный["vacancies_collected"],
+        "found_estimate": активный["found_estimate"],
+        "progress": активный["progress"],
+        "started_at": активный["started_at"],
+    })
+    return {"state": state}
 
 @app.get("/api/parser/stop")
 def stop_parser():
@@ -532,15 +1340,193 @@ def stop_parser():
     if parser_state["is_running"]:
         parser_state["stop_requested"] = True
         parser_state["status"] = "stopping"
+        # Просьба доходит до сбора напрямую: он идёт в фоновой задаче и
+        # проверяет её на каждой странице.
+        if active_collector is not None:
+            active_collector.request_stop()
         logger.info("Запрошена остановка парсера")
         return {"message": "Остановка запрошена", "state": parser_state}
     else:
         raise HTTPException(400, "Парсер не запущен")
 
+@app.get("/api/parser/estimate")
+def оценка_сбора(keywords_count: int = 1, max_pages: int = 10, упрутся: int | None = None):
+    """
+    Во что обойдётся сбор: обращений к источнику и минут.
+
+    Считается на сервере, потому что цена зависит от его настроек —
+    паузы между запросами и того, во сколько срезов режется упёршийся
+    запрос. Экран прежде считал по полминуты за запрос и обещал «1 мин»
+    там, где сбор занимал восемнадцать.
+
+    `упрутся` — сколько запросов упрётся в предел выдачи; его называет
+    разведка. Без него считается по худшему: режутся все, и цена
+    завышается во столько раз, сколько срезов в бюджете.
+    """
+    настройки = _настройки_сбора()
+    срезов = _app_settings.max_slices if _app_settings.резать_упёршиеся else 1
+
+    return оценка(
+        запросов=max(0, keywords_count),
+        max_pages=max(1, max_pages),
+        пауза=настройки.get("request_delay", 1.0),
+        срезов=срезов,
+        упрутся=упрутся,
+    )
+
+
+@app.post("/api/parser/scout")
+def разведка_сбора(payload: dict):
+    """
+    Сколько запросов упрётся в предел выдачи — до того, как собирать.
+
+    Стоит по одному лёгкому запросу на ключевое слово: спрашивается
+    страница из одной вакансии, из ответа берётся только «найдено».
+    Пятьдесят восемь запросов конфига — это около минуты, и она окупает
+    честную оценку: без разведки экран вынужден считать по худшему.
+    """
+    keywords = [str(k).strip() for k in (payload.get("keywords") or []) if str(k).strip()]
+    if not keywords:
+        raise HTTPException(400, "Список запросов пуст")
+
+    from src.collector import VacancyCollector  # локально: тянет тяжёлые зависимости
+
+    сборщик = VacancyCollector(max_pages=_app_settings.max_pages, use_cache=True)
+    итог = сборщик.разведать(keywords)
+    настройки = _настройки_сбора()
+    срезов = _app_settings.max_slices if _app_settings.резать_упёршиеся else 1
+
+    return {
+        **итог,
+        "оценка": оценка(
+            запросов=len(keywords),
+            max_pages=_app_settings.max_pages,
+            пауза=настройки.get("request_delay", 1.0),
+            срезов=срезов,
+            упрутся=len(итог["упрутся"]),
+        ),
+    }
+
+
+# Сколько запросов принимает сбор за раз. Каждый удлиняет работу примерно
+# на полминуты, а с резкой на срезы — на минуты; сотня запросов означает
+# сбор длиной в сутки, который человек запустил, не заметив.
+ПРЕДЕЛ_ЗАПРОСОВ = 50
+
+
+@app.get("/api/settings/collection")
+def настройки_сбора():
+    """
+    Настройки сбора: почта, пауза между запросами и список запросов.
+
+    Список отдаётся как есть, включая `null`. Пусто и «пустой список» —
+    разные вещи: в первом случае экран предложит заготовку из конфига,
+    во втором покажет пустоту, которую человек сделал сам.
+    """
+    данные = _настройки_сбора()
+    return {
+        "email": данные["email"],
+        "request_delay": данные["request_delay"],
+        "search_queries": данные.get("search_queries"),
+        "is_configured": bool(данные["email"]),
+    }
+
+
+@app.post("/api/settings/collection")
+def сохранить_настройки_сбора(payload: dict):
+    """
+    Сохранить настройки сбора.
+
+    Пауза ниже 200 мс — прямой путь к отказам источника по частоте,
+    поэтому меньшее значение не принимается: настройка, позволяющая
+    сломать сбор одним числом, вредна.
+    """
+    from src.storage import VacancyStorage
+
+    email = (payload.get("email") or "").strip()
+    if email and not EMAIL_REGEX.match(email):
+        raise HTTPException(400, "Неверный формат email")
+
+    задержка = payload.get("request_delay")
+    if задержка is not None:
+        try:
+            задержка = float(задержка)
+        except (TypeError, ValueError):
+            raise HTTPException(400, "Пауза должна быть числом секунд")
+        if задержка < 0.2:
+            raise HTTPException(400, "Пауза меньше 0,2 секунды приводит к отказам источника")
+        if задержка > 10:
+            raise HTTPException(400, "Пауза больше 10 секунд сделает сбор бесконечным")
+
+    запросы = payload.get("search_queries")
+    if запросы is not None:
+        if not isinstance(запросы, list):
+            raise HTTPException(400, "Список запросов должен быть массивом строк")
+        запросы = [str(з).strip() for з in запросы if str(з).strip()]
+        # Один и тот же запрос дважды удлиняет сбор и ничего не
+        # добавляет: порядок при этом сохраняется, человек его сам
+        # выстроил.
+        запросы = list(dict.fromkeys(запросы))
+        if len(запросы) > ПРЕДЕЛ_ЗАПРОСОВ:
+            raise HTTPException(
+                400,
+                f"Запросов больше {ПРЕДЕЛ_ЗАПРОСОВ} — такой сбор идёт сутками. "
+                "Разбейте его на несколько.",
+            )
+
+    storage = VacancyStorage()
+    try:
+        сохранено = storage.save_collection_settings(
+            email=email or None,
+            request_delay=задержка,
+            search_queries=запросы,
+        )
+    finally:
+        storage.close()
+
+    # Состояние в памяти держим в согласии с базой: его читают места,
+    # которым нужен быстрый ответ без обращения к хранилищу.
+    if сохранено["email"]:
+        user_settings["hh_user_email"] = сохранено["email"]
+
+    return {**сохранено, "is_configured": bool(сохранено["email"])}
+
+
+@app.get("/api/parser/check")
+def проверить_связь():
+    """
+    Проверка доступа к источнику.
+
+    Один лёгкий запрос вместо целого сбора: узнать, что токен протух,
+    лучше до запуска работы на десять минут, а не на её середине.
+    """
+    from src.api_client import HHAPIClient, ПричинаОтказа
+
+    почта = user_settings.get("hh_user_email")
+    if not почта:
+        return {
+            "доступно": False,
+            "задержка_мс": 0,
+            "причина": ПричинаОтказа.НЕТ_ПОЧТЫ,
+            "подробности": "Укажите почту в настройках сбора",
+        }
+
+    try:
+        client = HHAPIClient(email=почта, delay=_настройки_сбора()["request_delay"])
+        return client.проверить_доступ()
+    except Exception as e:
+        return {
+            "доступно": False,
+            "задержка_мс": 0,
+            "причина": ПричинаОтказа.НЕИЗВЕСТНО,
+            "подробности": str(e)[:200],
+        }
+
+
 @app.get("/api/parser/cache/stats")
 def cache_stats():
     """Статистика кэша API."""
-    from optimized_parser import APICache
+    from src.api_cache import APICache
 
     try:
         cache = APICache()
@@ -558,7 +1544,7 @@ def cache_stats():
 @app.post("/api/parser/cache/clear")
 def clear_cache(days: int = Query(default=7, description="Очистить кэш старше N дней")):
     """Очистка кэша API."""
-    from optimized_parser import APICache
+    from src.api_cache import APICache
 
     try:
         cache = APICache()
@@ -580,9 +1566,18 @@ def start_parser(
     max_pages: Optional[int] = Query(None),
     days_back: Optional[int] = Query(None),
     incremental: bool = Query(False),
-    use_cache: bool = Query(True)
+    use_cache: bool = Query(True),
+    глубоко: bool = Query(True),
 ):
-    """Запуск парсера (поддерживает обычный и оптимизированный режим)."""
+    """
+    Запуск парсера (поддерживает обычный и оптимизированный режим).
+
+    `глубоко` — резать ли запрос, упёршийся в предел выдачи. По умолчанию
+    да: источник отдаёт не больше 2000 вакансий на запрос, и без резки по
+    популярному слову видно пятую часть рынка. Внутри среза карточки не
+    берутся, поэтому охват стоит минут; снять галочку имеет смысл, когда
+    нужен быстрый поверхностный проход.
+    """
     from src.storage import VacancyStorage
     global parser_state
 
@@ -598,17 +1593,37 @@ def start_parser(
     if parser_state["is_running"]:
         raise HTTPException(400, "Парсер уже запущен")
 
-    # Используем пользовательские ключевые слова или берём из конфига
-    if keywords:
-        from src.config import config_loader
-        if not keywords or keywords == [""]:
-            keywords = config_loader.search_queries
-    else:
-        from src.config import config_loader
-        keywords = config_loader.search_queries
+    # Запросы приходят от человека и ничем не подменяются.
+    #
+    # Раньше пустой список молча заменялся списком из конфига — это 58
+    # запросов и часы работы, которых никто не просил. Экран кнопку при
+    # пустом списке блокирует, но API открыт: старый интерфейс, ошибка в
+    # клиенте или повтор запроса из истории браузера запускали чужой
+    # сбор, а остановить его можно было только вручную.
+    keywords = [к.strip() for к in (keywords or []) if к and к.strip()]
+    if not keywords:
+        raise HTTPException(
+            400,
+            "Не указано ни одного запроса. Добавьте запрос на экране «Сбор данных» "
+            "— собирать по списку из конфига мы не будем.",
+        )
+
+    # Продолжаем ли оборванный сбор.
+    #
+    # Продолжается только то, что оборвалось само: перезапуск приложения
+    # посреди работы. Сбор, остановленный человеком, продолжать нельзя —
+    # он сказал «хватит». Пройденные запросы пропускаются: их вакансии
+    # уже в базе, а повторный обход стоит столько же, сколько первый.
+    storage = VacancyStorage()
+    продолжение = storage.find_resumable_run(keywords)
+    пропустить = list((продолжение or {}).get("состояние", {}).get("пройденные_запросы", []))
+    if пропустить:
+        logger.info(
+            f"Найден оборванный сбор #{продолжение['id']}: "
+            f"{len(пропустить)} запросов уже пройдено, они будут пропущены"
+        )
 
     # Создаём запись о запуске парсера в БД
-    storage = VacancyStorage()
     parser_run_id = storage.create_parser_run(
         keywords=keywords,
         max_pages=max_pages or 10,
@@ -629,81 +1644,131 @@ def start_parser(
         "keywords": keywords,
         "incremental": incremental,
         "use_cache": use_cache,
+        "глубоко": глубоко,
         "parser_run_id": parser_run_id,  # ID записи в БД
+        # Что пропущено как уже собранное оборванной попыткой. Число
+        # уходит в ответ о состоянии: человек должен понимать, почему
+        # сбор из семи запросов прошёл за минуту.
+        "пропущено_пройденных": len(пропустить),
         "error_message": None,
         "started_at": datetime.now().isoformat(),
-        "completed_at": None
+        "completed_at": None,
+        # Ход по запросам. Сбор идёт десятки минут, и всё это время он
+        # приносит то, на что можно смотреть: что дал каждый запрос и
+        # какие вакансии только что найдены. Одна полоса этого не
+        # показывает — и к тому же врала.
+        "keyword_index": 0,
+        "keywords_total": len(keywords),
+        "keyword_done": 0,
+        "keyword_total": 0,
+        "pages_expected": 0,
+        "eta_seconds": None,
+        "queries": [
+            {
+                "keyword": запрос,
+                # Пройденные прерванной попыткой помечены сразу: иначе
+                # они висели бы «в очереди» до конца сбора.
+                "status": "skipped" if запрос in пропустить else "waiting",
+                "found": None, "new": None, "updated": None,
+            }
+            for запрос in keywords
+        ],
+        "recent": [],
     }
 
     def run():
-        global parser_state
+        global parser_state, active_collector
         try:
             # Создаём API-клиент с email из user_settings (не из settings модуля)
             from src.api_client import HHAPIClient
-            api_client = HHAPIClient(email=user_email)
+            # Пауза берётся из настроек, а не остаётся значением по
+            # умолчанию: настройка, которая ни на что не влияет, хуже
+            # отсутствующей — она обещает управление, которого нет.
+            api_client = HHAPIClient(email=user_email, delay=_настройки_сбора()["request_delay"])
 
-            # Используем оптимизированный парсер если включены соответствующие режимы
-            if incremental or use_cache:
-                from optimized_parser import OptimizedVacancyCollector
-                collector = OptimizedVacancyCollector(
-                    client=api_client,
-                    max_pages=max_pages,
-                    days_back=days_back,
-                    use_cache=use_cache,
-                    incremental=incremental
-                )
-            else:
-                from src.collector import VacancyCollector
-                collector = VacancyCollector(client=api_client, max_pages=max_pages, days_back=days_back)
+            # Один сборщик на все режимы: кэш и дописывание — его флаги.
+            # Прежде здесь выбиралась одна из двух почти одинаковых
+            # реализаций, и режим данных определял, каким кодом соберутся
+            # вакансии — вплоть до того, какие навыки попадут в базу.
+            from src.collector import VacancyCollector
 
-            # Передаём флаг остановки в collector
-            collector.stop_requested = False
+            # Одно соединение на весь сбор: открывать его на каждое
+            # событие значило бы платить за отчёт дороже, чем за работу.
+            progress_storage = VacancyStorage()
 
-            # Переопределяем метод сбора для обновления прогресса
-            if hasattr(collector, '_collect_by_keyword'):
-                original_collect_by_keyword = collector._collect_by_keyword
+            # Что уже обойдено. Список начинается с унаследованного от
+            # оборванной попытки: иначе продолжение, оборвавшись снова,
+            # забыло бы про её работу и третий запуск начал бы всё заново.
+            пройденные_запросы = list(пропустить)
 
-                # Проверяем сколько аргументов принимает метод
-                import inspect
-                sig = inspect.signature(original_collect_by_keyword)
-                accepts_progress = 'progress_bar' in sig.parameters
+            def on_progress(event):
+                """
+                Ход сбора приходит событиями, а не подменой методов.
 
-                def collect_by_keyword_with_progress(keyword, delay_between_pages=1.0, progress_bar=None):
-                    parser_state["current_keyword"] = keyword
-                    logger.info(f"Запрос: {keyword}")
-                    if accepts_progress:
-                        return original_collect_by_keyword(keyword, delay_between_pages, progress_bar)
-                    else:
-                        return original_collect_by_keyword(keyword, delay_between_pages)
+                Прежде этот обработчик переписывал `_collect_by_keyword` и
+                `search_vacancies` своими функциями: веб-слой знал имена
+                внутренних методов коллектора и их сигнатуры. Появление
+                нового параметра у поиска роняло сбор целиком.
+                """
+                global parser_state
+                if event.keyword:
+                    parser_state["current_keyword"] = event.keyword
+                parser_state["current_page"] = event.page
+                parser_state["vacancies_collected"] = event.collected
 
-                collector._collect_by_keyword = collect_by_keyword_with_progress
+                # Ход работы пишется в базу: состояние в памяти не
+                # переживает перезапуск, а по записи видно и то, что сбор
+                # шёл, и то, что он оборвался.
+                run_id = parser_state.get("parser_run_id")
 
-                # Переопределяем метод search_vacancies для отслеживания страниц
-                if hasattr(collector.client, 'search_vacancies'):
-                    original_search = collector.client.search_vacancies
-                    def search_with_progress(keyword, page, per_page=100):
-                        parser_state["current_page"] = page
-                        if parser_state.get("stop_requested", False):
-                            collector.stop_requested = True
-                            return None
-                        result = original_search(keyword, page, per_page)
-                        if result:
-                            items = result.get("items", [])
-                            parser_state["vacancies_collected"] = len(collector._seen_ids)
-                        return result
-                    collector.client.search_vacancies = search_with_progress
+                # Запрос обойдён целиком и записан в базу. Запоминаем
+                # это, чтобы перезапуск приложения не заставлял собирать
+                # его заново: с резкой на срезы один запрос — это уже не
+                # минута, а десятки.
+                if event.stage == "keyword_saved" and event.keyword:
+                    пройденные_запросы.append(event.keyword)
+                    if run_id:
+                        progress_storage.save_run_progress(run_id, {
+                            "пройденные_запросы": пройденные_запросы,
+                            "текущий_запрос": event.keyword,
+                            "всего_запросов": len(keywords),
+                        })
 
-            # Запускаем сбор с правильными параметрами
-            if hasattr(collector, 'collect_all'):
-                # Проверяем поддерживает ли collector параметр show_progress
-                import inspect
-                sig = inspect.signature(collector.collect_all)
-                if 'show_progress' in sig.parameters:
-                    result = collector.collect_all(keywords=keywords, save_raw=True, show_progress=False)
-                else:
-                    result = collector.collect_all(keywords=keywords, save_raw=True)
-            else:
-                raise AttributeError("Collector doesn't have collect_all method")
+                if event.found:
+                    parser_state["found_estimate"] = event.found
+
+                _учесть_ход(parser_state, event, max_pages or 10)
+
+                # В базу уходит тот же процент, что показан из памяти:
+                # после перезапуска приложения экран читает его оттуда,
+                # и двух разных чисел у одного сбора быть не должно.
+                if run_id:
+                    progress_storage.update_run_progress(
+                        run_id=run_id,
+                        collected=event.collected,
+                        current_keyword=event.keyword,
+                        current_page=event.page,
+                        found_estimate=event.found,
+                        percent=parser_state["progress"],
+                    )
+
+            collector = VacancyCollector(
+                client=api_client,
+                max_pages=max_pages,
+                days_back=days_back,
+                use_cache=use_cache,
+                incremental=incremental,
+                резать_упёршиеся=глубоко,
+                on_progress=on_progress
+            )
+
+            # Ссылка на идущий сбор: по ней остановка доходит до
+            # коллектора напрямую, без опроса общего словаря состояния.
+            active_collector = collector
+
+            result = collector.collect_all(
+                keywords=keywords, save_raw=True, пройденные=пропустить
+            )
 
             parser_state["progress"] = 100
             parser_state["status"] = "completed"
@@ -719,15 +1784,60 @@ def start_parser(
                     status="completed",
                     vacancies_collected=result.get("unique", 0),
                     vacancies_new=result.get("new", 0),
-                    vacancies_updated=result.get("updated", 0)
+                    vacancies_updated=result.get("updated", 0),
+                    # Сбор удался, но тексты описаний не записались:
+                    # статус остаётся «завершён», а причина названа —
+                    # иначе о потере узнают, когда тексты понадобятся.
+                    error_message=(
+                        f"Вакансии сохранены, тексты описаний — нет: {result['отказ_текстов']}"
+                        if result.get("отказ_текстов") else None
+                    ),
                 )
+                # Разбивка по запросам: из общего числа не видно, какой
+                # запрос упал, какой прочитан не до конца, а какой просто
+                # не принёс нового.
+                storage.save_run_queries(
+                    parser_state["parser_run_id"],
+                    result.get("by_keyword", {})
+                )
+                # Годится ли собранное для аналитики. Считается по
+                # записям этого запуска: качество базы меняется медленно
+                # и прячет ухудшение сегодняшнего сбора.
+                storage.save_run_quality(
+                    parser_state["parser_run_id"],
+                    result.get("качество", {})
+                )
+                # Точка истории: тренды считаются разницей между двумя
+                # снимками, а не сравнением периодов внутри одного среза
+                # базы — второе даёт затухание архива вместо динамики.
+                # Курс обновляем здесь же: рублёвый эквивалент считается
+                # по курсу на дату сбора, значит свежий курс нужен именно
+                # к моменту, когда данные обновились. Отказ ЦБ сбор не
+                # роняет — остаются прежние курсы с честной датой.
+                storage.refresh_currency_rates()
+                storage.save_metrics_snapshot(run_id=parser_state["parser_run_id"])
                 storage.close()
             except Exception as db_err:
                 logger.error(f"Ошибка записи завершения парсинга в БД: {db_err}")
 
         except Exception as e:
+            import requests
+            from src.api_client import ПричинаОтказа, TooManyRequests
+
+            # Причина отказа — не текст исключения, а код, по которому
+            # интерфейс выбирает объяснение и следующий шаг.
+            причина = getattr(e, "причина", None)
+            if причина is None:
+                if isinstance(e, TooManyRequests):
+                    причина = ПричинаОтказа.СЛИШКОМ_ЧАСТО
+                elif isinstance(e, requests.RequestException):
+                    причина = ПричинаОтказа.СЕТЬ
+                else:
+                    причина = ПричинаОтказа.НЕИЗВЕСТНО
+
             parser_state["status"] = "error"
             parser_state["error_message"] = str(e)
+            parser_state["error_type"] = причина
             parser_state["completed_at"] = datetime.now().isoformat()
 
             # Завершаем запись парсинга в БД (ошибка)
@@ -736,13 +1846,19 @@ def start_parser(
                 storage.complete_parser_run(
                     run_id=parser_state["parser_run_id"],
                     status="error",
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=parser_state.get("error_type")
                 )
                 storage.close()
             except Exception as db_err:
                 logger.error(f"Ошибка записи ошибки парсинга в БД: {db_err}")
 
         finally:
+            try:
+                progress_storage.close()
+            except Exception:
+                pass
+            active_collector = None
             parser_state["is_running"] = False
             parser_state["stop_requested"] = False
 
@@ -771,7 +1887,34 @@ def get_parser_history(limit: int = 20):
     storage = VacancyStorage()
     try:
         history = storage.get_parser_runs_history(limit=limit)
-        return {"history": history}
+        # К каждой записи — разбивка по запросам. Она объясняет итог:
+        # почему собрано столько и что помешало собрать больше.
+        for run in history:
+            run["queries"] = storage.get_run_queries(run["id"])
+            # Что сбор не увидел. Пометка «partial» говорила об этом
+            # словом, которого человек не знает, и не называла размер
+            # потери: по запросу с несколькими тысячами вакансий мы
+            # читаем первую тысячу, и итог сбора выглядит как весь рынок.
+            run["недобор"] = сводка_недобора(run["queries"])
+
+        # Качество собранного — рядом с числом собранного.
+        #
+        # «Собрано 1891» ничего не говорит о том, годятся ли эти записи
+        # для аналитики. Карточка вакансии даёт 14,7 навыка против 2,4
+        # без неё, и доля записей без карточки — прямой ответ на вопрос,
+        # почему навыков мало. Раньше это можно было узнать только
+        # запросом к базе руками.
+        df = storage.get_all_vacancies(include_inactive=True)
+        качество = {"всего": 0, "с_карточкой": 0, "без_навыков": 0}
+        if not df.empty:
+            с_карточкой = int(df["has_details"].fillna(0).astype(bool).sum())
+            качество = {
+                "всего": len(df),
+                "с_карточкой": с_карточкой,
+                "без_навыков": int((df["skill_count"].fillna(0) == 0).sum()),
+            }
+
+        return {"history": history, "качество": качество}
     finally:
         storage.close()
 
@@ -815,22 +1958,23 @@ def set_user_email(email_data: dict):
 
     user_settings["hh_user_email"] = email
 
-    # Сохраняем email в .env для сохранения между перезапусками сервера
+    # Почта сохраняется в базу, а не заменой строки в .env.
+    #
+    # Прежде она дописывалась в файл окружения регулярным выражением:
+    # под замену попадала любая строка с HH_USER_EMAIL, включая
+    # закомментированную, а при сбое записи файл оставался испорченным.
+    # Настройке место в базе — файл окружения задаёт первичные значения
+    # и дальше не меняется.
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
     try:
-        if _ENV_PATH.exists():
-            content = _ENV_PATH.read_text(encoding="utf-8")
-        else:
-            content = ""
-
-        if "HH_USER_EMAIL=" in content:
-            content = re.sub(r'HH_USER_EMAIL=.*', f'HH_USER_EMAIL={email}', content)
-        else:
-            content += f"\nHH_USER_EMAIL={email}\n"
-
-        _ENV_PATH.write_text(content, encoding="utf-8")
-        logger.info(f"Email сохранён в .env: {email}")
+        storage.save_collection_settings(email=email)
     except Exception as e:
-        logger.warning(f"Не удалось записать email в .env: {e}")
+        logger.error(f"Не удалось сохранить почту: {e}")
+        raise HTTPException(500, "Почта не сохранена")
+    finally:
+        storage.close()
 
     logger.info(f"Email пользователя установлен: {email}")
     return {"message": "Email сохранён", "email": email}
@@ -839,17 +1983,104 @@ def set_user_email(email_data: dict):
 # API для отчётов
 # =============================================================================
 
+# Разобранные срезы готовых файлов: ключ — имя, размер и время правки.
+#
+# Срез читается из самого файла, и открывать десяток xlsx на каждый
+# запрос списка незачем: файл, у которого не изменились ни размер, ни
+# время правки, не изменился и внутри. Перезапись файла тем же именем
+# кэш не обманет — время правки станет другим.
+_срезы_файлов: dict = {}
+
+
+def _срез_файла(путь, размер: int, изменён: float) -> dict:
+    from src.report_xlsx import прочитать_срез
+
+    ключ = (путь.name, размер, изменён)
+    if ключ not in _срезы_файлов:
+        # Кэш растёт по числу файлов в папке, а не по числу запросов:
+        # прежние ключи того же имени больше не нужны.
+        for прежний in [к for к in _срезы_файлов if к[0] == путь.name]:
+            _срезы_файлов.pop(прежний, None)
+        _срезы_файлов[ключ] = прочитать_срез(путь)
+    return _срезы_файлов[ключ]
+
+
+def _состояние_файла(имя, создан, сейчас, свой, срок, предупредить_за) -> dict:
+    """
+    Состояние файла одним словом и сколько ему осталось.
+
+    «Истекает» получает только файл, которого уборка действительно
+    коснётся. Экспорт и выгрузки прежних анализаторов срок не трогает,
+    и пометить их истекающими значило бы пообещать то, чего не будет.
+    """
+    if not свой(имя):
+        return {"state": "ready", "expires_in_days": None}
+    осталось = срок - int((сейчас - создан) // 86400)
+    return {
+        "state": "expiring" if осталось <= предупредить_за else "ready",
+        "expires_in_days": max(осталось, 0),
+    }
+
+
 @app.get("/api/reports/list")
 def list_reports():
+    """
+    Готовые файлы: чем каждый является, а не только как назван.
+
+    Имя файла несёт дату сборки и больше ничего: по списку нельзя было
+    понять, собран файл по всей базе или по выборке из восемнадцати
+    вакансий. Объём и условия читаются из листа «Срез» внутри файла —
+    там они уже есть, и там их нельзя разойтись с содержимым.
+
+    CSV в списке наравне с XLSX: выгрузка со экрана «Вакансии» кладёт
+    файл в ту же папку, а список его не показывал — человек искал его в
+    файловой системе.
+    """
     from src.config import settings
     from datetime import datetime
 
-    reports_dir = settings.reports_dir
-    if not reports_dir.exists():
-        return {"reports": []}
+    from src.report_xlsx import (
+        ПРЕДУПРЕДИТЬ_ЗА_ДНЕЙ, СРОК_ХРАНЕНИЯ_ДНЕЙ, собран_продуктом, убрать_устаревшие,
+    )
 
-    reports = [{"name": f.name, "size": f.stat().st_size, "created_at": datetime.fromtimestamp(f.stat().st_ctime).isoformat()} for f in reports_dir.glob("*.xlsx")]
-    return {"reports": sorted(reports, key=lambda x: x["created_at"], reverse=True)}
+    reports_dir = settings.reports_dir
+    хранение = {"days": СРОК_ХРАНЕНИЯ_ДНЕЙ, "removed": []}
+    if not reports_dir.exists():
+        return {"reports": [], "retention": хранение}
+
+    # Уборка по сроку — здесь, при обращении к списку: таймер внутри
+    # процесса пропускал бы её ровно тогда, когда приложение месяц не
+    # запускали. Убранное называется в ответе: файл, исчезнувший из
+    # списка молча, выглядит как потеря.
+    хранение["removed"] = убрать_устаревшие(reports_dir)
+    сейчас = datetime.now().timestamp()
+
+    reports = []
+    for f in sorted(reports_dir.iterdir()):
+        if not f.is_file() or f.suffix.lower() not in (".xlsx", ".csv"):
+            continue
+        сведения = f.stat()
+        срез = _срез_файла(f, сведения.st_size, сведения.st_mtime)
+        reports.append({
+            "name": f.name,
+            "size": сведения.st_size,
+            "created_at": datetime.fromtimestamp(сведения.st_ctime).isoformat(),
+            # Пустые поля у файла, который продукт не собирал: экран
+            # покажет прочерк, а не выдуманный срез.
+            "vacancies": срез.get("вакансий"),
+            "slice": срез.get("срез"),
+            "data_collected": срез.get("данные_собраны"),
+            "period": срез.get("период"),
+            **_состояние_файла(
+                f.name, сведения.st_ctime, сейчас,
+                собран_продуктом, СРОК_ХРАНЕНИЯ_ДНЕЙ, ПРЕДУПРЕДИТЬ_ЗА_ДНЕЙ,
+            ),
+        })
+
+    return {
+        "reports": sorted(reports, key=lambda x: x["created_at"], reverse=True),
+        "retention": хранение,
+    }
 
 @app.get("/api/reports/download/{filename:path}")
 def download_report(filename: str):
@@ -862,24 +2093,276 @@ def download_report(filename: str):
 
     return FileResponse(path=filepath, filename=filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
+@app.delete("/api/reports/{filename:path}")
+def delete_report(filename: str):
+    """
+    Удалить готовый файл из списка.
+
+    Папка отчётов копится: собранный ради проверки файл на восемнадцать
+    вакансий лежит в ней рядом с отчётом, который отправили заказчику, и
+    отличить их глазами тем труднее, чем больше файлов. Убрать лишнее
+    можно было только из файловой системы.
+
+    Имя приходит из адреса, поэтому проверяется не подстрокой «..», а
+    итоговым путём: `%2e%2e%2f`, обратные слэши Windows и абсолютный
+    путь — всё это разные записи одного и того же обхода, и ловится он
+    только сравнением того, куда путь в итоге показывает.
+    """
+    from src.config import settings
+
+    папка = settings.reports_dir.resolve()
+    цель = (папка / filename).resolve()
+
+    if цель.parent != папка or цель.name != Path(filename).name:
+        logger.warning(f"Удаление отклонено: путь ведёт наружу — {filename!r}")
+        raise HTTPException(400, "Удалять можно только файлы из папки отчётов")
+
+    if not цель.is_file():
+        raise HTTPException(404, "Отчёт не найден")
+
+    try:
+        цель.unlink()
+    except PermissionError:
+        # Открытый в Excel файл Windows не отдаёт. Код ошибки человеку
+        # ничего не подсказывает, а «закройте его в Excel» подсказывает.
+        raise HTTPException(409, "Файл занят другой программой. Закройте его и повторите.")
+    except OSError as e:
+        logger.exception("Отчёт не удалён")
+        raise HTTPException(500, f"Файл не удалён: {e}")
+
+    for ключ in [к for к in _срезы_файлов if к[0] == цель.name]:
+        _срезы_файлов.pop(ключ, None)
+
+    logger.info(f"Отчёт удалён: {цель.name}")
+    return {"deleted": цель.name}
+
+
+# Состояние сборки отчёта — в памяти процесса.
+#
+# Сборка живёт секунды и не переживает перезапуск приложения осмысленно:
+# после него файл всё равно не появится, и «идёт» из базы было бы ложью.
+# Поэтому здесь, в отличие от сбора вакансий, базы нет.
+состояние_отчёта = {
+    "status": "idle",        # idle | running | done | error
+    "started_at": None,
+    "finished_at": None,
+    "file": None,            # имя готового файла
+    "vacancies": None,       # сколько вакансий вошло в файл
+    "error": None,           # причина отказа словами
+}
+
+
+def _причина_отказа(ошибка: Exception) -> str:
+    """Отказ сборки словами, которые что-то говорят человеку.
+
+    «PermissionError: [Errno 13]» не подсказывает следующего шага, а
+    «файл открыт в Excel» — подсказывает. Причины, которые нельзя
+    назвать точно, честно называются общими словами: выдумывать
+    объяснение хуже, чем признать, что оно неизвестно.
+    """
+    if isinstance(ошибка, PermissionError):
+        return ("Файл отчёта занят другой программой. Закройте его в Excel "
+                "и соберите заново.")
+    if isinstance(ошибка, (FileNotFoundError, NotADirectoryError)):
+        return "Папка для отчётов недоступна. Проверьте путь в настройках."
+    if isinstance(ошибка, OSError) and getattr(ошибка, "errno", None) == 28:
+        return "На диске не осталось места для файла отчёта."
+    if isinstance(ошибка, MemoryError):
+        return "Не хватило памяти на сборку файла. Попробуйте сузить выборку."
+    return f"Сборка прервалась: {ошибка}"
+
+
+def _статус_отчёта():
+    """Копия состояния: вызывающий не должен править его случайно."""
+    return dict(состояние_отчёта)
+
+
+# Ниже этого числа выборка не годится для отчёта как документа: медианы
+# по десяти вакансиям — не показатель рынка, а листы «Сводка» и «Навыки»
+# получаются из двух строк. Собрать всё равно можно — предупреждение, а
+# не запрет: срез на пять вакансий бывает нужен для проверки.
+МАЛАЯ_ВЫБОРКА_ОТЧЁТА = 10
+
+
+@app.get("/api/reports/status")
+def report_status():
+    """
+    Состояние сборки отчёта: idle, running, done или error.
+
+    Кнопка «Собрать отчёт» отвечала «Генерация запущена» и замолкала.
+    Сборка идёт секунды и может отказать — человек об этом не узнавал:
+    файл просто не появлялся в списке, и было непонятно, ждать ещё или
+    уже нет.
+    """
+    return _статус_отчёта()
+
+
+@app.get("/api/reports/preview")
+def предпросмотр_отчёта(
+    search: str = "",
+    area: str = "",
+    experience: str = "",
+    skill: str = "",
+    currency: str = "",
+    source: str = "",
+    salary_only: bool = False,
+    include_inactive: bool = False,
+):
+    """
+    Что попадёт в файл, если собрать отчёт по этой выборке.
+
+    Отдельным ответом, а не догадкой на экране: человек должен видеть
+    состав файла до сборки. Отчёт по трём вакансиям — потраченное время
+    и файл, который стыдно отправить, а понять это после сборки дороже,
+    чем до.
+
+    Фильтры те же и применяются той же функцией, что список и сборка:
+    третьей копии условий в продукте быть не должно.
+    """
+    from src.report_xlsx import состав_файла
+    from src.storage import VacancyStorage
+
+    фильтры = Фильтры(
+        поиск=search, регион=area, опыт=experience, навык=skill,
+        валюта=currency, источник=source,
+        только_с_зарплатой=salary_only, включая_снятые=include_inactive,
+    )
+
+    storage = VacancyStorage()
+    try:
+        отобранное = отобрать(
+            storage.get_all_vacancies(include_inactive=include_inactive), фильтры
+        )
+    finally:
+        storage.close()
+
+    состав = состав_файла(отобранное)
+    return {
+        **состав,
+        "срез": словами(фильтры, всего=состав["вакансий"]),
+        "малая_выборка_от": МАЛАЯ_ВЫБОРКА_ОТЧЁТА,
+    }
+
+
 @app.post("/api/reports/generate")
-def generate_report(background_tasks: BackgroundTasks):
+def generate_report(
+    background_tasks: BackgroundTasks,
+    search: str = "",
+    area: str = "",
+    experience: str = "",
+    skill: str = "",
+    currency: str = "",
+    source: str = "",
+    salary_only: bool = False,
+    include_inactive: bool = False,
+):
+    """
+    Собрать отчёт по текущей выборке экрана.
+
+    Фильтры те же, что у списка вакансий, и применяются той же функцией:
+    человек настроил выборку и должен получить файл ровно по ней, а не по
+    всей базе. Без параметров собирается вся база — как раньше.
+    """
+    from src.storage import VacancyStorage
+
+    фильтры = Фильтры(
+        поиск=search, регион=area, опыт=experience, навык=skill,
+        валюта=currency, источник=source,
+        только_с_зарплатой=salary_only, включая_снятые=include_inactive,
+    )
+
+    if состояние_отчёта["status"] == "running":
+        # Второй запуск поверх первого дал бы два файла с одинаковым
+        # именем и гонку за него.
+        return {**_статус_отчёта(), "accepted": False,
+                "error": "Отчёт уже собирается. Дождитесь, пока файл появится в списке."}
+
+    # Пустой отчёт не собирается: файл из нулевых строк выглядит как
+    # поломка отчёта, а не как пустая база.
+    storage = VacancyStorage()
+    try:
+        отобранное = отобрать(
+            storage.get_all_vacancies(include_inactive=include_inactive), фильтры
+        )
+        пусто = отобранное.empty
+    finally:
+        storage.close()
+
+    if пусто:
+        # Пустая выборка и пустая база — разные беды, и лечатся по-разному:
+        # в первом случае надо ослабить фильтр, во втором собрать данные.
+        причина = (
+            "По этим фильтрам вакансий нет. Ослабьте условия — отчёт собирается по выборке."
+            if not фильтры.пусты else
+            "В базе нет вакансий. Сначала соберите данные — отчёт собирается по ним."
+        )
+        состояние_отчёта.update({
+            "status": "error",
+            "finished_at": datetime.now().isoformat(),
+            "file": None,
+            "vacancies": 0,
+            "error": причина,
+        })
+        return {**_статус_отчёта(), "accepted": False}
+
     def run():
         from src.storage import VacancyStorage
-        from src.analyzer import VacancyAnalyzer
-        from src.advanced_analyzer import AdvancedAnalytics
+        from src.report_xlsx import описать_срез, собрать_отчёт
 
         storage = VacancyStorage()
         try:
-            df = storage.get_all_vacancies()
-            if not df.empty:
-                VacancyAnalyzer(df).generate_excel_report()
-                AdvancedAnalytics(df).generate_detailed_excel_report()
+            df = отобрать(
+                storage.get_all_vacancies(include_inactive=include_inactive), фильтры
+            )
+
+            # Когда собраны данные — из последнего сбора, а не из времени
+            # сборки файла: отчёт может собираться спустя неделю после
+            # сбора, и получателю важна дата данных, а не дата файла.
+            последний = storage.get_last_parser_run()
+            завершён = последний.get("completed_at") if последний else None
+            собран = None
+            if завершён:
+                момент = pd.to_datetime(завершён, errors="coerce")
+                собран = f"{момент:%d.%m.%Y, %H:%M}" if pd.notna(момент) else None
+
+            путь = собрать_отчёт(df, срез=описать_срез(
+                df,
+                # Условия словами: получатель файла не видел экрана, с
+                # которого отчёт собран, и «активные вакансии» врали бы
+                # про выборку по фильтру.
+                фильтры=словами(фильтры),
+                данные_собраны=собран,
+            ))
+            состояние_отчёта.update({
+                "status": "done",
+                "finished_at": datetime.now().isoformat(),
+                "file": путь.name,
+                "vacancies": len(df),
+                "error": None,
+            })
+        except Exception as e:
+            # Причина словами, а не кодом: человек читает тост, а не лог.
+            # Тип исключения остаётся в логе — там он и нужен.
+            logger.exception("Отчёт не собрался")
+            состояние_отчёта.update({
+                "status": "error",
+                "finished_at": datetime.now().isoformat(),
+                "file": None,
+                "error": _причина_отказа(e),
+            })
         finally:
             storage.close()
 
+    состояние_отчёта.update({
+        "status": "running",
+        "started_at": datetime.now().isoformat(),
+        "finished_at": None,
+        "file": None,
+        "vacancies": None,
+        "error": None,
+    })
     background_tasks.add_task(run)
-    return {"message": "Генерация запущена"}
+    return {**_статус_отчёта(), "accepted": True}
 
 @app.get("/api/export/vacancies")
 def export_vacancies(format: str = "csv"):
@@ -915,6 +2398,90 @@ def export_vacancies(format: str = "csv"):
 # Кэш для каталога профессий
 _professions_catalog_cache = None
 
+# Сколько вакансий в базе стоит за каждой профессией справочника.
+#
+# Справочник — снимок: он перечисляет профессии рынка и несёт числа того
+# сбора, при котором был составлен. База с тех пор собиралась по другим
+# запросам, и её содержимое со справочником разошлось: из 1339 профессий
+# вакансии находились у 108, а 65 % собранных вакансий не попадали ни в
+# одну профессию. Человек выбирал профессию и попадал в пустоту, потому
+# что число рядом с ней описывало прошлое.
+#
+# Поэтому число считается по текущей базе, а не читается из файла.
+_счёт_профессий_кэш = {"ключ": None, "значения": {}}
+
+
+def _счёт_вакансий_по_профессиям(df, профессии):
+    """
+    Сопоставление профессий справочника с названиями вакансий.
+
+    Совпадением считается название профессии, стоящее в названии
+    вакансии отдельным словом, — с окончанием не длиннее двух букв.
+    Это компромисс между двумя способами промахнуться:
+
+    - подстрока без границ ловит чужие слова: «Логист» находится внутри
+      «Логистика», «IT» — внутри «Retail» и «Digital»;
+    - строгая граница слова теряет словоформы: «Менеджеров» и
+      «Аналитики» перестают считаться, а это те же профессии.
+
+    Полного разбора морфологии здесь не делается намеренно: он потребует
+    словаря и всё равно будет ошибаться на английских названиях, которых
+    в выдаче половина.
+    """
+    названия = df["vacancy_name"].fillna("").str.lower().tolist() if not df.empty else []
+
+    счёт = {}
+    for профессия in профессии:
+        имя = (профессия.get("name") or "").strip().lower()
+        if not имя:
+            счёт[профессия.get("key")] = 0
+            continue
+        шаблон = re.compile(r"(?<!\w)" + re.escape(имя) + r"\w{0,2}(?!\w)")
+        счёт[профессия["key"]] = sum(1 for название in названия if шаблон.search(название))
+
+    return счёт
+
+
+def _профессии_с_числами():
+    """
+    Профессии справочника с актуальным числом вакансий.
+
+    Полный проход по 1339 профессиям занимает около секунды, поэтому
+    результат кэшируется до следующего изменения базы: ключом служит
+    объём базы и момент последнего сбора.
+    """
+    from src.storage import VacancyStorage
+
+    каталог = _load_professions_catalog()
+    профессии = list(каталог.get("professions", {}).values())
+    if not профессии:
+        return []
+
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        последний = storage.get_last_parser_run(only_successful=True)
+    finally:
+        storage.close()
+
+    ключ = (len(df), (последний or {}).get("completed_at"))
+    if _счёт_профессий_кэш["ключ"] != ключ:
+        _счёт_профессий_кэш["значения"] = _счёт_вакансий_по_профессиям(df, профессии)
+        _счёт_профессий_кэш["ключ"] = ключ
+
+    счёт = _счёт_профессий_кэш["значения"]
+
+    # Число из справочника сохраняется отдельным полем: оно говорит,
+    # сколько вакансий было у профессии при составлении справочника, и
+    # его исчезновение выглядело бы как потеря данных.
+    return [
+        {**профессия,
+         "vacancies_count": счёт.get(профессия["key"], 0),
+         "catalog_count": профессия.get("vacancies_count", 0)}
+        for профессия in профессии
+    ]
+
+
 def _load_professions_catalog():
     """Загрузить каталог профессий из файла."""
     global _professions_catalog_cache
@@ -940,10 +2507,18 @@ def get_professions_list(
     search: Optional[str] = None,
     limit: int = 100
 ):
-    """Получить список профессий с фильтрами."""
+    """
+    Список профессий справочника.
+
+    Список остаётся полным: раздел нужен и тому, кто ещё не знает, в
+    какую сторону смотреть, — прятать от него профессии значило бы
+    прятать сами направления. Но число рядом с профессией берётся из
+    текущей базы, а не из файла, и профессия без вакансий это честно
+    показывает вместо обещания, которого не выполнит.
+    """
     catalog = _load_professions_catalog()
 
-    professions = list(catalog.get("professions", {}).values())
+    professions = _профессии_с_числами()
 
     # Фильтр по домену
     if domain:
@@ -958,16 +2533,22 @@ def get_professions_list(
         search_lower = search.lower()
         professions = [p for p in professions if search_lower in p.get("name", "").lower()]
 
-    # Сортировка по количеству вакансий
-    professions.sort(key=lambda x: x.get("vacancies_count", 0), reverse=True)
+    # Сначала профессии, по которым есть данные, — от больших выборок к
+    # малым; следом остальные по алфавиту. Иначе тысяча пустых строк
+    # ложится сверху и до собранного никто не долистает.
+    professions.sort(key=lambda p: (-p.get("vacancies_count", 0), p.get("name", "")))
 
-    # Ограничение
+    с_данными = sum(1 for p in professions if p.get("vacancies_count", 0) > 0)
+    всего_подходит = len(professions)
+
     professions = professions[:limit]
 
-    # Форматируем ответ
     return {
         "professions": professions,
-        "total": len(professions),
+        "total": всего_подходит,
+        # Сколько из них не обещают пустоты — фильтры на экране считают
+        # по этому числу, а не по длине показанной страницы.
+        "with_data": с_данными,
         "domains": catalog.get("domains", {}),
         "areas": catalog.get("areas", {})
     }
@@ -1137,49 +2718,24 @@ def get_kpi_metrics(
                 "last_updated": datetime.now().isoformat()
             }
 
-        # === Применяем фильтры ===
+        # === Фильтры среза ===
+        # Период применяется отдельно от прочих фильтров: предыдущее окно
+        # должно отбираться теми же условиями, но другими датами.
+        if "published_at" in df.columns:
+            df["published_at"] = pd.to_datetime(df["published_at"], errors="coerce")
 
-        # Фильтр по периоду
-        if period and period != "all_time":
-            if 'published_at' in df.columns:
-                df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce')
-                # Получаем часовой пояс из колонки published_at
-                tz = df['published_at'].dt.tz
-                now = pd.Timestamp.now(tz=tz) if tz else datetime.now()
-                if period == "today":
-                    df = df[df['published_at'] >= now.replace(hour=0, minute=0, second=0, microsecond=0)]
-                elif period == "week":
-                    df = df[df['published_at'] >= now - timedelta(days=7)]
-                elif period == "month":
-                    df = df[df['published_at'] >= now - timedelta(days=30)]
-                elif period == "quarter":
-                    df = df[df['published_at'] >= now - timedelta(days=90)]
-                elif period == "year":
-                    df = df[df['published_at'] >= now - timedelta(days=365)]
+        df = apply_vacancy_filters(df, domain, regions, experience, salary_only)
 
-        # Фильтр по домену (если есть колонка domain/profession)
-        if domain:
-            if 'domain' in df.columns:
-                df = df[df['domain'].str.contains(domain, case=False, na=False)]
-            elif 'profession' in df.columns:
-                df = df[df['profession'].str.contains(domain, case=False, na=False)]
+        windows = period_windows(df, period)
+        previous = None
+        trend_blocked = None
 
-        # Фильтр по регионам
-        if regions:
-            region_list = [r.strip() for r in regions.split(',')]
-            if 'area' in df.columns:
-                mask = df['area'].str.contains('|'.join(region_list), case=False, na=False)
-                df = df[mask]
-
-        # Фильтр по опыту
-        if experience:
-            if 'experience' in df.columns:
-                df = df[df['experience'] == experience]
-
-        # Фильтр только с зарплатой
-        if salary_only:
-            if 'salary_from' in df.columns:
-                df = df[df['salary_from'].notna()]
+        if windows:
+            current_start, current_end, previous_start = windows
+            trend_blocked = trend_reliability(df, previous_start)
+            if trend_blocked is None:
+                previous = slice_period(df, previous_start, current_start)
+            df = slice_period(df, current_start, current_end)
 
         if df.empty:
             return {
@@ -1195,95 +2751,105 @@ def get_kpi_metrics(
                 "last_updated": datetime.now().isoformat()
             }
 
-        # === Расчёт метрик ===
+        # === Метрики и тренды ===
+        now_values = collect_kpi_values(df)
+        prev_values = collect_kpi_values(previous) if previous is not None and not previous.empty else {}
 
-        # 1. Средняя зарплата
-        salary_df = df[df['salary_from'].notna()]
-        avg_salary = float(salary_df['salary_from'].mean()) if not salary_df.empty else 0
+        # Тренды по снимкам — если они есть.
+        #
+        # Сравнение периодов внутри одного среза базы завышает свежие дни:
+        # источник отдаёт только открытые вакансии, и старые дни к моменту
+        # сбора успевают опустеть. Два снимка, снятых в разные дни,
+        # сравнивать можно — каждый зафиксировал состояние на свою дату.
+        снимки = _тренды_по_снимкам()
+        if снимки:
+            # Объяснение снимается только по тем метрикам, которые
+            # снимки действительно покрыли. Прочерк без объяснения хуже
+            # прочерка с объяснением: человек видит пустоту и не знает,
+            # это поломка или свойство данных.
+            покрыты = set(снимки)
+            все_нужные = {"total_vacancies", "unique_companies", "unique_regions", "median_salary"}
+            непокрытые = все_нужные - покрыты
 
-        # 2. Медианная зарплата
-        median_salary = float(salary_df['salary_from'].median()) if not salary_df.empty else 0
+            if not непокрытые:
+                trend_blocked = None
+            elif непокрытые == {"median_salary"}:
+                trend_blocked = (
+                    "зарплатные тренды появятся после второго сбора: "
+                    "восстановленные точки истории хранят только счётные метрики"
+                )
+            else:
+                trend_blocked = (
+                    "часть трендов появится после второго сбора: "
+                    "восстановленные точки истории знают, сколько было вакансий, "
+                    "но не сколько из них оставались открытыми"
+                )
 
-        # 3. Всего вакансий
-        total_vacancies = len(df)
+        # Тренд считается по дате публикации вакансии, а не по дате сбора:
+        # база знает только те вакансии, которые мы успели собрать, и это
+        # ограничение названо в ответе, чтобы интерфейс мог его показать.
+        if not windows:
+            trend_basis = None
+        elif trend_blocked:
+            trend_basis = None
+        else:
+            trend_basis = f"к предыдущим {PERIOD_DAYS[period]} дням по дате публикации"
 
-        # 4. Навыков найдено (сумма всех навыков)
-        total_skills = int(df['skill_count'].sum()) if 'skill_count' in df.columns else 0
+        def metric(key, extra=None):
+            value = now_values.get(key)
 
-        # 5. Уникальных компаний
-        unique_companies = df['employer_name'].nunique() if 'employer_name' in df.columns else 0
+            # Снимок точнее среза: если по метрике есть две точки
+            # истории, тренд берётся оттуда.
+            если_из_снимков = снимки.get(key) if снимки else None
+            if если_из_снимков:
+                payload = {"value": value, **если_из_снимков}
+            else:
+                payload = {"value": value, **trend_of(value, prev_values.get(key))}
 
-        # 6. Уникальных регионов
-        unique_regions = df['area'].nunique() if 'area' in df.columns else 0
+            if extra:
+                payload.update(extra)
+            return payload
 
-        # 7. Hard Skills (подсчёт уникальных)
-        hard_skills_set = set()
-        if 'hard_skills' in df.columns:
-            for skills_str in df['hard_skills'].dropna():
-                if isinstance(skills_str, str):
-                    skills = [s.strip() for s in skills_str.split(',')]
-                    hard_skills_set.update([s for s in skills if s])
-        hard_skills_count = len(hard_skills_set)
+        # Объём выборки идёт рядом с зарплатными метриками: медиана по трём
+        # вакансиям и по восьмидесяти — разные по надёжности числа.
+        salary_extra = {"currency": "RUB", "sample": now_values["salary_sample"]}
 
-        # 8. Soft Skills (подсчёт уникальных)
-        soft_skills_set = set()
-        if 'soft_skills' in df.columns:
-            for skills_str in df['soft_skills'].dropna():
-                if isinstance(skills_str, str):
-                    skills = [s.strip() for s in skills_str.split(',')]
-                    soft_skills_set.update([s for s in skills if s])
-        soft_skills_count = len(soft_skills_set)
-
-        # === Расчёт трендов (сравнение с предыдущим периодом) ===
-        # Для демо используем случайные значения (в продакшене — сравнение дат)
-        import random
-        def calc_trend(current_value, min_percent=-20, max_percent=30):
-            """Генерация тренда для демо"""
-            trend_percent = random.uniform(min_percent, max_percent)
-            direction = "up" if trend_percent > 0 else "down" if trend_percent < 0 else "same"
-            return {
-                "trend_percent": round(abs(trend_percent), 1),
-                "trend_direction": direction
-            }
+        # У медианы по эквиваленту тренда нет и не будет, пока снимки не
+        # начнут хранить курс своего дня (К4‑4a): сравнивать сегодняшний
+        # эквивалент с прошлогодним по сегодняшнему курсу — значит
+        # выдавать падение рубля за рост зарплат. Прочерк с объяснением
+        # честнее числа, посчитанного не тем способом.
+        курсы_для_подписи = _курс_для_ответа()
+        эквивалент_extra = {
+            "currency": "RUB",
+            "basis": "equivalent",
+            "sample": now_values["salary_sample_rub"],
+            "rate_date": курсы_для_подписи,
+            "trend_unavailable": "Тренд появится, когда снимки начнут хранить курс своего дня",
+        }
 
         return {
             "metrics": {
-                "avg_salary": {
-                    "value": round(avg_salary, 2),
-                    "currency": "RUB",
-                    **calc_trend(avg_salary, -10, 25)
+                "median_salary": metric("median_salary", salary_extra),
+                "median_salary_rub": {
+                    "value": now_values["median_salary_rub"],
+                    **эквивалент_extra,
                 },
-                "median_salary": {
-                    "value": round(median_salary, 2),
-                    "currency": "RUB",
-                    **calc_trend(median_salary, -5, 20)
-                },
-                "total_vacancies": {
-                    "value": total_vacancies,
-                    **calc_trend(total_vacancies, -15, 40)
-                },
-                "total_skills": {
-                    "value": total_skills,
-                    **calc_trend(total_skills, 0, 50)
-                },
-                "unique_companies": {
-                    "value": unique_companies,
-                    **calc_trend(unique_companies, -10, 30)
-                },
-                "unique_regions": {
-                    "value": unique_regions,
-                    **calc_trend(unique_regions, 0, 15)
-                },
-                "hard_skills_count": {
-                    "value": hard_skills_count,
-                    **calc_trend(hard_skills_count, 0, 40)
-                },
-                "soft_skills_count": {
-                    "value": soft_skills_count,
-                    **calc_trend(soft_skills_count, 0, 30)
-                }
+                "total_vacancies": metric("total_vacancies"),
+                "total_skills": metric("total_skills"),
+                "unique_companies": metric("unique_companies"),
+                "unique_regions": metric("unique_regions"),
+                "hard_skills_count": metric("hard_skills_count"),
+                "soft_skills_count": metric("soft_skills_count")
             },
             "period": period,
+            "trend_basis": trend_basis,
+            "trend_unavailable": trend_blocked,
+            "sample": {
+                "vacancies": now_values["total_vacancies"],
+                "with_salary": now_values["salary_sample"],
+                "min_required": MIN_SAMPLE
+            },
             "filters": {
                 "period": period,
                 "domain": domain,
@@ -1297,9 +2863,73 @@ def get_kpi_metrics(
     finally:
         storage.close()
 
+@app.get("/api/analytics/new-by-month")
+def new_vacancies_by_month(months: int = 12):
+    """
+    Сколько новых вакансий приносил каждый месяц.
+
+    Считается по `first_seen_at` — дате, когда вакансия впервые попала в
+    базу, а не по дате публикации. Источник отдаёт только открытые
+    вакансии: те, что закрылись, из выдачи исчезают. Ряд по дате
+    публикации поэтому показывал бы вымирающий рынок — в старых месяцах
+    остались бы только долгоживущие вакансии, — хотя дело лишь в том, что
+    остальные успели закрыться.
+
+    Это ряд о том, что видел сбор, а не о том, что происходило на рынке:
+    месяцы до первого сбора пусты не потому, что вакансий не было.
+    """
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies(include_inactive=True)
+    finally:
+        storage.close()
+
+    months = max(1, min(months, 60))
+    сейчас = pd.Timestamp.now()
+    текущий = сейчас.to_period("M")
+    сетка = pd.period_range(end=текущий, periods=months, freq="M")
+
+    ряд = []
+    known = pd.Series(dtype="int64")
+    без_даты = 0
+
+    if not df.empty and "first_seen_at" in df.columns:
+        даты = pd.to_datetime(df["first_seen_at"], errors="coerce", format="mixed")
+        без_даты = int(даты.isna().sum())
+        known = даты.dropna().dt.to_period("M").value_counts()
+
+    for месяц in сетка:
+        # Месяц без данных отдаётся нулём, а не пропускается: пропуск
+        # сжимает ось, и на графике два соседних столбца оказываются
+        # рядом, хотя между ними полгода.
+        ряд.append({
+            "month": str(месяц),
+            "label": месяц.strftime("%m.%Y"),
+            "count": int(known.get(месяц, 0)),
+            # Текущий месяц ещё не кончился, и его столбец всегда ниже
+            # соседних. Без пометки это читается как обвал.
+            "partial": месяц == текущий,
+        })
+
+    первый = min(known.index) if len(known) else None
+
+    return {
+        "series": ряд,
+        "basis": "first_seen_at",
+        "total": int(known.sum()) if len(known) else 0,
+        # Месяцы до первого сбора пусты по построению — об этом должна
+        # сказать подпись, иначе ноль читается как «рынок стоял».
+        "collected_since": str(первый) if первый is not None else None,
+        "without_date": без_даты,
+        "current_month": str(текущий),
+    }
+
+
 @app.get("/api/analytics/top-skills")
 def get_top_skills(
-    type: str = Query("hard", pattern="^(hard|soft|tools)$"),
+    type: str = Query("hard", pattern="^(hard|soft|tools|employer)$"),
     limit: int = Query(20, ge=1, le=100),
     period: Optional[str] = Query("all_time", description="Период: today|week|month|quarter|year|all_time"),
     domain: Optional[str] = Query(None, description="Домен профессии"),
@@ -1400,10 +3030,16 @@ def get_top_skills(
 
         # Собираем все навыки
         all_skills = []
+        # Четвёртая категория — не наша: это то, что работодатель назвал
+        # сам в поле вакансии. Разложить её по hard/soft/tools не по
+        # чему — три четверти таких навыков нет в наших словарях, и
+        # категорию мы для них не знаем. Поэтому они считаются отдельно,
+        # а не растворяются в остальных.
         column_map = {
             "hard": "hard_skills",
             "soft": "soft_skills",
-            "tools": "tools"
+            "tools": "tools",
+            "employer": "employer_skills"
         }
 
         column_name = column_map.get(type)
@@ -1841,6 +3477,25 @@ def export_analytics(
         storage.close()
 
 # =============================================================================
+# Маршруты интерфейса
+#
+# Интерфейс — одностраничное приложение: адреса вроде /vacancies или
+# /reports существуют только в браузере, на сервере им ничего не
+# соответствует. Поэтому всё, что не начинается с /api, отдаёт точку
+# входа, а дальше маршрут разбирает сам интерфейс.
+#
+# Обработчик стоит последним: FastAPI проверяет маршруты по порядку
+# объявления, и объявленный раньше он перехватывал бы вызовы API.
+# =============================================================================
+
+@app.get("/{full_path:path}")
+def spa_routes(full_path: str):
+    if full_path.startswith("api/"):
+        raise HTTPException(404, "Неизвестный метод API")
+    return index_response()
+
+
+# =============================================================================
 # Запуск
 # =============================================================================
 
@@ -1851,8 +3506,8 @@ if __name__ == "__main__":
     print("🚀 HH.ru Analytics — Веб-приложение")
     print("=" * 60)
     print(f"📁 Project: {PROJECT_ROOT}")
-    print(f"📁 Static: {STATIC_DIR}")
-    print(f"✅ Static exists: {STATIC_DIR.exists()}")
+    print(f"📁 Интерфейс: {FRONTEND_DIST}")
+    print(f"✅ Сборка на месте: {FRONTEND_DIST.exists()}")
     print()
     print("🌐 Откройте в браузере:")
     print("   http://localhost:8000")

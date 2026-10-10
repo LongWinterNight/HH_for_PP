@@ -7,7 +7,10 @@ import sys
 from pathlib import Path
 
 # Добавляем корень проекта в path
-project_root = Path(__file__).parent
+# Корень проекта — два уровня вверх от scripts/maintenance/, а не
+# папка самого скрипта: со старым путём `import src` работал, только
+# если запускать из корня, и диагностика падала на третьей проверке.
+project_root = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(project_root))
 
 print("=" * 80)
@@ -50,7 +53,6 @@ required_files = [
     "src/__init__.py",
     "src/api_client.py",
     "src/collector.py",
-    "src/processor.py",
     "src/storage.py",
     "src/analyzer.py",
     "src/advanced_analyzer.py",
@@ -62,7 +64,6 @@ required_files = [
     "web/static/index.html",
     "tests/__init__.py",
     "tests/test_api_client.py",
-    "tests/test_processor.py",
     "tests/test_analyzer.py",
 ]
 
@@ -251,19 +252,22 @@ try:
 except Exception as e:
     check("VacancyCollector", False, str(e))
 
-# Processor
+# Извлечение навыков — тем же кодом, каким его делает живой сбор.
+# Раньше здесь проверялся VacancyProcessor: вторая реализация навыков,
+# удалённая 11.09.2026 (S11). Диагностика, проверяющая не то, чем
+# работает продукт, хуже отсутствующей — она успокаивает зря.
 try:
-    from src.processor import VacancyProcessor
-    processor = VacancyProcessor()
-    check("VacancyProcessor инициализация", True)
-    check("Словарь навыков", len(processor.skills_dict) > 0)
-    
-    # Тест обработки текста
-    test_text = "Требуется Python разработчик со знанием Docker и Git"
-    skills, by_category = processor._extract_skills_from_text(test_text)
-    check("Извлечение навыков", len(skills) > 0 or len(by_category.get("hard_skills", [])) > 0)
+    from src.normalize import SkillDictionaries, find_skills
+
+    словари = SkillDictionaries.from_config()
+    все_навыки = list(словари.hard) + list(словари.soft) + list(словари.tools)
+    check("Словарь навыков", len(все_навыки) > 0)
+
+    тестовый_текст = "требуется python разработчик со знанием docker и git"
+    найдено = find_skills(тестовый_текст, все_навыки)
+    check("Извлечение навыков", len(найдено) > 0)
 except Exception as e:
-    check("VacancyProcessor", False, str(e))
+    check("Извлечение навыков", False, str(e))
 
 # Storage
 try:
@@ -401,7 +405,6 @@ print("=" * 80)
 
 test_files = [
     "tests/test_api_client.py",
-    "tests/test_processor.py",
     "tests/test_analyzer.py"
 ]
 
@@ -482,7 +485,7 @@ print("""
 
 ✅ Тесты:
    - 35 тестов пройдено
-   - Покрытие: api_client, processor, analyzer
+   - Покрытие: api_client, normalize, analyzer
 """)
 
 print("=" * 80)

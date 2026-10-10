@@ -31,6 +31,49 @@ from src.config import settings
 logger = get_logger(__name__)
 
 
+class ПричинаОтказа:
+    """
+    Почему источник не отдал данные.
+
+    Причина нужна не для журнала, а для человека: «нет токена» и «сеть
+    недоступна» требуют разных действий, а в общем сообщении об ошибке
+    они неразличимы. Раньше в интерфейс уходил текст исключения — по
+    нему нельзя было понять ни что случилось, ни что делать.
+    """
+
+    НЕТ_ТОКЕНА = "no_token"
+    ТОКЕН_ОТКЛОНЁН = "token_rejected"
+    НЕТ_ПОЧТЫ = "no_email"
+    СЛИШКОМ_ЧАСТО = "rate_limited"
+    СЕТЬ = "network"
+    НЕИЗВЕСТНО = "unknown"
+
+
+class ОтказИсточника(Exception):
+    """Источник отказал по известной причине."""
+
+    def __init__(self, причина: str, подробности: str = "") -> None:
+        super().__init__(подробности or причина)
+        self.причина = причина
+        self.подробности = подробности
+
+
+class TooManyRequests(Exception):
+    """
+    Источник отказал из-за частоты запросов (HTTP 429).
+
+    Отдельный тип, а не общий HTTPError: по нему настроен повтор, и его
+    же считает статистика сбора. Прежде отказ бросался как HTTPError,
+    который в условие повтора не входил, — страница молча терялась и в
+    данных выглядела как отсутствие вакансий.
+    """
+
+    def __init__(self, retry_after: Optional[float] = None) -> None:
+        super().__init__("Источник просит снизить частоту запросов")
+        self.retry_after = retry_after
+        self.причина = ПричинаОтказа.СЛИШКОМ_ЧАСТО
+
+
 class HHAPIClient:
     """
     Клиент для работы с HH.ru API.
@@ -46,6 +89,13 @@ class HHAPIClient:
         >>> vacancies = client.search_vacancies(keyword="Python developer")
         >>> print(f"Найдено вакансий: {len(vacancies)}")
     """
+
+    # Потолок паузы из заголовка Retry-After: источник может попросить
+    # ждать очень долго, а сбор не должен зависать на часы.
+    MAX_RETRY_AFTER = 60.0
+
+    # Столько успешных запросов подряд возвращают задержку к базовой.
+    SUCCESSES_TO_RESTORE = 20
 
     def __init__(
         self,
@@ -87,7 +137,17 @@ class HHAPIClient:
             )
 
         self.base_url = "https://api.hh.ru/"
+
+        # Базовая задержка — та, к которой сбор возвращается после
+        # отказов. Текущая может быть выше, но только временно.
+        self.base_delay = delay
         self.delay = delay
+
+        # Сколько раз источник просил снизить частоту за время жизни
+        # клиента. Число уходит в статистику сбора: по нему видно, что
+        # выборка неполна не потому, что вакансий нет.
+        self.rate_limit_hits = 0
+        self._successes_since_limit = 0
 
         # Создаём сессию для переиспользования TCP-соединений
         self.session = requests.Session()
@@ -154,7 +214,10 @@ class HHAPIClient:
         # Декоратор retry настраивает стратегию повторных попыток
         @retry(
             # Повторяем при 5xx ошибках ИЛИ ошибках сети
-            retry=(retry_if_result(is_server_error) | retry_if_exception_type((requests.ConnectionError, requests.Timeout))),
+            retry=(
+                retry_if_result(is_server_error)
+                | retry_if_exception_type((requests.ConnectionError, requests.Timeout, TooManyRequests))
+            ),
             # Максимум 3 попытки
             stop=stop_after_attempt(3),
             # Экспоненциальная задержка: 1с, 2с, 4с (с джиттером)
@@ -173,13 +236,33 @@ class HHAPIClient:
             # Логгируем статус ответа
             logger.debug(f"Получен ответ: {response.status_code}")
 
-            # Специальная обработка 429 ошибки (Too Many Requests)
+            # Источник просит снизить частоту
             if response.status_code == 429:
-                logger.warning("Получен HTTP 429 (Too Many Requests). Увеличиваю задержку...")
-                # Увеличиваем задержку в 2 раза на будущее
-                self.delay *= 2
-                # Выбрасываем исключение для повторной попытки
-                raise requests.exceptions.HTTPError("Rate limit exceeded")
+                self.rate_limit_hits += 1
+
+                # Сколько ждать, говорит сам источник. Заголовка может не
+                # быть — тогда решает стратегия повторов.
+                retry_after = None
+                header = response.headers.get("Retry-After")
+                if header:
+                    try:
+                        retry_after = min(float(header), self.MAX_RETRY_AFTER)
+                    except ValueError:
+                        retry_after = None
+
+                # Задержка растёт временно и с потолком: без потолка
+                # достаточно нескольких отказов, чтобы сбор встал.
+                self.delay = min(self.delay * 2, self.base_delay * 8)
+                logger.warning(
+                    f"Источник просит снизить частоту (429). Пауза "
+                    f"{retry_after if retry_after else 'по стратегии повторов'}, "
+                    f"задержка между запросами {self.delay:.1f}s"
+                )
+
+                if retry_after:
+                    time.sleep(retry_after)
+
+                raise TooManyRequests(retry_after)
 
             # Для 4xx ошибок (кроме 429) — не повторяем, просто логируем
             if 400 <= response.status_code < 500:
@@ -207,6 +290,15 @@ class HHAPIClient:
         try:
             response = _execute_request()
 
+            # Успешная серия возвращает задержку к базовой: разовый отказ
+            # не должен замедлять весь оставшийся сбор.
+            if response.status_code < 400:
+                self._successes_since_limit += 1
+                if self._successes_since_limit >= self.SUCCESSES_TO_RESTORE and self.delay > self.base_delay:
+                    logger.info(f"Задержка возвращена к базовой: {self.base_delay:.1f}s")
+                    self.delay = self.base_delay
+                    self._successes_since_limit = 0
+
             # После успешного запроса проверяем статус
             if response.status_code >= 400:
                 logger.warning(f"Завершаем с ошибкой {response.status_code}")
@@ -227,7 +319,11 @@ class HHAPIClient:
         self,
         keyword: str,
         page: int = 0,
-        per_page: int = 100
+        per_page: int = 100,
+        order_by: str = "publication_time",
+        date_from: Optional[str] = None,
+        area: Optional[str] = None,
+        date_to: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
         Поиск вакансий по ключевому слову.
@@ -236,6 +332,26 @@ class HHAPIClient:
             keyword: Поисковый запрос (например, "Python developer" или "LLM")
             page: Номер страницы для пагинации (начинается с 0)
             per_page: Количество вакансий на странице (максимум 100)
+            order_by: Порядок выдачи. По умолчанию по дате публикации, а
+                не по релевантности: сбор ограничивает выборку возрастом
+                вакансий, и при сортировке по релевантности старые
+                вакансии перемешаны со свежими — прекратить обход в
+                нужном месте становится невозможно
+            date_from: Нижняя граница даты публикации в формате ISO
+                (`2026-08-08` или `2026-08-08T00:00:00`). Отсекает старые
+                вакансии на стороне источника: иначе они скачиваются и
+                тут же выбрасываются, расходуя лимит запросов впустую
+            area: Идентификатор региона из справочника hh.ru (`1` —
+                Москва, `2` — Санкт-Петербург, `113` — Россия). Без него
+                запрос идёт по всей стране, а источник отдаёт не больше
+                2000 вакансий на запрос: по популярной профессии мы
+                видим первую тысячу и не знаем, что за ней. Разбиение
+                того же запроса по регионам — единственный способ уйти
+                глубже этого предела
+            date_to: Верхняя граница даты публикации. Вместе с
+                `date_from` задаёт окно: им режется запрос, который
+                упёрся в предел выдачи, а делить его по регионам уже
+                некуда — например, вакансии одного города
 
         Returns:
             Словарь с результатами поиска или None при ошибке.
@@ -265,13 +381,41 @@ class HHAPIClient:
             "text": keyword,
             "page": page,
             "per_page": per_page,
-            # area: можно добавить регион (например, 1 для Москвы)
-            # order_by: можно сортировать по релевантности или дате
+            "order_by": order_by,
         }
+        if date_from:
+            params["date_from"] = date_from
+        # Регион уходит в запрос только когда он задан: пустой area
+        # источник понимает иначе, чем его отсутствие.
+        if area:
+            params["area"] = area
+        if date_to:
+            params["date_to"] = date_to
 
-        logger.info(f"Поиск вакансий: '{keyword}', страница {page}")
+        где = f", регион {area}" if area else ""
+        logger.info(f"Поиск вакансий: '{keyword}', страница {page}{где}")
 
         return self._make_request(url, params)
+
+    def get_areas(self) -> Optional[Any]:
+        """
+        Справочник регионов: страны, их регионы и города.
+
+        Нужен, чтобы резать запрос на срезы: источник отдаёт не больше
+        2000 вакансий на запрос, и по популярной профессии мы видим
+        пятую часть выдачи. Тот же запрос по регионам обходит предел —
+        у каждого своя выдача.
+
+        Returns:
+            Дерево регионов как его отдаёт источник, либо None при
+            ошибке. Справочник кладётся на диск (`src/regions.py`):
+            он меняется раз в год, и спрашивать его на каждый сбор
+            значит тратить лимит запросов на неизменное.
+        """
+        url = f"{self.base_url}areas"
+
+        logger.info("Получение справочника регионов")
+        return self._make_request(url, {})
 
     def get_vacancy_details(self, vacancy_id: str) -> Optional[Dict[str, Any]]:
         """
@@ -304,6 +448,72 @@ class HHAPIClient:
         logger.info(f"Получение деталей вакансии: {vacancy_id}")
 
         return self._make_request(url)
+
+    def проверить_доступ(self) -> Dict[str, Any]:
+        """
+        Проверить, отвечает ли источник и пускает ли он нас.
+
+        Один лёгкий запрос вместо целого сбора: человеку нужно знать, что
+        доступ работает, до того как он запустит работу на десять минут и
+        получит отказ на середине.
+
+        Returns:
+            {"доступно": bool, "задержка_мс": int, "причина": str | None,
+             "подробности": str}
+        """
+        import time as _time
+
+        if not self.email:
+            return {
+                "доступно": False,
+                "задержка_мс": 0,
+                "причина": ПричинаОтказа.НЕТ_ПОЧТЫ,
+                "подробности": "Источник требует контактную почту в заголовке запроса",
+            }
+
+        начало = _time.monotonic()
+        try:
+            ответ = self.session.get(
+                f"{self.base_url}vacancies",
+                params={"text": "python", "per_page": 1},
+                timeout=10,
+            )
+        except requests.RequestException as e:
+            return {
+                "доступно": False,
+                "задержка_мс": int((_time.monotonic() - начало) * 1000),
+                "причина": ПричинаОтказа.СЕТЬ,
+                "подробности": f"Источник недоступен: {type(e).__name__}",
+            }
+
+        задержка = int((_time.monotonic() - начало) * 1000)
+
+        if ответ.status_code == 200:
+            return {"доступно": True, "задержка_мс": задержка, "причина": None, "подробности": ""}
+
+        if ответ.status_code == 403:
+            причина = ПричинаОтказа.НЕТ_ТОКЕНА if not self.access_token else ПричинаОтказа.ТОКЕН_ОТКЛОНЁН
+            return {
+                "доступно": False,
+                "задержка_мс": задержка,
+                "причина": причина,
+                "подробности": ответ.text[:200],
+            }
+
+        if ответ.status_code == 429:
+            return {
+                "доступно": False,
+                "задержка_мс": задержка,
+                "причина": ПричинаОтказа.СЛИШКОМ_ЧАСТО,
+                "подробности": "Источник просит снизить частоту запросов",
+            }
+
+        return {
+            "доступно": False,
+            "задержка_мс": задержка,
+            "причина": ПричинаОтказа.НЕИЗВЕСТНО,
+            "подробности": f"Источник ответил {ответ.status_code}",
+        }
 
     def close(self) -> None:
         """

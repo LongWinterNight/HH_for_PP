@@ -1,0 +1,278 @@
+{
+  "items": [
+    {
+      "id": "100000001",
+      "premium": false,
+      "name": "Тестовая вакансия 001",
+      "department": null,
+      "has_test": false,
+      "response_letter_required": false,
+      "area": {
+        "id": "78",
+        "name": "Самара",
+        "url": "https://api.hh.ru/areas/78"
+      },
+      "salary": {
+        "from": 62100,
+        "to": 120000,
+        "currency": "RUR",
+        "gross": true
+      },
+      "salary_range": {
+        "from": 62100,
+        "to": 120000,
+        "currency": "RUR",
+        "gross": true,
+        "mode": {
+          "id": "MONTH",
+          "name": "За месяц"
+        },
+        "frequency": {
+          "id": "TWICE_PER_MONTH",
+          "name": "Два раза в месяц"
+        }
+      },
+      "type": {
+        "id": "open",
+        "name": "Открытая"
+      },
+      "address": null,
+      "response_url": null,
+      "sort_point_distance": null,
+      "published_at": "2026-09-09T20:16:42+0300",
+      "created_at": "2026-09-09T20:16:42+0300",
+      "archived": false,
+      "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=100000001",
+      "show_contacts": true,
+      "closed_for_applicants": false,
+      "extra_labels": [],
+      "labels": [
+        {
+          "id": "vacancy-label-no-resume",
+          "text": "Можно без резюме"
+        },
+        {
+          "id": "vacancy-label-be-first",
+          "text": "Откликнитесь среди первых"
+        }
+      ],
+      "tags": [
+        {
+          "id": "vacancy-serp__vacancy-work-experience-noExperience",
+          "text": "Без опыта",
+          "icon": "BriefcaseOutlinedSize16"
+        },
+        {
+          "id": "vacancy-serp__vacancy-compensation-frequency-TWICE_PER_MONTH",
+          "text": "Выплаты: Два раза в месяц"
+        }
+      ],
+      "insider_interview": null,
+      "url": "https://api.hh.ru/vacancies/100000001?host=hh.ru",
+      "alternate_url": "https://hh.ru/vacancy/100000001",
+      "relations": [],
+      "employer": {
+        "id": "9000001",
+        "name": "Компания-пример 001",
+        "url": "https://api.hh.ru/employers/9000001",
+        "alternate_url": "https://hh.ru/employer/9000001",
+        "logo_urls": null,
+        "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9000001",
+        "country_id": 1,
+        "accredited_it_employer": true,
+        "trusted": true,
+        "employer_on_additional_check": false
+      },
+      "snippet": {
+        "requirement": "Опыт работы с <highlighttext>Excel</highlighttext> и CRM.",
+        "responsibility": "Вести учёт заявок и отчётность."
+      },
+      "contacts": null,
+      "accept_temporary": true,
+      "fly_in_fly_out_duration": [],
+      "work_format": [
+        {
+          "id": "ON_SITE",
+          "name": "На месте работодателя"
+        },
+        {
+          "id": "HYBRID",
+          "name": "Гибрид"
+        }
+      ],
+      "working_hours": [
+        {
+          "id": "HOURS_8",
+          "name": "8 часов"
+        }
+      ],
+      "work_schedule_by_days": [
+        {
+          "id": "FIVE_ON_TWO_OFF",
+          "name": "5/2"
+        },
+        {
+          "id": "OTHER",
+          "name": "Другое"
+        }
+      ],
+      "accept_labor_contract": true,
+      "civil_law_contracts": [
+        {
+          "id": "SELF_EMPLOYED",
+          "name": "с самозанятым"
+        },
+        {
+          "id": "INDIVIDUAL_PERSON",
+          "name": "с физлицом"
+        }
+      ],
+      "night_shifts": false,
+      "professional_roles": [
+        {
+          "id": "118",
+          "name": "Специалист по подбору персонала"
+        }
+      ],
+      "accept_incomplete_resumes": true,
+      "experience": {
+        "id": "noExperience",
+        "name": "Нет опыта"
+      },
+      "employment_form": {
+        "id": "FULL",
+        "name": "Полная"
+      },
+      "internship": false,
+      "adv_response_url": null,
+      "is_adv_vacancy": false,
+      "adv_context": null
+    },
+    {
+      "id": "100000002",
+      "premium": true,
+      "name": "Тестовая вакансия 002",
+      "department": null,
+      "has_test": false,
+      "response_letter_required": false,
+      "area": {
+        "id": "66",
+        "name": "Нижний Новгород",
+        "url": "https://api.hh.ru/areas/66"
+      },
+      "salary": null,
+      "salary_range": null,
+      "type": {
+        "id": "direct",
+        "name": "Рекламная"
+      },
+      "address": null,
+      "response_url": "https://hh.ru/vrsurvey/gaz_loader_driver?utm_source=hh_lead_gen&utm_medium=VHR&utm_campaign=gaz_voditel_na_pogruzchik",
+      "sort_point_distance": null,
+      "published_at": "2026-09-09T20:08:10+0300",
+      "created_at": "2026-09-09T20:08:10+0300",
+      "archived": false,
+      "apply_alternate_url": "https://hh.ru/applicant/vacancy_response?vacancyId=100000002",
+      "immediate_redirect_url": "https://hh.ru/vrsurvey/gaz_loader_driver?utm_source=hh_lead_gen&utm_medium=VHR&utm_campaign=gaz_voditel_na_pogruzchik",
+      "branding": {
+        "type": "MAKEUP",
+        "tariff": null
+      },
+      "show_logo_in_search": true,
+      "show_contacts": false,
+      "closed_for_applicants": false,
+      "extra_labels": [
+        {
+          "id": "vacancy-extra-labels-premium",
+          "text": "Премиум вакансия",
+          "icon": "LabelFlameFilledSize16"
+        }
+      ],
+      "labels": [
+        {
+          "id": "vacancy-label-no-resume",
+          "text": "Можно без резюме"
+        }
+      ],
+      "tags": [
+        {
+          "id": "vacancy-serp__vacancy-work-experience-noExperience",
+          "text": "Без опыта",
+          "icon": "BriefcaseOutlinedSize16"
+        }
+      ],
+      "insider_interview": null,
+      "url": "https://api.hh.ru/vacancies/100000002?host=hh.ru",
+      "alternate_url": "https://hh.ru/vacancy/100000002",
+      "relations": [],
+      "employer": {
+        "id": "9000002",
+        "name": "Компания-пример 002",
+        "url": "https://api.hh.ru/employers/9000002",
+        "alternate_url": "https://hh.ru/employer/9000002",
+        "logo_urls": null,
+        "vacancies_url": "https://api.hh.ru/vacancies?employer_id=9000002",
+        "country_id": 1,
+        "accredited_it_employer": false,
+        "trusted": true,
+        "employer_on_additional_check": false
+      },
+      "snippet": {
+        "requirement": "Опыт работы с <highlighttext>Excel</highlighttext> и CRM.",
+        "responsibility": "Вести учёт заявок и отчётность."
+      },
+      "contacts": null,
+      "accept_temporary": false,
+      "fly_in_fly_out_duration": [],
+      "work_format": [
+        {
+          "id": "ON_SITE",
+          "name": "На месте работодателя"
+        }
+      ],
+      "working_hours": [
+        {
+          "id": "HOURS_8",
+          "name": "8 часов"
+        }
+      ],
+      "work_schedule_by_days": [
+        {
+          "id": "FIVE_ON_TWO_OFF",
+          "name": "5/2"
+        }
+      ],
+      "accept_labor_contract": false,
+      "civil_law_contracts": [],
+      "night_shifts": false,
+      "professional_roles": [
+        {
+          "id": "102",
+          "name": "Разнорабочий"
+        }
+      ],
+      "accept_incomplete_resumes": true,
+      "experience": {
+        "id": "noExperience",
+        "name": "Нет опыта"
+      },
+      "employment_form": {
+        "id": "FULL",
+        "name": "Полная"
+      },
+      "internship": false,
+      "adv_response_url": null,
+      "is_adv_vacancy": false,
+      "adv_context": null
+    }
+  ],
+  "found": 10295,
+  "pages": 1000,
+  "page": 0,
+  "per_page": 2,
+  "clusters": null,
+  "arguments": null,
+  "fixes": null,
+  "suggests": null,
+  "alternate_url": "https://hh.ru/search/vacancy?text=%D0%BF%D1%80%D0%B8%D0%BC%D0%B5%D1%80"
+}

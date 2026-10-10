@@ -1,10 +1,25 @@
 # ============================================================
-# HH.ru Analytics — Dockerfile (Production)
+# BaseVacancy — Dockerfile (Production)
 # ============================================================
-# Образ: Python 3.11 slim (минимальный размер)
+# Сборка двухэтапная: node собирает интерфейс, python его раздаёт.
+# В финальный образ node не попадает — только собранные файлы.
 # Запуск: uvicorn с 4 worker'ами для конкурентности
 # ============================================================
 
+# --- Этап 1: сборка интерфейса ------------------------------
+FROM node:22-alpine AS frontend
+
+WORKDIR /frontend
+
+# Зависимости ставятся отдельным слоем: пока package.json не менялся,
+# Docker переиспользует кеш и не качает пакеты заново.
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build
+
+# --- Этап 2: приложение -------------------------------------
 FROM python:3.11-slim-bookworm
 
 # Метки
@@ -36,6 +51,10 @@ RUN pip install --upgrade pip && \
 # Копирование исходного кода
 COPY src/ ./src/
 COPY web/ ./web/
+
+# Собранный интерфейс из первого этапа. Исходники фронтенда в образ не
+# попадают: в продукте нужен только результат сборки.
+COPY --from=frontend /frontend/dist ./frontend/dist
 COPY config.yaml .
 COPY optimized_parser.py .
 COPY main.py .
