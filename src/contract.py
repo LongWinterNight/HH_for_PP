@@ -38,7 +38,11 @@ from typing import Any, Dict, List, Optional
 # Поля, без которых работать можно, но хуже. Их пропажа — повод
 # посмотреть, не сменилась ли схема: так уходила зарплата в
 # `salary_range`, и это стоило месяцев неверных чисел.
-ЖЕЛАТЕЛЬНЫЕ_ПОЛЯ_ВАКАНСИИ = ["salary", "salary_range", "experience", "schedule"]
+# `schedule` и `employment` источник убрал: вместо них `work_format`,
+# `work_schedule_by_days` и `employment_form`. Ждать исчезнувшее значило
+# предупреждать на каждом запросе о том, что уже не изменится, — и за
+# этим шумом не заметить следующую настоящую перемену.
+ЖЕЛАТЕЛЬНЫЕ_ПОЛЯ_ВАКАНСИИ = ["salary", "salary_range", "experience", "work_format", "employment_form"]
 
 
 def _нет_полей(данные: Optional[Dict[str, Any]], поля: List[str]) -> List[str]:
