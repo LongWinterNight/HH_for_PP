@@ -2085,16 +2085,54 @@ def list_reports():
         "retention": хранение,
     }
 
+def _файл_отчёта(filename: str):
+    """
+    Путь к файлу отчёта по имени из адреса — либо отказ.
+
+    Имя приходит от клиента, и доверять ему нельзя. Скачивание брало его
+    как есть: `/api/reports/download/../.env` отдавал файл с паролем и
+    токеном источника любому, кто вошёл под учётной записью тестера.
+
+    Правило одно на все системы: имя файла — это имя, без пути. Любой
+    разделитель, прямой или обратный, отклоняется сам по себе. Сравнение
+    итогового пути с папкой здесь недостаточно: на Linux обратный слэш —
+    обычный символ, и `..\\config.yaml` там не обход, а странное имя;
+    на Windows — обход. Один и тот же запрос не должен значить разное
+    в зависимости от того, где запущен сервер.
+    """
+    from src.config import settings
+
+    if not filename or "/" in filename or "\\" in filename or filename in (".", ".."):
+        logger.warning(f"Имя файла отчёта отклонено: {filename!r}")
+        raise HTTPException(400, "Нужно имя файла из папки отчётов, без пути")
+
+    папка = settings.reports_dir.resolve()
+    цель = (папка / filename).resolve()
+    # Страховка на случай ссылок и особых имён устройств: итог обязан
+    # лежать прямо в папке отчётов.
+    if цель.parent != папка:
+        logger.warning(f"Имя файла отчёта ведёт наружу: {filename!r}")
+        raise HTTPException(400, "Нужно имя файла из папки отчётов, без пути")
+
+    if not цель.is_file():
+        raise HTTPException(404, "Отчёт не найден")
+    return цель
+
+
 @app.get("/api/reports/download/{filename:path}")
 def download_report(filename: str):
-    from src.config import settings
     from fastapi.responses import FileResponse
 
-    filepath = settings.reports_dir / filename
-    if not filepath.exists():
-        raise HTTPException(404, "Отчёт не найден")
+    filepath = _файл_отчёта(filename)
 
-    return FileResponse(path=filepath, filename=filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    # Тип — по расширению: в списке есть и CSV, а отдавать его как
+    # таблицу Excel значит предлагать открыть файл не той программой.
+    тип = (
+        "text/csv; charset=utf-8" if filepath.suffix.lower() == ".csv"
+        else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    return FileResponse(path=filepath, filename=filepath.name, media_type=тип)
+
 
 @app.delete("/api/reports/{filename:path}")
 def delete_report(filename: str):
@@ -2106,22 +2144,11 @@ def delete_report(filename: str):
     отличить их глазами тем труднее, чем больше файлов. Убрать лишнее
     можно было только из файловой системы.
 
-    Имя приходит из адреса, поэтому проверяется не подстрокой «..», а
-    итоговым путём: `%2e%2e%2f`, обратные слэши Windows и абсолютный
-    путь — всё это разные записи одного и того же обхода, и ловится он
-    только сравнением того, куда путь в итоге показывает.
+    Имя приходит из адреса и проверяется тем же правилом, что и при
+    скачивании (`_файл_отчёта`): имя без пути, итог — прямо в папке
+    отчётов.
     """
-    from src.config import settings
-
-    папка = settings.reports_dir.resolve()
-    цель = (папка / filename).resolve()
-
-    if цель.parent != папка or цель.name != Path(filename).name:
-        logger.warning(f"Удаление отклонено: путь ведёт наружу — {filename!r}")
-        raise HTTPException(400, "Удалять можно только файлы из папки отчётов")
-
-    if not цель.is_file():
-        raise HTTPException(404, "Отчёт не найден")
+    цель = _файл_отчёта(filename)
 
     try:
         цель.unlink()

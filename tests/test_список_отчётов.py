@@ -17,7 +17,7 @@ from openpyxl import Workbook
 
 from src.config import settings
 from src.report_xlsx import прочитать_срез, собрать_отчёт, описать_срез
-from web.app.main import _срезы_файлов, delete_report, list_reports
+from web.app.main import _срезы_файлов, delete_report, download_report, list_reports
 
 ВЫБОРКА = pd.DataFrame([
     {
@@ -116,6 +116,20 @@ class TestСписок:
         assert строка["vacancies"] == 1 and строка["slice"] == "регион: Казань"
 
 
+# Записи одного и того же обхода. Отказ обязан быть одинаковым на всех
+# системах: первая сборка на Linux показала, что обратный слэш там —
+# обычный символ имени, и правило, сверявшее только итоговый путь,
+# отвечало «не найден» вместо «отклонён».
+ПУТИ_НАРУЖУ = [
+    "../config.yaml",
+    "..\\config.yaml",
+    "sub/../../config.yaml",
+    "sub\\file.xlsx",
+    "/etc/passwd",
+    "..",
+]
+
+
 class TestУдаление:
 
     def test_файл_удаляется(self, отчёт):
@@ -123,11 +137,7 @@ class TestУдаление:
         assert not отчёт.exists()
         assert list_reports()["reports"] == []
 
-    @pytest.mark.parametrize("путь", [
-        "../config.yaml",
-        "..\config.yaml",
-        "sub/../../config.yaml",
-    ])
+    @pytest.mark.parametrize("путь", ПУТИ_НАРУЖУ)
     def test_путь_наружу_отклонён(self, папка, путь):
         снаружи = папка.parent / "config.yaml"
         снаружи.write_text("важное", encoding="utf-8")
@@ -192,3 +202,35 @@ class TestСрокХранения:
 
         чужой = _состояние_файла("vacancies_export.csv", 0, 200 * день, собран_продуктом, 30, 3)
         assert чужой == {"state": "ready", "expires_in_days": None}
+
+
+class TestСкачивание:
+    """
+    Скачивание брало имя из адреса как есть и отдавало любой файл с
+    диска: `../.env` — пароль и токен источника. Проверки пути у него не
+    было вовсе; у удаления, написанного позже, была.
+    """
+
+    def test_отчёт_скачивается(self, отчёт):
+        ответ = download_report(отчёт.name)
+        assert ответ.path == отчёт.resolve()
+
+    @pytest.mark.parametrize("путь", ПУТИ_НАРУЖУ)
+    def test_файл_вне_папки_не_отдаётся(self, папка, путь):
+        (папка.parent / "config.yaml").write_text("пароль", encoding="utf-8")
+
+        with pytest.raises(HTTPException) as отказ:
+            download_report(путь)
+
+        assert отказ.value.status_code == 400
+
+    def test_отсутствующий_отчёт_не_найден(self, папка):
+        with pytest.raises(HTTPException) as отказ:
+            download_report("basevacancy_1999-01-01_0000.xlsx")
+        assert отказ.value.status_code == 404
+
+    def test_csv_отдаётся_как_csv(self, папка):
+        файл = папка / "vacancies_export_20260912.csv"
+        файл.write_text("id", encoding="utf-8")
+        assert download_report(файл.name).media_type.startswith("text/csv")
+
