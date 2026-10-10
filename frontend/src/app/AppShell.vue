@@ -3,6 +3,7 @@ import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppNav from '@/app/AppNav.vue'
 import AppTabbar from '@/app/AppTabbar.vue'
+import BvStatus from '@/components/ui/BvStatus.vue'
 import { useHeaderMeta } from '@/composables/useHeaderMeta'
 import { useViewport } from '@/composables/useViewport'
 import { num, dateTime, timeAgoShort } from '@/utils/format'
@@ -25,6 +26,22 @@ const счётчикБазы = computed(() => {
   if (!данные?.vacancies) return ''
   const давность = данные.last_collected_at ? ` · ${timeAgoShort(данные.last_collected_at)}` : ''
   return `${num(данные.vacancies)}${давность}`
+})
+
+// Последний сбор не удался. Прежде об этом знал только экран «Сбор
+// данных», и только до перезапуска приложения: отказ жил в памяти
+// процесса. Сбор так пролежал месяц. Теперь исход читается из базы и
+// стоит в шапке — его видно с любого экрана и после перезапуска.
+const отказСбора = computed(() => {
+  const запуск = состояниеБазы.value?.last_run
+  return запуск?.failed ? запуск : null
+})
+
+const подсказкаОтказа = computed(() => {
+  const запуск = отказСбора.value
+  if (!запуск) return ''
+  const когда = запуск.finished_at ? ` · ${dateTime(запуск.finished_at)}` : ''
+  return `${запуск.title}${когда}. ${запуск.text}`
 })
 
 const точнаяДата = computed(() => {
@@ -59,6 +76,18 @@ watch(() => route.fullPath, обновить, { immediate: true })
 
         <div class="shell__meta">
           <slot name="meta" />
+          <!-- Ссылка, а не подпись: по ней сразу попадаешь туда, где
+               отказ объяснён и где его можно повторить. На узком экране
+               остаётся только знак — место в шапке одно. -->
+          <RouterLink
+            v-if="отказСбора"
+            to="/collection"
+            class="shell__alert"
+            :title="подсказкаОтказа"
+            :aria-label="`Последний сбор не удался: ${отказСбора.title}`"
+          >
+            <BvStatus kind="err" :label="узкий ? '' : 'Сбор не удался'" />
+          </RouterLink>
           <span v-if="узкий && подписьЭкрана" class="shell__summary">{{ подписьЭкрана }}</span>
           <span v-else-if="счётчикБазы" class="shell__summary" :title="точнаяДата">{{ счётчикБазы }}</span>
         </div>
@@ -141,6 +170,28 @@ watch(() => route.fullPath, обновить, { immediate: true })
 
 /* Объём выборки или счётчик базы. Цифры моноширинные: подпись меняется
    при каждом переходе, и прыгающая ширина дёргает шапку. */
+/* Отказ сбора в шапке. Нажимается вся метка, а не только точка. */
+.shell__alert {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--h-control-sm);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.shell__alert:focus-visible { box-shadow: var(--focus-ring); outline: none; }
+
+/* На узком экране от метки остаётся точка в восемь пикселей. Знак
+   маленький, а нажимается область вокруг него: иначе пальцем в неё не
+   попасть — та же беда, что была у крестика в чипе запроса. */
+.shell__alert { position: relative; }
+.shell__alert::after {
+  content: '';
+  position: absolute;
+  inset: -8px -14px;
+}
+
 .shell__summary {
   font-size: var(--t-caption-size);
   font-variant-numeric: tabular-nums;

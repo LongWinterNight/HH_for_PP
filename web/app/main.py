@@ -55,6 +55,12 @@ def разобрать_оборвавшиеся_сборы():
     """
     from src.storage import VacancyStorage
 
+    # Сбои самого сервера — в тот же журнал на диске. Здесь, а не при
+    # импорте: сервер настраивает свои логгеры после загрузки приложения.
+    from src.journal import подключить_сервер
+
+    подключить_сервер()
+
     storage = VacancyStorage()
     try:
         # Порог ноль: на старте любая запись «running» — след прошлого
@@ -69,6 +75,18 @@ def разобрать_оборвавшиеся_сборы():
         помечено = storage.mark_interrupted_runs(stale_after_minutes=0)
         if помечено:
             logger.info(f"При старте помечено прерванных сборов: {помечено}")
+            # Оборванный сбор — тоже отказ, и самый тихий из всех: в
+            # этот момент на экран никто не смотрит, а процесс, который
+            # мог бы о нём сказать, уже умер.
+            from src.alerts import Отказ, сообщить
+
+            последний = storage.get_last_parser_run(only_successful=False) or {}
+            сообщить(Отказ(
+                причина="interrupted",
+                подробности=f"оборвано сборов: {помечено}",
+                запуск=последний.get("id"),
+                запросы=последний.get("keywords") or [],
+            ))
     except Exception as e:
         # Уборка не должна мешать приложению подняться.
         logger.warning(f"Не удалось разобрать прерванные сборы: {e}")
@@ -678,6 +696,28 @@ def analytics_page():
 def health():
     return {"status": "ok"}
 
+def _исход_последнего_запуска(storage) -> Optional[dict]:
+    """Последний запуск сбора коротко: исход, причина, время."""
+    запуск = storage.get_last_parser_run(only_successful=False)
+    if not запуск:
+        return None
+
+    не_удался = запуск["status"] in ("error", "interrupted")
+    причина = запуск.get("error_type") or ("interrupted" if запуск["status"] == "interrupted" else "unknown")
+    итог = {
+        "id": запуск["id"],
+        "status": запуск["status"],
+        "failed": не_удался,
+        "finished_at": запуск["completed_at"] or запуск["started_at"],
+    }
+    if не_удался:
+        from src.alerts import ОБЪЯСНЕНИЯ
+
+        объяснение = ОБЪЯСНЕНИЯ.get(причина, ОБЪЯСНЕНИЯ["unknown"])
+        итог.update({"reason": причина, "title": объяснение["title"], "text": объяснение["text"]})
+    return итог
+
+
 @app.get("/api/overview")
 def получить_состояние_базы():
     """
@@ -699,6 +739,10 @@ def получить_состояние_базы():
             # названо, чтобы скрытое не выглядело потерянным.
             "off_query": storage.get_off_query_count(),
             "last_collected_at": последний["completed_at"] if последний else None,
+            # Чем кончился самый последний запуск, удачный или нет.
+            # Из базы, а не из памяти процесса: отказ должен быть виден
+            # и после перезапуска, и тому, кто не открывал экран сбора.
+            "last_run": _исход_последнего_запуска(storage),
         }
     finally:
         storage.close()
@@ -1820,6 +1864,18 @@ def start_parser(
                 storage.refresh_currency_rates()
                 storage.save_metrics_snapshot(run_id=parser_state["parser_run_id"])
                 storage.close()
+
+                # Сбор удался, но не целиком — об этом тоже сообщается:
+                # иначе о потере узнают, когда тексты понадобятся.
+                if result.get("отказ_текстов"):
+                    from src.alerts import Отказ, сообщить
+
+                    сообщить(Отказ(
+                        причина="partial",
+                        подробности=f"тексты описаний не записаны: {result['отказ_текстов']}",
+                        запуск=parser_state["parser_run_id"],
+                        запросы=list(keywords),
+                    ))
             except Exception as db_err:
                 logger.error(f"Ошибка записи завершения парсинга в БД: {db_err}")
 
@@ -1842,6 +1898,19 @@ def start_parser(
             parser_state["error_message"] = str(e)
             parser_state["error_type"] = причина
             parser_state["completed_at"] = datetime.now().isoformat()
+
+            # Трассировка — в журнал: по тексту исключения место сбоя не
+            # найти, а окно консоли к утру закрыто. И оповещение: отказ,
+            # о котором знает только экран, пролежал месяц.
+            logger.exception(f"Сбор №{parser_state.get('parser_run_id')} не удался")
+            from src.alerts import Отказ, сообщить
+
+            сообщить(Отказ(
+                причина=причина,
+                подробности=str(e),
+                запуск=parser_state.get("parser_run_id"),
+                запросы=list(keywords),
+            ))
 
             # Завершаем запись парсинга в БД (ошибка)
             try:

@@ -2191,6 +2191,7 @@ class VacancyStorage:
                     "vacancies_updated": run.vacancies_updated,
                     "errors_count": run.errors_count,
                     "error_message": run.error_message,
+                    "error_type": run.error_type,
                 }
 
             except SQLAlchemyError as e:

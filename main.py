@@ -107,7 +107,16 @@ def run_collection(
         logger.warning("Сбор прерван пользователем")
         return {"total": 0, "unique": 0, "files": []}
     except Exception as e:
-        logger.error(f"Ошибка при сборе: {type(e).__name__} - {e}")
+        logger.exception(f"Ошибка при сборе: {type(e).__name__} - {e}")
+        # Сбор из командной строки идёт по расписанию, когда за экраном
+        # никого нет: без оповещения его отказ увидят через месяц.
+        from src.alerts import Отказ, сообщить
+
+        сообщить(Отказ(
+            причина=getattr(e, "причина", None) or "unknown",
+            подробности=f"{type(e).__name__}: {e}",
+            запросы=list(keywords or []),
+        ))
         raise
     finally:
         collector.close()

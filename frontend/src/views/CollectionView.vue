@@ -16,6 +16,7 @@ import { объяснитьОтказ } from '@/utils/collectionErrors'
 import { useApi } from '@/composables/useApi'
 import { useCollectionStatus } from '@/composables/useCollectionStatus'
 import { useToast } from '@/composables/useToast'
+import { useHeaderMeta } from '@/composables/useHeaderMeta'
 import { dateTime, num, plural, timeAgo, vacancies as vacanciesCount } from '@/utils/format'
 
 // Сбор данных. Экран отвечает на три вопроса: что собираем, что
@@ -123,6 +124,16 @@ const canStart = computed(() => keywords.value.length > 0 && Boolean(email.value
 // человеку нужно знать, что случилось и что делать, а не как называется
 // сломавшаяся функция.
 const отказ = computed(() => объяснитьОтказ(state.value?.error_type, state.value?.error_message || ''))
+
+// Отказ, которого этот процесс уже не помнит. Состояние сбора живёт в
+// памяти приложения, и после перезапуска экран выглядел так, будто
+// ничего не случилось. Исход последнего запуска читается из базы — тем
+// же запросом, что и шапка.
+const { состояниеБазы } = useHeaderMeta()
+const прежнийОтказ = computed(() => {
+  const запуск = состояниеБазы.value?.last_run
+  return запуск?.failed && !state.value?.error_message ? запуск : null
+})
 
 // Проверка доступа к источнику: один лёгкий запрос вместо целого сбора.
 const проверка = ref(null)
@@ -524,6 +535,17 @@ function durationOf(run) {
       kind="error"
       :title="отказ.title"
       :text="`${отказ.text} Собранные до остановки вакансии сохранены в базе.`"
+    >
+      <template #actions>
+        <BvButton size="md" :loading="starting" :disabled="!canStart" @click="requestStart">Повторить сбор</BvButton>
+      </template>
+    </BvBanner>
+
+    <BvBanner
+      v-else-if="прежнийОтказ"
+      kind="error"
+      :title="прежнийОтказ.title"
+      :text="`${прежнийОтказ.text} Это исход последнего запуска, ${timeAgo(прежнийОтказ.finished_at)}.`"
     >
       <template #actions>
         <BvButton size="md" :loading="starting" :disabled="!canStart" @click="requestStart">Повторить сбор</BvButton>
