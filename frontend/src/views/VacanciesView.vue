@@ -51,12 +51,15 @@ const filters = ref({
 // валютами порядок держит рублёвый эквивалент по курсу ЦБ, и требовать
 // сначала выбрать валюту больше незачем.
 const sort = ref('date_desc')
-const sortOptions = [
+// «По соответствию» есть только при поиске: без запроса соответствовать
+// нечему, и пункт, который ничего не делает, в списке не нужен.
+const sortOptions = computed(() => [
+  ...(filters.value.search ? [{ value: 'relevance', label: 'По соответствию' }] : []),
   { value: 'date_desc', label: 'Сначала новые' },
   { value: 'salary_desc', label: 'Зарплата ↓' },
   { value: 'salary_asc', label: 'Зарплата ↑' },
   { value: 'none', label: 'Без сортировки' }
-]
+])
 
 const currencyOptions = computed(() => {
   const raw = currencies.data.value?.vacancies_by_currency ?? {}
@@ -78,11 +81,30 @@ const experienceOptions = [
 
 const page = ref(1)
 const perPage = ref(20)
+
+// Что поиск сделал с запросом: исправил опечатку, не нашёл точных
+// совпадений, искал ли по смыслу. Молча подменять запрос нельзя —
+// человек должен видеть, что искали не совсем то, что он набрал.
+const оПоиске = computed(() => list.data.value?.['поиск'] ?? {})
+const пояснениеПоиска = computed(() => {
+  if (!filters.value.search) return ''
+  const части = []
+  const замены = Object.entries(оПоиске.value['замены'] ?? {})
+  if (замены.length) {
+    части.push(`Искали также: ${замены.map(([было, стало]) => `«${было}» → ${стало}`).join('; ')}.`)
+  }
+  if (оПоиске.value['ослаблен']) {
+    части.push('Вакансий со всеми словами запроса нет — показаны те, где есть часть из них.')
+  }
+  return части.join(' ')
+})
 const selected = ref(null)
 const expanded = ref(false)
 
 const list = useApi((options) => {
-  const [sortBy, sortOrder] = sort.value === 'none' ? ['none', 'desc'] : sort.value.split('_')
+  const [sortBy, sortOrder] = ['none', 'relevance'].includes(sort.value)
+    ? [sort.value, 'desc']
+    : sort.value.split('_')
   return vacanciesApi.list({
     page: page.value,
     per_page: perPage.value,
@@ -184,6 +206,16 @@ watch(() => route.fullPath, () => {
 //
 // Кроме восстановления из адреса: там страница пришла вместе с
 // фильтрами, и сброс превращал ссылку на вторую страницу в первую.
+// Человек начал искать — список встаёт по соответствию запросу: лучшее
+// совпадение на пятой странице «сначала новых» не увидит никто. Запрос
+// стёрт — порядок возвращается к дате. Выбранную руками сортировку
+// (по зарплате) смена запроса не трогает.
+watch(() => filters.value.search, (стало, было) => {
+  if (восстанавливаем) return
+  if (стало && !было && sort.value === 'date_desc') sort.value = 'relevance'
+  if (!стало && sort.value === 'relevance') sort.value = 'date_desc'
+})
+
 watch([filters, sort, perPage], () => {
   if (восстанавливаем) return
   page.value = 1
@@ -522,7 +554,7 @@ function downloadXlsx() {
         <BvAutocomplete
           v-model="filters.search"
           label="Поиск"
-          placeholder="Название или компания"
+          placeholder="Профессия, навык или задача"
           :suggest="suggestVacancies"
         />
         <BvAutocomplete
@@ -581,6 +613,8 @@ function downloadXlsx() {
 
     <!-- Единственное место системы, где маркерный жёлтый работает фоном:
          он помечает, что все числа на экране считаны по суженной выборке. -->
+    <p v-if="пояснениеПоиска" class="vac__search-note" role="status">{{ пояснениеПоиска }}</p>
+
     <BvBanner
       v-if="isNarrowed"
       kind="filtered"
@@ -669,6 +703,10 @@ function downloadXlsx() {
                        источников несколько: иначе она повторяет одно и
                        то же у каждой строки. -->
                   <span v-if="несколькоИсточников && v.source" class="vac__source">{{ v.source }}</span>
+                  <!-- Почему вакансия в выдаче. Без подписи найденное
+                       «по смыслу» выглядит ошибкой поиска: слов запроса
+                       в строке нет, а она стоит третьей. -->
+                  <span v-if="v.search_why" class="vac__why">найдено {{ v.search_why }}</span>
                   <span v-if="копийУ(v) > 1" class="vac__copies" :title="подписьКопий(v)">
                     ещё в {{ копийУ(v) - 1 }} {{ городов(копийУ(v) - 1) }}
                   </span>
@@ -1062,4 +1100,19 @@ function downloadXlsx() {
    двенадцати скрытых дороже полного написания одного из них. */
 .vac__skills :deep(.chip) { min-width: 0; }
 .vac__skills :deep(.chip--count) { flex: 0 0 auto; }
+
+/* Почему вакансия найдена: тихая подпись в строке компании. */
+.vac__why {
+  font-size: var(--t-caption-size);
+  color: var(--c-text-muted);
+  white-space: nowrap;
+}
+
+/* Что поиск сделал с запросом. Не баннер: это пояснение, а не событие. */
+.vac__search-note {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-lh);
+  color: var(--c-text-secondary);
+  max-width: none;
+}
 </style>
