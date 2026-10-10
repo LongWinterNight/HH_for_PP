@@ -1,0 +1,23 @@
+{
+  "name": "basevacancy-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "BaseVacancy — интерфейс аналитики вакансий",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/geologica": "^5.3.0",
+    "@fontsource/martian-mono": "^5.3.0",
+    "chart.js": "^4.5.1",
+    "vue": "^3.5.42",
+    "vue-router": "^5.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.2.2"
+  }
+}
