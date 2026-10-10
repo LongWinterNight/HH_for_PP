@@ -1,133 +1,98 @@
-name: CI/CD Pipeline
+name: CI
 
+# Проверка запускается на каждой ветке. Прежде она ждала веток main и
+# develop, которых в репозитории нет (основная — master), и за всё время
+# не сработала ни разу: месяц работы прошёл без единой сборки.
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["**"]
+    tags: ["v*"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["master"]
+
+# Новый пуш в ту же ветку отменяет прежнюю проверку: её итог уже не нужен.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  backend:
+    name: Тесты · ${{ matrix.os }} · Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.11", "3.12"]
+        # Продукт живёт на Windows и разрабатывается на Python 3.13;
+        # Linux — то, на чём он поедет в контейнере. Прежняя матрица из
+        # девяти заданий проверяла три версии на трёх системах, из
+        # которых macOS и Python 3.10 никто не использует.
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Cache pip dependencies
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+      - uses: actions/checkout@v4
 
-    - name: Create .env file for tests
-      run: |
-        echo "HH_USER_EMAIL=test@example.com" > .env
-        echo "API_REQUEST_DELAY=0.1" >> .env
-        echo "MAX_PAGES=2" >> .env
-        echo "DAYS_BACK=7" >> .env
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        # Останавливаем сборку только если есть критические ошибки
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    
-    - name: Test with pytest
-      run: |
-        pip install pytest pytest-cov
-        pytest tests/ -v --cov=src --cov-report=xml --cov-report=term-missing
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-${{ matrix.python-version }}
+      - name: Зависимости
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt ruff
 
-  build:
-    needs: test
+      - name: Окружение для тестов
+        shell: bash
+        run: |
+          {
+            echo "HH_USER_EMAIL=test@example.com"
+            echo "API_REQUEST_DELAY=0.1"
+            echo "MAX_PAGES=2"
+            echo "DAYS_BACK=7"
+          } > .env
+
+      # Только то, что ломает работу: синтаксис, неизвестные имена,
+      # переменная до присваивания. Именно так нашёлся эндпоинт, который
+      # падал на каждом вызове. Стиль этим шагом не проверяется.
+      - name: Линтер · ошибки, а не стиль
+        run: ruff check . --select E9,F63,F7,F82 --exclude frontend,data
+
+      - name: Тесты
+        run: pytest tests/ -q --cov=src --cov=web --cov-report=term-missing:skip-covered
+
+  frontend:
+    name: Интерфейс · сборка
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Check package structure
-      run: |
-        echo "Checking project structure..."
-        test -f main.py
-        test -f README.md
-        test -f requirements.txt
-        test -d src
-    
-    - name: Validate configuration
-      run: |
-        python -c "import yaml; yaml.safe_load(open('config.yaml'))"
-        echo "Configuration valid"
+    defaults:
+      run:
+        working-directory: frontend
 
-  docs:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Check documentation
-      run: |
-        test -f README.md
-        test -f CONTRIBUTING.md
-        test -f CHANGELOG.md
-        test -f LICENSE
-        echo "All documentation files present"
-    
-    - name: Validate README
-      run: |
-        grep -q "HH.ru Analytics" README.md
-        grep -q "Быстрый старт" README.md
-        echo "README.md is valid"
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run build
 
   release:
-    needs: [test, build, docs]
-    runs-on: ubuntu-latest
+    name: Выпуск
+    needs: [backend, frontend]
     if: startsWith(github.ref, 'refs/tags/v')
-    
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        generate_release_notes: true
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

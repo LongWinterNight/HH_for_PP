@@ -160,3 +160,37 @@ def test_метрики_не_считают_среднюю():
 
     assert ключи_со_средней(значения) == []
     assert значения["median_salary"] is not None
+
+
+class TestАвтодополнениеСКэшем:
+    """
+    Эндпоинт падал на каждом вызове: присваивание кэша внутри функции
+    делало его локальной переменной, и первая же проверка ключа бросала
+    UnboundLocalError. Нашёл линтер, а не тест, — теста не было.
+    """
+
+    def test_вызов_не_падает_и_второй_берётся_из_кэша(self, monkeypatch):
+        import web.app.main as приложение
+
+        monkeypatch.setattr(приложение, "autocomplete_skills", lambda q: {"items": [q]})
+        приложение._autocomplete_cache.clear()
+
+        первый = приложение.autocomplete_cached(type="skills", q="figma")
+        второй = приложение.autocomplete_cached(type="skills", q="figma")
+
+        assert первый == {"items": ["figma"], "cached": False}
+        assert второй == {"items": ["figma"], "cached": True}
+
+    def test_переполненный_кэш_чистится_на_месте(self, monkeypatch):
+        import web.app.main as приложение
+
+        monkeypatch.setattr(приложение, "autocomplete_skills", lambda q: {"items": [q]})
+        кэш = приложение._autocomplete_cache
+        кэш.clear()
+        кэш.update({f"skills:старый{n}": ({"items": []}, 0.0) for n in range(120)})
+
+        приложение.autocomplete_cached(type="skills", q="figma")
+
+        # Тот же объект, а не новый: модуль продолжает видеть свой кэш.
+        assert приложение._autocomplete_cache is кэш
+        assert list(кэш) == ["skills:figma"]

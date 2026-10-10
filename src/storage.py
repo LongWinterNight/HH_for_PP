@@ -14,7 +14,11 @@
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Только для подсказок типов: при обычном импорте вышел бы круг.
+    from src.cbr_rates import Курсы
 import json
 
 import pandas as pd

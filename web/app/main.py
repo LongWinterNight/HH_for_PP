@@ -3125,13 +3125,17 @@ def autocomplete_cached(
     # Сохранение в кэш
     _autocomplete_cache[cache_key] = (result, time.time())
 
-    # Очистка старого кэша (раз в 100 запросов)
+    # Очистка старого кэша (раз в 100 запросов).
+    #
+    # Устаревшее удаляется из того же словаря, а не заменяется новым.
+    # Присваивание имени внутри функции делало кэш её локальной
+    # переменной, и проверка «есть ли ключ» выше падала с
+    # UnboundLocalError раньше, чем доходила до любой работы: эндпоинт
+    # отвечал ошибкой на каждый вызов.
     if len(_autocomplete_cache) > 100:
         now = time.time()
-        _autocomplete_cache = {
-            k: v for k, v in _autocomplete_cache.items()
-            if now - v[1] < _cache_ttl
-        }
+        for устаревший in [k for k, v in _autocomplete_cache.items() if now - v[1] >= _cache_ttl]:
+            del _autocomplete_cache[устаревший]
 
     return {**result, "cached": False}
 
