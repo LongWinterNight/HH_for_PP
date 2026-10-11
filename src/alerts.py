@@ -91,13 +91,21 @@ class Отказ:
     запуск: Optional[int] = None
     запросы: List[str] = field(default_factory=list)
     когда: str = field(default_factory=lambda: datetime.now().isoformat(timespec="seconds"))
+    # Проверка канала, а не отказ. Без этого признака пробное сообщение
+    # лежало в журнале оповещений рядом с настоящими и выглядело так же:
+    # на экране оно читалось как «сбор прервался».
+    проба: bool = False
 
     @property
     def заголовок(self) -> str:
+        if self.проба:
+            return "Проверка оповещения"
         return ОБЪЯСНЕНИЯ.get(self.причина, ОБЪЯСНЕНИЯ["unknown"])["title"]
 
     @property
     def объяснение(self) -> str:
+        if self.проба:
+            return "Это пробное сообщение: настоящего отказа не было. Если вы его видите, канал работает."
         return ОБЪЯСНЕНИЯ.get(self.причина, ОБЪЯСНЕНИЯ["unknown"])["text"]
 
     def текст(self) -> str:
