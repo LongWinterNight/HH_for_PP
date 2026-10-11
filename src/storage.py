@@ -399,6 +399,16 @@ class ParserRunModel(Base):
     # стоила бы миграции.
     progress_state = Column(Text)
 
+    # Кто запустил сбор (миграция 021): `screen` — человек с экрана,
+    # `schedule` — команда по расписанию. Сбор по расписанию идёт в
+    # отдельном процессе, и без этого признака приложение принимало бы
+    # его запись за след собственного умершего сбора.
+    source = Column(String(20), default="screen")
+
+    # Просьба остановиться (миграция 021). Сбору в том же процессе её
+    # передают напрямую; сбору в другом процессе — только через базу.
+    stop_requested = Column(Boolean, default=False)
+
     # Отметка живости: по ней видно, что процесс сбора ещё дышит.
     # Запись со старой отметкой и статусом «running» — это след
     # оборвавшегося сбора, а не идущая работа.
@@ -1447,7 +1457,8 @@ class VacancyStorage:
         max_pages: int = 10,
         days_back: int = 30,
         is_incremental: bool = True,
-        use_cache: bool = True
+        use_cache: bool = True,
+        source: str = "screen",
     ) -> int:
         """
         Создать запись о запуске парсера.
@@ -1458,6 +1469,7 @@ class VacancyStorage:
             days_back: Дней назад
             is_incremental: Инкрементальный режим
             use_cache: Использовать кэш
+            source: Кто запустил: `screen` или `schedule`
 
         Returns:
             ID созданной записи
@@ -1472,6 +1484,11 @@ class VacancyStorage:
                     days_back=days_back,
                     is_incremental=is_incremental,
                     use_cache=use_cache,
+                    source=source,
+                    # Отметка живости ставится сразу: между созданием
+                    # записи и первым событием сбора проходят секунды, и
+                    # запись без отметки выглядела бы оборванной.
+                    heartbeat_at=datetime.now(),
                 )
                 session.add(run)
                 session.commit()
@@ -1853,9 +1870,43 @@ class VacancyStorage:
                 "heartbeat_at": run.heartbeat_at.isoformat() if run.heartbeat_at else None,
                 "is_incremental": run.is_incremental,
                 "use_cache": run.use_cache,
+                "source": run.source or "screen",
+                "stop_requested": bool(run.stop_requested),
             }
 
-    def mark_interrupted_runs(self, stale_after_minutes: int = 5) -> int:
+    def request_run_stop(self, run_id: int) -> bool:
+        """
+        Попросить идущий сбор остановиться — через базу.
+
+        Сбор по расписанию идёт в другом процессе: дотянуться до него из
+        приложения можно только записью, которую он сам прочитает.
+
+        Returns:
+            Записана ли просьба (сбор ещё идёт)
+        """
+        with Session(self.engine) as session:
+            try:
+                run = session.query(ParserRunModel).filter_by(id=run_id, status="running").first()
+                if not run:
+                    return False
+                run.stop_requested = True
+                session.commit()
+                return True
+            except SQLAlchemyError as e:
+                session.rollback()
+                logger.warning(f"Не удалось записать просьбу об остановке сбора #{run_id}: {e}")
+                return False
+
+    def is_run_stop_requested(self, run_id: int) -> bool:
+        """Просили ли остановить этот сбор. Сбой чтения — «не просили»."""
+        with Session(self.engine) as session:
+            try:
+                run = session.query(ParserRunModel).filter_by(id=run_id).first()
+                return bool(run and run.stop_requested)
+            except SQLAlchemyError:
+                return False
+
+    def mark_interrupted_runs(self, stale_after_minutes: int = 5, foreign_stale_minutes: Optional[int] = None) -> int:
         """
         Пометить оборвавшиеся сборы.
 
@@ -1867,29 +1918,36 @@ class VacancyStorage:
         Args:
             stale_after_minutes: Через сколько минут молчания сбор
                 считается оборвавшимся
+            foreign_stale_minutes: Свой порог для сборов по расписанию.
+                Они идут в другом процессе и перезапуск приложения их не
+                убивает: на старте приложение считает мёртвым любой свой
+                сбор (порог ноль), а чужой — только замолчавший
 
         Returns:
             Сколько записей помечено
         """
-        граница = datetime.now() - timedelta(minutes=stale_after_minutes)
+        сейчас = datetime.now()
+        граница = сейчас - timedelta(minutes=stale_after_minutes)
+        граница_чужих = (
+            граница if foreign_stale_minutes is None else сейчас - timedelta(minutes=foreign_stale_minutes)
+        )
 
         with Session(self.engine) as session:
             try:
-                зависшие = (
-                    session.query(ParserRunModel)
-                    .filter(ParserRunModel.status == "running")
-                    .filter(
-                        (ParserRunModel.heartbeat_at.is_(None))
-                        | (ParserRunModel.heartbeat_at < граница)
-                    )
-                    .all()
-                )
+                идущие = session.query(ParserRunModel).filter(ParserRunModel.status == "running").all()
+                зависшие = [
+                    run for run in идущие
+                    if run.heartbeat_at is None
+                    or run.heartbeat_at < (граница_чужих if run.source == "schedule" else граница)
+                ]
 
                 for run in зависшие:
                     run.status = "interrupted"
                     run.completed_at = run.completed_at or datetime.now()
                     run.error_message = run.error_message or (
-                        "Сбор прерван: приложение было перезапущено во время работы"
+                        "Сбор по расписанию оборвался: его процесс перестал отвечать"
+                        if run.source == "schedule"
+                        else "Сбор прерван: приложение было перезапущено во время работы"
                     )
 
                 session.commit()
@@ -2230,6 +2288,7 @@ class VacancyStorage:
                         "is_incremental": r.is_incremental,
                         "use_cache": r.use_cache,
                         "error_message": r.error_message,
+                        "source": r.source or "screen",
                         # Качество этого запуска, а не всей базы: по нему
                         # видно, ухудшается ли сбор со временем.
                         "качество": {

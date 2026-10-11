@@ -78,7 +78,15 @@ def разобрать_оборвавшиеся_сборы():
         # старт второго пометит сбор первого прерванным. Продукт
         # рассчитан на один процесс; если экземпляров станет несколько,
         # признак принадлежности процессу нужно хранить в самой записи.
-        помечено = storage.mark_interrupted_runs(stale_after_minutes=0)
+        #
+        # Сбор по расписанию идёт в другом процессе и перезапуск
+        # приложения переживает — он считается оборванным, только если
+        # сам давно молчит.
+        from src.collection_run import МОЛЧАНИЕ_ЧУЖОГО_СБОРА_МИН
+
+        помечено = storage.mark_interrupted_runs(
+            stale_after_minutes=0, foreign_stale_minutes=МОЛЧАНИЕ_ЧУЖОГО_СБОРА_МИН
+        )
         if помечено:
             logger.info(f"При старте помечено прерванных сборов: {помечено}")
             # Оборванный сбор — тоже отказ, и самый тихий из всех: в
@@ -93,11 +101,47 @@ def разобрать_оборвавшиеся_сборы():
                 запуск=последний.get("id"),
                 запросы=последний.get("keywords") or [],
             ))
+        _сказать_о_пропуске(storage)
     except Exception as e:
         # Уборка не должна мешать приложению подняться.
         logger.warning(f"Не удалось разобрать прерванные сборы: {e}")
     finally:
         storage.close()
+
+def _сказать_о_пропуске(storage, журнал=None) -> bool:
+    """
+    Сообщить, что сбор по расписанию не прошёл.
+
+    Отказ сбора шлёт оповещение сам. А сбор, который не запустился, не
+    шлёт ничего: некому. Заметить его может только тот, кто знает
+    расписание и смотрит на календарь, — приложение при старте.
+
+    Об одном пропуске говорится раз в сутки: приложение перезапускается
+    при каждой правке, и десять одинаковых сообщений за вечер приучили
+    бы их не читать.
+    """
+    from src import schedule
+    from src.alerts import Отказ, последние, сообщить
+
+    состояние = schedule.состояние(storage)
+    if not состояние["пропущен"]:
+        return False
+
+    сутки_назад = (datetime.now() - timedelta(days=1)).isoformat()
+    for запись in последние(30, журнал=журнал):
+        событие = запись.get("событие", {})
+        if событие.get("причина") == "missed" and событие.get("когда", "") > сутки_назад:
+            return False
+
+    сообщить(Отказ(
+        причина="missed",
+        подробности=(
+            f"последний удачный сбор: {состояние['последний_сбор'] or 'не было'}; "
+            f"расписание: раз в {состояние['каждые_дней']} дн. в {состояние['время']}"
+        ),
+    ), журнал=журнал)
+    return True
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -137,70 +181,6 @@ user_settings = {
 }
 
 # Сколько последних вакансий держит лента «только что найдено».
-ЛЕНТА_ВАКАНСИЙ = 6
-
-
-def _учесть_ход(состояние: dict, event, страниц: int) -> None:
-    """
-    Перенести событие сбора в состояние, которое опрашивает экран.
-
-    Отдельной функцией, а не внутри обработчика: обработчик живёт в
-    замыкании запуска и снаружи недоступен, а считать здесь есть что —
-    процент, ожидаемые страницы, оставшееся время, разбивку по запросам.
-    """
-    from src.progress import осталось_секунд, процент, страниц_ожидается
-
-    if event.keywords_total:
-        состояние["keywords_total"] = event.keywords_total
-    if event.keyword_index:
-        состояние["keyword_index"] = event.keyword_index
-
-    пройден = event.stage == "keyword_saved"
-    if event.stage == "keyword_started":
-        # Новый запрос: счётчики прежнего к нему не относятся.
-        состояние["keyword_done"] = 0
-        состояние["keyword_total"] = 0
-        состояние["pages_expected"] = 0
-    if event.keyword_total:
-        состояние["keyword_done"] = event.keyword_done
-        состояние["keyword_total"] = event.keyword_total
-        состояние["pages_expected"] = страниц_ожидается(event.found, страниц)
-
-    if event.stage != "finished":
-        новый = процент(
-            состояние.get("keyword_index", 0),
-            состояние.get("keywords_total", 0),
-            состояние.get("keyword_done", 0),
-            состояние.get("keyword_total", 0),
-            запрос_пройден=пройден,
-        )
-        # Назад полоса не ходит: при резке на срезы доля внутри запроса
-        # считается по срезу и бывает меньше уже показанной.
-        состояние["progress"] = max(состояние.get("progress", 0), новый)
-
-    начат = состояние.get("started_at")
-    if начат:
-        прошло = (datetime.now() - datetime.fromisoformat(начат)).total_seconds()
-        состояние["eta_seconds"] = осталось_секунд(прошло, состояние["progress"])
-
-    for строка in состояние.get("queries", []):
-        if строка["keyword"] != event.keyword:
-            continue
-        if event.found:
-            строка["found"] = event.found
-        if пройден:
-            строка.update(status="done", new=event.new, updated=event.updated)
-        elif строка["status"] != "done":
-            строка["status"] = "running"
-
-    if event.vacancy and event.vacancy.get("name"):
-        лента = состояние.setdefault("recent", [])
-        if not лента or лента[0] != event.vacancy:
-            лента.insert(0, event.vacancy)
-            del лента[ЛЕНТА_ВАКАНСИЙ:]
-
-
-# Состояние парсера
 parser_state = {
     "is_running": False,
     "status": "idle",
@@ -1530,7 +1510,13 @@ def parser_status():
 
 @app.get("/api/parser/stop")
 def stop_parser():
-    """Остановка парсера."""
+    """
+    Остановка сбора.
+
+    Сбор, идущий в этом процессе, получает просьбу напрямую. Сбор по
+    расписанию идёт в другом процессе: ему просьба записывается в базу,
+    и он читает её на ближайшем событии.
+    """
     global parser_state
     if parser_state["is_running"]:
         parser_state["stop_requested"] = True
@@ -1541,8 +1527,20 @@ def stop_parser():
             active_collector.request_stop()
         logger.info("Запрошена остановка парсера")
         return {"message": "Остановка запрошена", "state": parser_state}
-    else:
-        raise HTTPException(400, "Парсер не запущен")
+
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        активный = storage.get_active_run()
+        if активный and storage.request_run_stop(активный["id"]):
+            logger.info(f"Запрошена остановка сбора №{активный['id']} ({активный['source']})")
+            return {"message": "Остановка запрошена", "state": {**parser_state, "status": "stopping"}}
+    finally:
+        storage.close()
+
+    raise HTTPException(400, "Парсер не запущен")
+
 
 @app.get("/api/parser/estimate")
 def оценка_сбора(keywords_count: int = 1, max_pages: int = 10, упрутся: int | None = None):
@@ -1803,284 +1801,82 @@ def start_parser(
             "— собирать по списку из конфига мы не будем.",
         )
 
-    # Продолжаем ли оборванный сбор.
-    #
-    # Продолжается только то, что оборвалось само: перезапуск приложения
-    # посреди работы. Сбор, остановленный человеком, продолжать нельзя —
-    # он сказал «хватит». Пройденные запросы пропускаются: их вакансии
-    # уже в базе, а повторный обход стоит столько же, сколько первый.
+    from src import collection_run
+
     storage = VacancyStorage()
-    продолжение = storage.find_resumable_run(keywords)
-    пропустить = list((продолжение or {}).get("состояние", {}).get("пройденные_запросы", []))
-    if пропустить:
-        logger.info(
-            f"Найден оборванный сбор #{продолжение['id']}: "
-            f"{len(пропустить)} запросов уже пройдено, они будут пропущены"
+    try:
+        # Сбор может идти и не здесь: по расписанию он идёт отдельным
+        # процессом. Два сбора сразу писали бы в одну базу и делили бы
+        # один предел запросов к источнику.
+        другой = collection_run.идёт_другой_сбор(storage)
+        if другой:
+            кто = "по расписанию" if другой["source"] == collection_run.РАСПИСАНИЕ else "в другом окне"
+            raise HTTPException(400, f"Сбор уже идёт {кто} (№{другой['id']}). Дождитесь его или остановите.")
+
+        # Продолжаем ли оборванный сбор.
+        #
+        # Продолжается только то, что оборвалось само: перезапуск
+        # приложения посреди работы. Сбор, остановленный человеком,
+        # продолжать нельзя — он сказал «хватит». Пройденные запросы
+        # пропускаются: их вакансии уже в базе, а повторный обход стоит
+        # столько же, сколько первый.
+        продолжение = storage.find_resumable_run(keywords)
+        пропустить = list((продолжение or {}).get("состояние", {}).get("пройденные_запросы", []))
+        if пропустить:
+            logger.info(
+                f"Найден оборванный сбор #{продолжение['id']}: "
+                f"{len(пропустить)} запросов уже пройдено, они будут пропущены"
+            )
+
+        # Запись о запуске создаётся до начала работы: её номер нужен
+        # экрану сразу.
+        parser_run_id = storage.create_parser_run(
+            keywords=keywords,
+            max_pages=max_pages or 10,
+            days_back=days_back or 30,
+            is_incremental=incremental,
+            use_cache=use_cache,
+            source=collection_run.ЭКРАН,
         )
+    finally:
+        storage.close()
 
-    # Создаём запись о запуске парсера в БД
-    parser_run_id = storage.create_parser_run(
-        keywords=keywords,
-        max_pages=max_pages or 10,
-        days_back=days_back or 30,
-        is_incremental=incremental,
-        use_cache=use_cache
+    parser_state = collection_run.новое_состояние(
+        keywords, запуск=parser_run_id, max_pages=max_pages, incremental=incremental,
+        use_cache=use_cache, глубоко=глубоко, пропустить=пропустить,
     )
-    storage.close()
+    # Словарь состояния передаётся в сбор и обновляется им по ходу; имя
+    # `parser_state` за время сбора может быть переназначено только
+    # следующим запуском, а он невозможен, пока идёт этот.
+    состояние = parser_state
 
-    parser_state = {
-        "is_running": True,
-        "status": "running",
-        "progress": 0,
-        "current_keyword": keywords[0] if keywords else "",
-        "current_page": 0,
-        "total_pages": max_pages or 10,
-        "vacancies_collected": 0,
-        "keywords": keywords,
-        "incremental": incremental,
-        "use_cache": use_cache,
-        "глубоко": глубоко,
-        "parser_run_id": parser_run_id,  # ID записи в БД
-        # Что пропущено как уже собранное оборванной попыткой. Число
-        # уходит в ответ о состоянии: человек должен понимать, почему
-        # сбор из семи запросов прошёл за минуту.
-        "пропущено_пройденных": len(пропустить),
-        "error_message": None,
-        "started_at": datetime.now().isoformat(),
-        "completed_at": None,
-        # Ход по запросам. Сбор идёт десятки минут, и всё это время он
-        # приносит то, на что можно смотреть: что дал каждый запрос и
-        # какие вакансии только что найдены. Одна полоса этого не
-        # показывает — и к тому же врала.
-        "keyword_index": 0,
-        "keywords_total": len(keywords),
-        "keyword_done": 0,
-        "keyword_total": 0,
-        "pages_expected": 0,
-        "eta_seconds": None,
-        "queries": [
-            {
-                "keyword": запрос,
-                # Пройденные прерванной попыткой помечены сразу: иначе
-                # они висели бы «в очереди» до конца сбора.
-                "status": "skipped" if запрос in пропустить else "waiting",
-                "found": None, "new": None, "updated": None,
-            }
-            for запрос in keywords
-        ],
-        "recent": [],
-    }
+    def запомнить(collector):
+        # Ссылка на идущий сбор: по ней остановка доходит до сборщика
+        # напрямую, без опроса общего словаря состояния.
+        global active_collector
+        active_collector = collector
 
     def run():
-        global parser_state, active_collector
+        global active_collector
         try:
-            # Создаём API-клиент с email из user_settings (не из settings модуля)
-            from src.api_client import HHAPIClient
-            # Пауза берётся из настроек, а не остаётся значением по
-            # умолчанию: настройка, которая ни на что не влияет, хуже
-            # отсутствующей — она обещает управление, которого нет.
-            api_client = HHAPIClient(email=user_email, delay=_настройки_сбора()["request_delay"])
-
-            # Один сборщик на все режимы: кэш и дописывание — его флаги.
-            # Прежде здесь выбиралась одна из двух почти одинаковых
-            # реализаций, и режим данных определял, каким кодом соберутся
-            # вакансии — вплоть до того, какие навыки попадут в базу.
-            from src.collector import VacancyCollector
-
-            # Одно соединение на весь сбор: открывать его на каждое
-            # событие значило бы платить за отчёт дороже, чем за работу.
-            progress_storage = VacancyStorage()
-
-            # Что уже обойдено. Список начинается с унаследованного от
-            # оборванной попытки: иначе продолжение, оборвавшись снова,
-            # забыло бы про её работу и третий запуск начал бы всё заново.
-            пройденные_запросы = list(пропустить)
-
-            def on_progress(event):
-                """
-                Ход сбора приходит событиями, а не подменой методов.
-
-                Прежде этот обработчик переписывал `_collect_by_keyword` и
-                `search_vacancies` своими функциями: веб-слой знал имена
-                внутренних методов коллектора и их сигнатуры. Появление
-                нового параметра у поиска роняло сбор целиком.
-                """
-                global parser_state
-                if event.keyword:
-                    parser_state["current_keyword"] = event.keyword
-                parser_state["current_page"] = event.page
-                parser_state["vacancies_collected"] = event.collected
-
-                # Ход работы пишется в базу: состояние в памяти не
-                # переживает перезапуск, а по записи видно и то, что сбор
-                # шёл, и то, что он оборвался.
-                run_id = parser_state.get("parser_run_id")
-
-                # Запрос обойдён целиком и записан в базу. Запоминаем
-                # это, чтобы перезапуск приложения не заставлял собирать
-                # его заново: с резкой на срезы один запрос — это уже не
-                # минута, а десятки.
-                if event.stage == "keyword_saved" and event.keyword:
-                    пройденные_запросы.append(event.keyword)
-                    if run_id:
-                        progress_storage.save_run_progress(run_id, {
-                            "пройденные_запросы": пройденные_запросы,
-                            "текущий_запрос": event.keyword,
-                            "всего_запросов": len(keywords),
-                        })
-
-                if event.found:
-                    parser_state["found_estimate"] = event.found
-
-                _учесть_ход(parser_state, event, max_pages or 10)
-
-                # В базу уходит тот же процент, что показан из памяти:
-                # после перезапуска приложения экран читает его оттуда,
-                # и двух разных чисел у одного сбора быть не должно.
-                if run_id:
-                    progress_storage.update_run_progress(
-                        run_id=run_id,
-                        collected=event.collected,
-                        current_keyword=event.keyword,
-                        current_page=event.page,
-                        found_estimate=event.found,
-                        percent=parser_state["progress"],
-                    )
-
-            collector = VacancyCollector(
-                client=api_client,
+            # Сбор один на оба способа запуска — см. `src/collection_run.py`.
+            collection_run.провести(
+                keywords,
+                email=user_email,
+                пауза=_настройки_сбора()["request_delay"],
                 max_pages=max_pages,
                 days_back=days_back,
-                use_cache=use_cache,
                 incremental=incremental,
-                резать_упёршиеся=глубоко,
-                on_progress=on_progress
+                use_cache=use_cache,
+                глубоко=глубоко,
+                источник=collection_run.ЭКРАН,
+                запуск=parser_run_id,
+                состояние=состояние,
+                пропустить=пропустить,
+                на_сборщик=запомнить,
             )
-
-            # Ссылка на идущий сбор: по ней остановка доходит до
-            # коллектора напрямую, без опроса общего словаря состояния.
-            active_collector = collector
-
-            result = collector.collect_all(
-                keywords=keywords, save_raw=True, пройденные=пропустить
-            )
-
-            parser_state["progress"] = 100
-            parser_state["status"] = "completed"
-            parser_state["completed_at"] = datetime.now().isoformat()
-            parser_state["vacancies_collected"] = result.get("unique", 0)
-            collector.close()
-
-            # Завершаем запись парсинга в БД (успех)
-            try:
-                storage = VacancyStorage()
-                storage.complete_parser_run(
-                    run_id=parser_state["parser_run_id"],
-                    status="completed",
-                    vacancies_collected=result.get("unique", 0),
-                    vacancies_new=result.get("new", 0),
-                    vacancies_updated=result.get("updated", 0),
-                    # Сбор удался, но тексты описаний не записались:
-                    # статус остаётся «завершён», а причина названа —
-                    # иначе о потере узнают, когда тексты понадобятся.
-                    error_message=(
-                        f"Вакансии сохранены, тексты описаний — нет: {result['отказ_текстов']}"
-                        if result.get("отказ_текстов") else None
-                    ),
-                )
-                # Разбивка по запросам: из общего числа не видно, какой
-                # запрос упал, какой прочитан не до конца, а какой просто
-                # не принёс нового.
-                storage.save_run_queries(
-                    parser_state["parser_run_id"],
-                    result.get("by_keyword", {})
-                )
-                # Годится ли собранное для аналитики. Считается по
-                # записям этого запуска: качество базы меняется медленно
-                # и прячет ухудшение сегодняшнего сбора.
-                storage.save_run_quality(
-                    parser_state["parser_run_id"],
-                    result.get("качество", {})
-                )
-                # Точка истории: тренды считаются разницей между двумя
-                # снимками, а не сравнением периодов внутри одного среза
-                # базы — второе даёт затухание архива вместо динамики.
-                # Курс обновляем здесь же: рублёвый эквивалент считается
-                # по курсу на дату сбора, значит свежий курс нужен именно
-                # к моменту, когда данные обновились. Отказ ЦБ сбор не
-                # роняет — остаются прежние курсы с честной датой.
-                storage.refresh_currency_rates()
-                storage.save_metrics_snapshot(run_id=parser_state["parser_run_id"])
-                storage.close()
-
-                # Сбор удался, но не целиком — об этом тоже сообщается:
-                # иначе о потере узнают, когда тексты понадобятся.
-                if result.get("отказ_текстов"):
-                    from src.alerts import Отказ, сообщить
-
-                    сообщить(Отказ(
-                        причина="partial",
-                        подробности=f"тексты описаний не записаны: {result['отказ_текстов']}",
-                        запуск=parser_state["parser_run_id"],
-                        запросы=list(keywords),
-                    ))
-            except Exception as db_err:
-                logger.error(f"Ошибка записи завершения парсинга в БД: {db_err}")
-
-        except Exception as e:
-            import requests
-            from src.api_client import ПричинаОтказа, TooManyRequests
-
-            # Причина отказа — не текст исключения, а код, по которому
-            # интерфейс выбирает объяснение и следующий шаг.
-            причина = getattr(e, "причина", None)
-            if причина is None:
-                if isinstance(e, TooManyRequests):
-                    причина = ПричинаОтказа.СЛИШКОМ_ЧАСТО
-                elif isinstance(e, requests.RequestException):
-                    причина = ПричинаОтказа.СЕТЬ
-                else:
-                    причина = ПричинаОтказа.НЕИЗВЕСТНО
-
-            parser_state["status"] = "error"
-            parser_state["error_message"] = str(e)
-            parser_state["error_type"] = причина
-            parser_state["completed_at"] = datetime.now().isoformat()
-
-            # Трассировка — в журнал: по тексту исключения место сбоя не
-            # найти, а окно консоли к утру закрыто. И оповещение: отказ,
-            # о котором знает только экран, пролежал месяц.
-            logger.exception(f"Сбор №{parser_state.get('parser_run_id')} не удался")
-            from src.alerts import Отказ, сообщить
-
-            сообщить(Отказ(
-                причина=причина,
-                подробности=str(e),
-                запуск=parser_state.get("parser_run_id"),
-                запросы=list(keywords),
-            ))
-
-            # Завершаем запись парсинга в БД (ошибка)
-            try:
-                storage = VacancyStorage()
-                storage.complete_parser_run(
-                    run_id=parser_state["parser_run_id"],
-                    status="error",
-                    error_message=str(e),
-                    error_type=parser_state.get("error_type")
-                )
-                storage.close()
-            except Exception as db_err:
-                logger.error(f"Ошибка записи ошибки парсинга в БД: {db_err}")
-
         finally:
-            try:
-                progress_storage.close()
-            except Exception:
-                pass
             active_collector = None
-            parser_state["is_running"] = False
-            parser_state["stop_requested"] = False
 
     background_tasks.add_task(run)
     return {"message": "Парсер запущен", "state": parser_state}
@@ -2088,6 +1884,22 @@ def start_parser(
 # =============================================================================
 # API для последнего парсинга и настроек
 # =============================================================================
+
+@app.get("/api/schedule")
+def расписание_сбора():
+    """
+    Расписание сбора и то, держится ли оно: когда следующий запуск,
+    когда был последний удачный сбор и не пропущен ли обещанный.
+    """
+    from src import schedule
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        return schedule.состояние(storage)
+    finally:
+        storage.close()
+
 
 @app.get("/api/parser/last-run")
 def get_last_parser_run():

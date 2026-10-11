@@ -63,6 +63,8 @@ export const collection = {
   // Проверка доступа к источнику: один лёгкий запрос вместо целого сбора.
   check: (options) => get('/parser/check', {}, options),
   history: (options) => get('/parser/history', {}, options),
+  // Расписание сбора и то, держится ли оно.
+  schedule: (options) => get('/schedule', {}, options),
   // Во что обойдётся сбор. Считает сервер: цена зависит от его настроек
   // — паузы между запросами и того, включена ли резка на срезы.
   estimate: (params, options) => get('/parser/estimate', params, options),

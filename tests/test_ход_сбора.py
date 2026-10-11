@@ -108,7 +108,7 @@ class TestСостояниеЭкрана:
         Пять запросов; первый принёс 702, идёт второй на 175. Прежде
         здесь было 99 %: 712 собранных делились на 175 найденных.
         """
-        from web.app.main import _учесть_ход
+        from src.collection_run import учесть_ход as _учесть_ход
 
         запросы = ["3dsmax", "рендер", "Арт-директор", "артдиректор", "визуализатор"]
         с = self._состояние(запросы)
@@ -133,7 +133,7 @@ class TestСостояниеЭкрана:
 
     def test_полоса_не_ходит_назад(self):
         """При резке на срезы доля внутри запроса считается по срезу."""
-        from web.app.main import _учесть_ход
+        from src.collection_run import учесть_ход as _учесть_ход
 
         с = self._состояние(["Python"])
         _учесть_ход(с, self._событие("page_fetched", keyword="Python", found=2000, keyword_index=1,
@@ -144,7 +144,7 @@ class TestСостояниеЭкрана:
         assert с["progress"] == было == 80
 
     def test_лента_держит_последние_и_не_повторяет(self):
-        from web.app.main import ЛЕНТА_ВАКАНСИЙ, _учесть_ход
+        from src.collection_run import ЛЕНТА_ВАКАНСИЙ, учесть_ход as _учесть_ход
 
         с = self._состояние(["Python"])
         for n in list(range(10)) + [9]:

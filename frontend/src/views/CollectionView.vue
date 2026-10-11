@@ -65,6 +65,32 @@ const toast = useToast()
 const status = useCollectionStatus()
 const history = useApi((options) => collection.history(options))
 
+// Расписание сбора. Ставит его команда на компьютере, где живёт
+// продукт; экран показывает, что обещано и выполняется ли обещание.
+const расписание = useApi((options) => collection.schedule(options))
+
+const расписаниеСловами = computed(() => {
+  const р = расписание.data.value
+  if (!р?.['установлено']) return null
+  const какЧасто = р['каждые_дней'] === 1 ? 'Каждый день' : `Раз в ${р['каждые_дней']} ${plural(р['каждые_дней'], 'день', 'дня', 'дней')}`
+  return {
+    когда: `${какЧасто} в ${р['время']}`,
+    следующий: р['следующий'],
+    последний: р['последний_сбор'],
+    пропущен: р['пропущен'],
+    дней: р['дней_без_сбора']
+  }
+})
+
+// Пропуск называется числом дней, а пока удачных сборов не было — прямо.
+const оПропуске = computed(() => {
+  const р = расписаниеСловами.value
+  if (!р?.пропущен) return ''
+  return р.дней === null
+    ? 'Расписание установлено, но ни один сбор по нему ещё не прошёл.'
+    : `Сбора не было ${р.дней} ${plural(р.дней, 'день', 'дня', 'дней')} — дольше, чем обещает расписание.`
+})
+
 // Качество собранного — рядом с числом собранного.
 //
 // «Собрано 1891» ничего не говорит о том, годятся ли записи для
@@ -88,6 +114,7 @@ const settingsApi = useApi((options) => settings.collection(options))
 onMounted(async () => {
   status.startPolling()
   history.load()
+  расписание.load()
 
   const saved = await settingsApi.load()
   email.value = saved?.email || ''
@@ -686,6 +713,50 @@ function durationOf(run) {
       <span v-if="startError" class="col__error">{{ startError }}</span>
     </div>
 
+    <BvCard title="Сбор по расписанию">
+      <template #actions>
+        <BvStatus
+          v-if="расписание.data.value"
+          :kind="расписаниеСловами ? 'ok' : 'stop'"
+          :label="расписаниеСловами ? 'Включён' : 'Не установлен'"
+        />
+      </template>
+
+      <!-- Пропуск не шлёт оповещений сам: сбор, который не запустился,
+           сообщить о себе не может. Поэтому он назван здесь. -->
+      <BvBanner
+        v-if="оПропуске"
+        kind="warning"
+        title="Сбор по расписанию не прошёл"
+        :text="`${оПропуске} Обычно это значит, что компьютер был выключен или задание планировщика не запускается.`"
+      />
+
+      <dl v-if="расписаниеСловами" class="col__schedule">
+        <div>
+          <dt class="label">Когда</dt>
+          <dd>{{ расписаниеСловами.когда }}</dd>
+        </div>
+        <div>
+          <dt class="label">Следующий запуск</dt>
+          <dd>{{ dateTime(расписаниеСловами.следующий) }}</dd>
+        </div>
+        <div>
+          <dt class="label">Последний удачный сбор</dt>
+          <dd>{{ расписаниеСловами.последний ? timeAgo(расписаниеСловами.последний) : 'ещё не было' }}</dd>
+        </div>
+      </dl>
+
+      <p v-if="расписание.error.value" class="col__error">{{ расписание.error.value }}</p>
+      <p v-else-if="расписаниеСловами" class="col__note">
+        Сбор идёт по запросам из списка выше и только дописывает к базе; перед ним снимается её копия.
+        Компьютер должен быть включён: пропущенный запуск пройдёт при следующем включении.
+      </p>
+      <p v-else-if="расписание.data.value" class="col__note">
+        Сейчас сбор идёт только по кнопке. Расписание ставится на компьютере, где работает продукт, командой
+        <span class="col__command">python scripts/расписание.py --установить --время 03:30</span>
+      </p>
+    </BvCard>
+
     <BvCard title="История сборов">
       <template #actions>
         <span class="col__note">{{ runs.length ? `${runs.length} запусков` : '' }}</span>
@@ -749,7 +820,9 @@ function durationOf(run) {
           <tr v-for="run in runs" :key="run.id">
             <td class="col__run">
               <span class="col__run-date">{{ dateTime(run.started_at) }}</span>
-              <span class="col__run-ago">{{ timeAgo(run.started_at) }}</span>
+              <span class="col__run-ago">
+                {{ timeAgo(run.started_at) }}<template v-if="run.source === 'schedule'"> · по расписанию</template>
+              </span>
             </td>
             <td>
               <BvStatus :kind="statusOf(run).kind" :label="statusOf(run).label" />
@@ -779,6 +852,35 @@ function durationOf(run) {
 </template>
 
 <style scoped>
+/* Расписание тремя парами «подпись — значение» в ряд, как строка итогов. */
+.col__schedule {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: var(--s-4) var(--s-6);
+}
+
+.col__schedule div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.col__schedule dd {
+  margin: 0;
+  font-size: var(--t-body-size);
+  color: var(--c-text);
+}
+
+/* Команда — то, что набирают дословно: моноширинным и без переноса посреди слова. */
+.col__command {
+  font-family: var(--font-mono);
+  font-size: var(--t-label-alt-size);
+  color: var(--c-text-secondary);
+  overflow-wrap: anywhere;
+}
+
 .col {
   display: flex;
   flex-direction: column;

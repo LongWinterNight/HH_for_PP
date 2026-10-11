@@ -135,12 +135,31 @@ class TestОборвавшиесяСборы:
 
     def test_запись_без_отметки_живости_считается_оборвавшейся(self, хранилище):
         """
-        Сбор, упавший до первого события, отметки не оставил — но он
-        точно не идёт: процесс, который его вёл, уже мёртв.
+        Запись без отметки — след сбора, начатого до того, как отметка
+        стала ставиться при создании. Он точно не идёт: процесс, который
+        его вёл, уже мёртв.
+        """
+        import sqlite3
+
+        запуск = хранилище.create_parser_run(keywords=["Python"])
+        conn = sqlite3.connect(хранилище.engine.url.database)
+        conn.execute("UPDATE parser_runs SET heartbeat_at = NULL WHERE id = ?", (запуск,))
+        conn.commit()
+        conn.close()
+
+        assert хранилище.mark_interrupted_runs(stale_after_minutes=5) == 1
+
+    def test_только_что_созданный_сбор_оборванным_не_считается(self, хранилище):
+        """
+        Между созданием записи и первым событием сбора проходят секунды.
+        Пока сбор шёл только внутри приложения, это окно никто не видел;
+        сбор по расписанию идёт рядом с ним, и проверка, пришедшая в это
+        окно, принимала бы живой сбор за мёртвый.
         """
         хранилище.create_parser_run(keywords=["Python"])
 
-        assert хранилище.mark_interrupted_runs(stale_after_minutes=5) == 1
+        assert хранилище.mark_interrupted_runs(stale_after_minutes=5) == 0
+        assert хранилище.get_active_run() is not None
 
 
 class TestСнимкиМетрик:
