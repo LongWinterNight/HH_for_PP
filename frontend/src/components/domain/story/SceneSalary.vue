@@ -1,36 +1,35 @@
 <script setup>
 import { computed } from 'vue'
 import BvBarList from '@/components/charts/BvBarList.vue'
+import BvChartFrame from '@/components/charts/BvChartFrame.vue'
+import BvCard from '@/components/ui/BvCard.vue'
+import BvKpiTile from '@/components/ui/BvKpiTile.vue'
+import { useCount } from '@/composables/useCount'
 import { useScene } from '@/composables/useScene'
 import { num, plural } from '@/utils/format'
 
 // Аналитика: почему в зарплатах стоит медиана, а не средняя.
 //
-// Объясняется на распределении настоящих зарплат базы. Сначала обе
-// величины считаются без одного процента самых высоких зарплат, затем
-// этот процент возвращается — и видно, какая из двух линий уехала.
-// Довод «средняя чувствительна к выбросам» здесь не утверждение, а
-// наблюдение: сдвиги измерены и показаны рядом.
-//
-// Столбцы — вёрсткой, а не канвасом: их нужно вырастить по одному и
-// провести поверх две линии, а ради трёх десятков прямоугольников
-// библиотека не нужна.
+// Гистограмма — та же, что в «Графиках»: столбцы шкалы величин, корзина
+// с медианой отмечена маркером. Средняя в продукте не показывается
+// вовсе; здесь она нарисована один раз — чтобы показать, почему.
+// Сначала обе величины считаются без одного процента самых высоких
+// зарплат, затем процент возвращается, и видно, какая из двух уехала.
+// Сдвиги измерены и стоят рядом полосами.
 const props = defineProps({
   // story['зарплаты'] из /api/system/story.
   data: { type: Object, default: null }
 })
 
 const ШАГОВ = 4 // распределение, медиана, средняя, возвращён верх
-const сцена = useScene(ШАГОВ, { пауза: (номер) => (номер === 1 ? 1500 : 1300), готово: () => Boolean(props.data) })
+const сцена = useScene(ШАГОВ, { пауза: 1100, готово: () => Boolean(props.data) })
 const { корень, шаг, идёт } = сцена
 
 defineExpose({ повторить: сцена.повторить, идёт })
 
-const корзины = computed(() => props.data?.['корзины'] ?? [])
-const наибольшая = computed(() => Math.max(...корзины.value, props.data?.['за_пределом'] ?? 0, 1))
-const высота = (число) => `${(число / наибольшая.value) * 100}%`
-
 const верхВозвращён = computed(() => шаг.value >= 4)
+const медиана = computed(() => props.data?.[верхВозвращён.value ? 'медиана' : 'медиана_без_верха'] ?? 0)
+const средняя = computed(() => props.data?.[верхВозвращён.value ? 'средняя' : 'средняя_без_верха'] ?? 0)
 
 // Столбец «выше предела»: до возврата верхнего процента в нём нет тех
 // зарплат, которые сцена отложила.
@@ -39,18 +38,34 @@ const заПределом = computed(() => {
   return верхВозвращён.value ? всего : Math.max(0, всего - (props.data?.['верхних'] ?? 0))
 })
 
-const медиана = computed(() => props.data?.[верхВозвращён.value ? 'медиана' : 'медиана_без_верха'] ?? 0)
-const средняя = computed(() => props.data?.[верхВозвращён.value ? 'средняя' : 'средняя_без_верха'] ?? 0)
-const место = (сумма) => `${Math.min(100, (сумма / (props.data?.['предел'] || 1)) * 100)}%`
+const столбцы = computed(() => {
+  const д = props.data
+  if (!д) return []
+  const наибольшая = Math.max(...д['корзины'], д['за_пределом'], 1)
+  const сМедианой = Math.min(д['корзины'].length - 1, Math.floor(медиана.value / д['шаг']))
+  return [
+    ...д['корзины'].map((число, i) => ({
+      число,
+      высота: `${(число / наибольшая) * 100}%`,
+      подпись: `${Math.round((д['шаг'] * i) / 1000)}`,
+      медиана: шаг.value >= 2 && i === сМедианой
+    })),
+    { число: заПределом.value, высота: `${(заПределом.value / наибольшая) * 100}%`, подпись: `${Math.round(д['предел'] / 1000)}+`, медиана: false }
+  ]
+})
+
+// Место средней на оси: ось делят корзины и ещё один столбец «выше».
+const местоСредней = computed(() => {
+  const д = props.data
+  if (!д) return '0%'
+  const доляОси = д['корзины'].length / (д['корзины'].length + 1)
+  return `${Math.min(1, средняя.value / д['предел']) * доляОси * 100}%`
+})
 
 const рубли = (сумма) => `${num(Math.round(сумма))} ₽`
-const тысячи = (сумма) => `${Math.round(сумма / 1000)}`
 
-// Деления оси: шесть отметок от нуля до предела.
-const деления = computed(() => {
-  const предел = props.data?.['предел'] ?? 0
-  return [0, 1, 2, 3, 4, 5].map((i) => ({ место: `${i * 20}%`, подпись: тысячи((предел / 5) * i) }))
-})
+const числоМедианы = useCount(() => Math.round(медиана.value), () => шаг.value >= 2)
+const числоСредней = useCount(() => Math.round(средняя.value), () => шаг.value >= 3)
 
 const сдвиги = computed(() => {
   const д = props.data
@@ -71,68 +86,71 @@ const копииМеняют = computed(() => {
   const д = props.data
   return д?.['медиана_по_вакансиям'] != null && Math.round(д['медиана_по_вакансиям']) !== Math.round(д['медиана'])
 })
-
-const подпись = computed(() => {
-  const д = props.data
-  if (!д) return ''
-  return [
-    '',
-    `Зарплаты ${num(д['вакансий'])} вакансий: нижняя граница вилки в рублях. Столбец — сколько вакансий платит столько.`,
-    'Медиана: половина вакансий платит меньше этой суммы, половина — больше.',
-    'Средняя стоит правее: её тянет длинный хвост высоких зарплат.',
-    `Вернули ${д['верхних']} самых высоких — от ${рубли(д['наименьшая_из_верхних'])} до ${рубли(д['наибольшая'])}. Средняя уехала, медиана почти на месте.`
-  ][Math.min(шаг.value, ШАГОВ)]
-})
 </script>
 
 <template>
-  <div ref="корень" class="sal">
-    <p v-if="!data" class="sal__note">Зарплат в базе слишком мало, чтобы показать распределение.</p>
+  <div ref="корень" class="st-stack">
+    <p v-if="!data" class="st-note">Зарплат в базе слишком мало, чтобы показать распределение.</p>
 
     <template v-else>
-      <div class="sal__chart" :class="{ 'is-grown': шаг >= 1 }">
-        <div class="sal__plot">
-          <div class="sal__bars" aria-hidden="true">
-            <span v-for="(число, i) in корзины" :key="i" class="sal__bar" :style="{ height: высота(число), '--i': i }"></span>
+      <div class="st-grid st-grid--wide st-grid--stretch">
+        <BvChartFrame title="Зарплаты" subtitle="нижняя граница вилки, тыс. ₽ в месяц" :sample="data['вакансий']" :height="260">
+          <template #actions>
+            <span class="sal__legend" aria-hidden="true">
+              <span class="sal__key"><span class="sal__swatch sal__swatch--median"></span>медиана</span>
+              <span class="sal__key"><span class="sal__swatch sal__swatch--mean"></span>средняя</span>
+            </span>
+          </template>
+
+          <div class="sal__plot" :class="{ 'is-on': шаг >= 1 }" role="img" :aria-label="`Распределение зарплат: медиана ${рубли(data['медиана'])}, средняя ${рубли(data['средняя'])}`">
+            <!-- Сетка только горизонтальная: вертикальные линии спорят со столбцами. -->
+            <span v-for="линия in 4" :key="линия" class="sal__grid" :style="{ bottom: `calc(24px + (100% - 24px) * ${линия / 4})` }"></span>
+
+            <div class="sal__bars">
+              <div v-for="(столбец, i) in столбцы" :key="i" class="sal__col" :style="{ '--i': i }">
+                <span class="sal__bar-wrap">
+                  <span
+                    class="sal__bar"
+                    :class="{ 'is-median': столбец.медиана, 'is-over': i === столбцы.length - 1 && верхВозвращён }"
+                    :style="{ height: столбец.высота }"
+                  ></span>
+                </span>
+                <span class="sal__tick">{{ столбец.подпись }}</span>
+              </div>
+            </div>
+
+            <!-- Средняя: в продукте её нет, здесь — одна линия, чтобы показать почему. -->
+            <span class="sal__mean" :class="{ 'is-on': шаг >= 3 }" :style="{ left: местоСредней }"></span>
           </div>
+        </BvChartFrame>
 
-          <!-- Две линии поверх распределения. Различаются начертанием, не цветом. -->
-          <span class="sal__line sal__line--median" :class="{ 'is-shown': шаг >= 2 }" :style="{ left: место(медиана) }" aria-hidden="true"></span>
-          <span class="sal__line sal__line--mean" :class="{ 'is-shown': шаг >= 3 }" :style="{ left: место(средняя) }" aria-hidden="true"></span>
-
-          <div class="sal__axis" aria-hidden="true">
-            <span v-for="деление in деления" :key="деление.место" class="sal__tick" :style="{ left: деление.место }">{{ деление.подпись }}</span>
-          </div>
-        </div>
-
-        <!-- Всё, что выше предела оси, — одним столбцом справа. -->
-        <div class="sal__over" aria-hidden="true">
-          <span class="sal__bar sal__bar--over" :class="{ 'is-back': верхВозвращён }" :style="{ height: высота(заПределом), '--i': корзины.length }"></span>
-          <span class="sal__tick sal__tick--over">выше</span>
+        <div class="st-stack" aria-live="polite">
+          <BvKpiTile
+          no-trend
+            label="Медиана · RUB"
+            :value="числоМедианы === null ? null : рубли(числоМедианы)"
+            note="половина вакансий платит меньше, половина — больше"
+          />
+          <BvKpiTile
+          no-trend
+            label="Средняя · RUB"
+            :value="числоСредней === null ? null : рубли(числоСредней)"
+            note="в продукте не показывается: её тянут выбросы"
+          />
         </div>
       </div>
-      <p class="sal__unit">тыс. ₽ в месяц</p>
 
-      <dl class="sal__legend">
-        <div class="sal__key" :class="{ 'is-shown': шаг >= 2 }">
-          <dt><span class="sal__swatch sal__swatch--median" aria-hidden="true"></span>медиана</dt>
-          <dd>{{ рубли(медиана) }}</dd>
-        </div>
-        <div class="sal__key" :class="{ 'is-shown': шаг >= 3 }">
-          <dt><span class="sal__swatch sal__swatch--mean" aria-hidden="true"></span>средняя</dt>
-          <dd>{{ рубли(средняя) }}</dd>
-        </div>
-      </dl>
-
-      <p class="sal__caption" aria-live="polite">{{ подпись }}</p>
-
-      <section class="sal__shift" :class="{ 'is-shown': верхВозвращён }">
-        <h3 class="sal__title">
-          На сколько сдвинули {{ data['верхних'] }} {{ plural(data['верхних'], 'вакансия', 'вакансии', 'вакансий') }}
-          из {{ num(data['вакансий']) }}
-        </h3>
+      <BvCard
+        :title="`Что сделали ${data['верхних']} ${plural(data['верхних'], 'вакансия', 'вакансии', 'вакансий')} из ${num(data['вакансий'])}`"
+        class="st-in"
+        :class="{ 'is-on': верхВозвращён }"
+      >
+        <template #actions>
+          <span class="st-scope">зарплаты от {{ рубли(data['наименьшая_из_верхних']) }} до {{ рубли(data['наибольшая']) }}</span>
+        </template>
         <BvBarList :items="сдвиги" :format="(v) => `+${рубли(v)}`" />
-        <p class="sal__note">
+        <p class="st-note">
+          Сначала обе величины посчитаны без одного процента самых высоких зарплат, затем он возвращён.
           <template v-if="воСколько">Средняя сдвинулась в {{ воСколько }} раза сильнее медианы. </template>
           Поэтому во всех зарплатных числах продукта стоит медиана: одна вакансия с лишним нулём её не меняет.
           <template v-if="копииМеняют">
@@ -140,204 +158,127 @@ const подпись = computed(() => {
             {{ рубли(data['медиана_по_вакансиям']) }}.
           </template>
         </p>
-      </section>
+      </BvCard>
     </template>
   </div>
 </template>
 
 <style scoped>
-.sal {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
+.sal__legend {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  font-size: var(--t-caption-size);
+  color: var(--c-text-secondary);
 }
 
-.sal__chart {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 36px;
-  gap: var(--s-3);
+.sal__key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
 }
 
-.sal__plot,
-.sal__over {
+.sal__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* Маркер — одно значение на график: медиана. */
+.sal__swatch--median { background: var(--c-marker); }
+.sal__swatch--mean {
+  width: 0;
+  height: 12px;
+  border-radius: 0;
+  border-left: 2px dashed var(--c-text);
+}
+
+.sal__plot {
   position: relative;
-  height: 220px;
-  padding-bottom: 22px;
-  box-sizing: content-box;
+  flex: 1 1 auto;
+  min-height: 260px;
+}
+
+.sal__grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--c-border);
 }
 
 .sal__bars {
+  position: absolute;
+  inset: 0;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: minmax(0, 1fr);
-  align-items: end;
-  gap: 2px;
-  height: 220px;
+  gap: var(--s-1);
+}
+
+.sal__col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sal__bar-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
   box-shadow: inset 0 -1px 0 var(--c-border-strong);
 }
 
 .sal__bar {
   display: block;
+  width: 100%;
   min-height: 1px;
-  border-radius: 2px 2px 0 0;
-  background: var(--c-border-strong);
+  border-radius: var(--r-xs) var(--r-xs) 0 0;
+  background: var(--c-data-2);
   transform: scaleY(0);
   transform-origin: center bottom;
-  transition: transform 520ms var(--ease-enter), height 700ms var(--ease-enter), background-color 400ms var(--ease-standard);
-  transition-delay: calc(var(--i) * 28ms), 0ms, 0ms;
+  transition: transform var(--dur-enter) var(--ease-enter), height var(--dur-enter) var(--ease-enter),
+    background-color var(--dur-panel) var(--ease-standard);
+  transition-delay: calc(var(--i) * 24ms), 0ms, 0ms;
 }
 
-.sal__chart.is-grown .sal__bar { transform: scaleY(1); }
-
-.sal__over {
-  display: flex;
-  align-items: flex-end;
-  height: 220px;
-  box-shadow: none;
-}
-
-.sal__bar--over {
-  width: 100%;
-  margin-bottom: 0;
-  box-shadow: inset 0 -1px 0 var(--c-border-strong);
-}
-
-/* Возвращённый верх — тёмным: это те самые вакансии, из-за которых
-   уехала средняя. */
-.sal__bar--over.is-back { background: var(--c-text); }
-
-.sal__line {
-  position: absolute;
-  top: 0;
-  height: 220px;
-  width: 0;
-  opacity: 0;
-  /* Переезд линии — главное событие сцены: медленно, чтобы за ним следили. */
-  transition: left 1400ms var(--ease-standard), opacity var(--dur-panel) var(--ease-standard);
-}
-
-.sal__line.is-shown { opacity: 1; }
-.sal__line--median { border-left: 2px solid var(--c-text); }
-.sal__line--mean { border-left: 2px dashed var(--c-text); }
-
-.sal__axis {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 18px;
-}
+.sal__plot.is-on .sal__bar { transform: scaleY(1); }
+.sal__bar.is-median { background: var(--c-marker); }
+/* Возвращённый верх — темнейшей ступенью: из-за него уехала средняя. */
+.sal__bar.is-over { background: var(--c-data-1); }
 
 .sal__tick {
-  position: absolute;
-  bottom: 0;
-  transform: translateX(-50%);
+  flex: 0 0 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   font-size: var(--t-label-alt-size);
   line-height: var(--t-label-alt-lh);
-  font-variant-numeric: tabular-nums;
   color: var(--c-text-muted);
   white-space: nowrap;
 }
 
-.sal__tick:first-child { transform: none; }
-.sal__tick:last-child { transform: translateX(-100%); }
-.sal__tick--over { left: 50%; bottom: -22px; transform: translateX(-50%) !important; }
-
-.sal__unit,
-.sal__note {
-  font-size: var(--t-caption-size);
-  line-height: var(--t-caption-lh);
-  color: var(--c-text-muted);
-  max-width: none;
-}
-
-.sal__unit { margin-top: var(--s-1); }
-
-.sal__legend {
-  margin: var(--s-2) 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2) var(--s-8);
-}
-
-.sal__key {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-3);
-  opacity: 0.25;
-  transition: opacity var(--dur-panel) var(--ease-standard);
-}
-
-.sal__key.is-shown { opacity: 1; }
-
-.sal__key dt {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  font-size: var(--t-caption-size);
-  color: var(--c-text-secondary);
-}
-
-.sal__key dd {
-  margin: 0;
-  font-size: var(--t-h3-size);
-  font-weight: var(--w-strong);
-  font-variant-numeric: tabular-nums;
-  color: var(--c-text);
-}
-
-.sal__swatch {
+.sal__mean {
+  position: absolute;
+  top: 0;
+  bottom: 24px;
   width: 0;
-  height: 16px;
-}
-
-.sal__swatch--median { border-left: 2px solid var(--c-text); }
-.sal__swatch--mean { border-left: 2px dashed var(--c-text); }
-
-/* Высота подписи занята заранее: смена текста не двигает блок ниже. */
-.sal__caption {
-  min-height: calc(var(--t-body-lh) * 2);
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-lh);
-  color: var(--c-text-secondary);
-  max-width: 78ch;
-}
-
-.sal__shift {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  padding-top: var(--s-5);
-  box-shadow: inset 0 1px 0 var(--c-border);
+  border-left: 2px dashed var(--c-text);
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity var(--dur-enter) var(--ease-enter) 900ms, transform var(--dur-enter) var(--ease-enter) 900ms;
+  transition: left var(--dur-enter) var(--ease-standard), opacity var(--dur-panel) var(--ease-standard);
 }
 
-.sal__shift.is-shown { opacity: 1; transform: none; }
-
-.sal__title {
-  font-size: var(--t-ui-size);
-  font-weight: var(--w-medium);
-  color: var(--c-text);
-}
-
-.sal__note { max-width: 78ch; }
+.sal__mean.is-on { opacity: 1; }
 
 @media (max-width: 767px) {
-  .sal__plot,
-  .sal__over,
-  .sal__bars,
-  .sal__line { height: 160px; }
-  .sal__bars { gap: 1px; }
-  .sal__chart { grid-template-columns: minmax(0, 1fr) 28px; gap: var(--s-2); }
-  .sal__caption { min-height: calc(var(--t-body-lh) * 4); }
+  .sal__bars { gap: 2px; }
+  /* Подписи оси через одну: все четырнадцать в 390 не помещаются. */
+  .sal__col:nth-child(even) .sal__tick { visibility: hidden; }
+  .sal__col:last-child .sal__tick { visibility: visible; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .sal__bar,
-  .sal__line,
-  .sal__key,
-  .sal__shift { transition: none !important; }
+  .sal__mean { transition: none; }
 }
 </style>

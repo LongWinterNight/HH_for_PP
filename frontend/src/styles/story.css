@@ -1,0 +1,131 @@
+/* ============================================================
+   Экран «Как устроено» — общее для сцен глав.
+
+   Сцены собраны из примитивов системы; здесь только то, чего
+   примитивы не задают: раскладка карточек главы на холсте и
+   единое движение. Всё движение экрана описано в этом файле —
+   чтобы длительность, которой нет в системе, негде было завести.
+
+   Движение — на токенах системы:
+     появление блока   --dur-enter  / --ease-enter
+     смена состояния   --dur-panel  / --ease-standard
+     мелкая правка     --dur-ui     / --ease-ui
+   Каскад — шагом 60 мс через --i.
+   ============================================================ */
+
+/* Карточки главы лежат на холсте сеткой, как на «Дашборде». */
+.st-grid {
+  display: grid;
+  gap: var(--gap-grid);
+  align-items: start;
+}
+
+.st-grid--kpi { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); }
+.st-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.st-grid--wide { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+.st-grid--stretch { align-items: stretch; }
+
+@media (max-width: 1023px) {
+  .st-grid--2,
+  .st-grid--wide { grid-template-columns: minmax(0, 1fr); }
+}
+
+.st-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-grid);
+  min-width: 0;
+}
+
+/* Появление: блок, до которого сцена ещё не дошла, занимает своё
+   место, но не виден — страница не прыгает, когда он проявляется. */
+.st-in {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--dur-enter) var(--ease-enter), transform var(--dur-enter) var(--ease-enter);
+  transition-delay: calc(var(--i, 0) * 60ms);
+}
+
+.st-in.is-on { opacity: 1; transform: none; }
+
+/* Блок, до которого не дошли, приглушён, но читается: видно, что будет. */
+.st-dim { transition: opacity var(--dur-panel) var(--ease-standard); }
+.st-dim:not(.is-on) { opacity: 0.4; }
+
+/* Пояснение под блоком: мелкий текст, как подписи под графиками. */
+.st-note {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-lh);
+  color: var(--c-text-muted);
+  max-width: 78ch;
+}
+
+/* Оговорка справа от заголовка карточки. */
+.st-scope {
+  font-size: var(--t-caption-size);
+  color: var(--c-text-muted);
+  white-space: nowrap;
+}
+
+/* Вакансия строкой: название и компания под ним — как в таблице вакансий. */
+.st-vac {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.st-vac__name {
+  color: var(--c-text);
+  font-weight: var(--w-medium);
+  overflow-wrap: break-word;
+}
+
+.st-vac__company {
+  font-size: var(--t-caption-size);
+  color: var(--c-text-muted);
+  overflow-wrap: break-word;
+}
+
+/* В таблице колонка с названием держит ширину: на узком экране таблица
+   прокручивается вбок, а название не рвётся по буквам. То же делает
+   колонка названия в таблице вакансий. */
+td > .st-vac { min-width: 180px; }
+td > .st-vac--short { min-width: 120px; }
+
+/* Найденное слово: тем же жёлтым, что чип навыка. Единственный жёлтый
+   экрана значит одно — «это слово система нашла в тексте». */
+.st-hit {
+  color: inherit;
+  background-color: transparent;
+  background-image: linear-gradient(var(--c-cat-1), var(--c-cat-1));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  border-radius: 3px;
+  padding: 1px 2px;
+  margin: 0 -2px;
+  transition: background-size var(--dur-panel) var(--ease-enter), color var(--dur-ui) var(--ease-ui);
+}
+
+.st-hit.is-on { color: var(--c-text); background-size: 100% 100%; }
+
+/* Крупное значение не-KPI: вилка зарплаты, «424 → 133». Кегль тот же,
+   что у «половины вакансий» на «Аналитике». */
+.st-figure {
+  font-size: var(--t-h2-size);
+  line-height: var(--t-h2-lh);
+  letter-spacing: var(--t-h2-ls);
+  font-weight: var(--w-strong);
+  color: var(--c-text);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 767px) {
+  .st-figure { font-size: var(--t-h3-size); line-height: var(--t-h3-lh); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-in,
+  .st-dim,
+  .st-hit { transition: none; }
+}

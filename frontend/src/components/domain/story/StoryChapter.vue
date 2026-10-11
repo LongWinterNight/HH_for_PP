@@ -1,15 +1,16 @@
 <script setup>
 import BvButton from '@/components/ui/BvButton.vue'
-import BvCard from '@/components/ui/BvCard.vue'
 
 // Глава экрана «Как устроено»: один шаг пути вакансии.
 //
-// Карточка системы с номером шага, вопросом, на который глава отвечает,
-// и сценой. Номер здесь не украшение: главы идут в том порядке, в
-// каком система работает с вакансией.
+// Раздел на холсте, а не карточка: карточки системы лежат внутри него
+// сеткой, как на «Дашборде», и друг в друга не вкладываются. Порядок
+// глав повторяет порядок, в котором система работает с вакансией.
 defineProps({
   id: { type: String, required: true },
   number: { type: Number, required: true },
+  // Сколько всего шагов в пути: «шаг 3 из 7» говорит, далеко ли до конца.
+  total: { type: Number, default: 7 },
   title: { type: String, required: true },
   // Вопрос, на который отвечает глава, — словами человека, а не системы.
   question: { type: String, default: '' },
@@ -23,36 +24,39 @@ defineEmits(['replay'])
 </script>
 
 <template>
-  <BvCard :id="`chapter-${id}`" class="chapter" :data-chapter="id">
+  <section :id="`chapter-${id}`" class="chapter" :data-chapter="id" :aria-labelledby="`chapter-${id}-title`">
     <header class="chapter__head">
-      <span class="chapter__num" aria-hidden="true">{{ String(number).padStart(2, '0') }}</span>
       <div class="chapter__titles">
-        <h2 class="chapter__title">{{ title }}</h2>
+        <span class="label">Шаг {{ number }} из {{ total }}</span>
+        <h2 :id="`chapter-${id}-title`">{{ title }}</h2>
         <p v-if="question" class="chapter__question">{{ question }}</p>
       </div>
-      <BvButton v-if="replayable" size="sm" :disabled="playing" @click="$emit('replay')">Повторить</BvButton>
+      <div v-if="replayable || $slots.aside" class="chapter__aside">
+        <!-- Состояние, относящееся к главе: например, поднята ли модель поиска. -->
+        <slot name="aside" />
+        <BvButton v-if="replayable" size="sm" :disabled="playing" @click="$emit('replay')">Показать ещё раз</BvButton>
+      </div>
     </header>
     <slot />
-  </BvCard>
+  </section>
 </template>
 
 <style scoped>
-/* Переход по главе из рельса не должен прятать её заголовок под шапку. */
-.chapter { scroll-margin-top: calc(var(--h-header) + var(--s-16)); }
-
-.chapter__head {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--s-4);
+.chapter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-grid);
+  min-width: 0;
+  /* Переход к главе не прячет её заголовок под шапку и ленту глав. */
+  scroll-margin-top: calc(var(--h-header) + var(--s-16));
 }
 
-.chapter__num {
-  font-family: var(--font-mono);
-  font-size: var(--t-caption-size);
-  line-height: var(--t-h2-lh);
-  font-variant-numeric: tabular-nums;
-  color: var(--c-text-muted);
+.chapter__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4);
 }
 
 .chapter__titles {
@@ -62,24 +66,12 @@ defineEmits(['replay'])
   min-width: 0;
 }
 
-.chapter__title {
-  font-size: var(--t-h2-size);
-  line-height: var(--t-h2-lh);
-  letter-spacing: var(--t-h2-ls);
-  font-weight: var(--w-strong);
-  color: var(--c-text);
-}
+.chapter__question { color: var(--c-text-secondary); }
 
-.chapter__question {
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-lh);
-  color: var(--c-text-secondary);
-  max-width: 72ch;
-}
-
-@media (max-width: 767px) {
-  .chapter__head { grid-template-columns: minmax(0, 1fr) auto; }
-  .chapter__num { display: none; }
-  .chapter__title { font-size: var(--t-h3-size); line-height: var(--t-h3-lh); }
+.chapter__aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
 }
 </style>

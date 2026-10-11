@@ -1,32 +1,33 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import BvBanner from '@/components/ui/BvBanner.vue'
 import BvButton from '@/components/ui/BvButton.vue'
-import BvCard from '@/components/ui/BvCard.vue'
+import BvKpiTile from '@/components/ui/BvKpiTile.vue'
+import BvSegmented from '@/components/ui/BvSegmented.vue'
 import BvStatus from '@/components/ui/BvStatus.vue'
 import FailureFlow from '@/components/domain/FailureFlow.vue'
 import SearchExplainer from '@/components/domain/SearchExplainer.vue'
-import SystemPipeline from '@/components/domain/SystemPipeline.vue'
 import SceneClean from '@/components/domain/story/SceneClean.vue'
 import SceneCollect from '@/components/domain/story/SceneCollect.vue'
 import SceneParse from '@/components/domain/story/SceneParse.vue'
 import SceneSalary from '@/components/domain/story/SceneSalary.vue'
 import SceneStore from '@/components/domain/story/SceneStore.vue'
 import StoryChapter from '@/components/domain/story/StoryChapter.vue'
-import StoryRail from '@/components/domain/story/StoryRail.vue'
 import { system } from '@/api/endpoints'
 import { useApi } from '@/composables/useApi'
-import { num, plural, timeAgo } from '@/utils/format'
+import { num, timeAgo } from '@/utils/format'
+import '@/styles/story.css'
 
 // «Как устроено»: что продукт делает с вакансией, шаг за шагом.
 //
-// Не рабочий экран, а объясняющий. Одна настоящая вакансия из базы
+// Не рабочий экран, а объясняющий, но собран из тех же частей, что
+// рабочие: плитки показателей сверху, карточки на холсте, таблицы,
+// полосы шкалы величин, статусы. Одна настоящая вакансия из базы
 // проходит семь глав — сбор, разбор, очистку, хранение, поиск,
-// аналитику, надзор, — и каждая глава показывает свой шаг на её
-// данных и на числах всей базы. Сверху — тот же путь одной схемой.
+// аналитику, надзор.
 //
 // Сцена главы проигрывается сама, когда до неё докрутили, один раз и
-// останавливается на итоге. Непрерывно движется только то, что
-// действительно идёт: поток по схеме во время сбора.
+// останавливается на итоге. Движение — на токенах системы.
 
 const состояние = useApi((options) => system.state(options))
 const история = useApi((options) => system.story(options))
@@ -66,21 +67,27 @@ function обновить() {
 }
 
 const сбор = computed(() => состояние.data.value?.['сбор'] ?? null)
+const база = computed(() => состояние.data.value?.['база'] ?? null)
+const разбор = computed(() => состояние.data.value?.['разбор'] ?? null)
 const поиск = computed(() => состояние.data.value?.['поиск'] ?? null)
 const герой = computed(() => история.data.value?.['герой'] ?? null)
 
+const загрузка = computed(() => состояние.loading.value && !состояние.data.value)
+
 // Одна строка под заголовком: что система делает прямо сейчас.
 const сейчас = computed(() => {
-  if (состояние.loading.value && !состояние.data.value) return 'Спрашиваем состояние систем…'
+  if (загрузка.value) return 'Спрашиваем состояние систем…'
   if (!состояние.data.value) return ''
   // Слова «идёт сбор» говорит метка рядом; повторять их текстом незачем.
-  if (идётСбор.value) return 'Числа на схеме обновляются сами.'
+  if (идётСбор.value) return 'Числа обновляются сами.'
   const последний = сбор.value?.['последний']
-  if (!последний) return 'Сбор ещё не запускался — схема показывает пустую систему.'
+  if (!последний) return 'Сбор ещё не запускался.'
   const когда = последний['завершён'] || последний['начат']
   const исход = { completed: 'прошёл', error: 'не удался', interrupted: 'был оборван', stopped: 'остановлен' }[последний['исход']] ?? последний['исход']
-  return `Система в покое. Последний сбор ${исход} ${timeAgo(когда)}.`
+  return `Последний сбор ${исход} ${timeAgo(когда)}.`
 })
+
+const число = (значение) => (значение === null || значение === undefined ? null : num(значение))
 
 // Состояние поиска по смыслу — меткой: поднята ли модель.
 const смысл = computed(() => {
@@ -88,7 +95,7 @@ const смысл = computed(() => {
   if (!п) return null
   if (!п['смысл_включён']) return { kind: 'stop', label: 'Смысл выключен' }
   if (п['модель_поднята']) return { kind: 'ok', label: `Модель ${п['модель']} поднята` }
-  if (п['отказ_модели']) return { kind: 'stop', label: 'Модель недоступна — только слова' }
+  if (п['отказ_модели']) return { kind: 'stop', label: 'Только слова' }
   return { kind: 'idle', label: 'Модель поднимется при первом поиске' }
 })
 
@@ -103,35 +110,19 @@ const ГЛАВЫ = [
   { id: 'watch', number: 7, title: 'Надзор', question: 'Что произойдёт, если сбор упадёт, и кто об этом узнает.' }
 ]
 
-// Что система узнала о вакансии-примере на каждом шаге — строкой в рельсе.
-const факты = computed(() => {
-  const г = герой.value
-  if (!г) return {}
-  const з = г['зарплата'] ?? {}
-  const х = г['хранение'] ?? {}
-  const распределение = история.data.value?.['зарплаты']
-  const рубли = з['от_руб'] != null ? `≈ ${num(Math.round(з['от_руб']))} ₽` : ''
-  const навыков = г['навыки']?.length ?? 0
-  return {
-    collect: г['запрос'] ? `найдена запросом «${г['запрос']}»` : '',
-    parse: [`${навыков} ${plural(навыков, 'навык', 'навыка', 'навыков')}`, рубли].filter(Boolean).join(' · '),
-    clean: 'активна и найдена по запросу — остаётся в списке',
-    store: `${х['полей']} ${plural(х['полей'], 'поле', 'поля', 'полей')} · ${num(х['байт_сжато'])} байт текста`
-      + (х['размерность'] ? ` · вектор из ${num(х['размерность'])} чисел` : ''),
-    search: х['размерность'] ? 'лежит в двух индексах: слова и смысл' : 'лежит в индексе слов',
-    salary: з['в_распределении'] && распределение
-      ? `её ${рубли} — одна из ${num(распределение['вакансий'])} зарплат распределения`
-      : 'в распределение зарплат не входит'
-  }
-})
+const РАЗДЕЛЫ = ГЛАВЫ.map((глава) => ({ value: глава.id, label: глава.title }))
 
 // --- какая глава сейчас читается -----------------------------------------
 
 const активная = ref(ГЛАВЫ[0].id)
 let кадр = null
+// Пока страница едет к выбранной главе, переключатель не перескакивает
+// по главам, которые она проезжает.
+let едемДо = 0
 
 function определитьГлаву() {
   кадр = null
+  if (performance.now() < едемДо) return
   // Читается та глава, чей заголовок последним прошёл верхнюю треть окна.
   const черта = window.innerHeight * 0.38
   let найдена = ГЛАВЫ[0].id
@@ -148,6 +139,8 @@ function приПрокрутке() {
 
 function перейти(ид) {
   const плавно = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  активная.value = ид
+  едемДо = performance.now() + (плавно ? 900 : 0)
   document.getElementById(`chapter-${ид}`)?.scrollIntoView({ behavior: плавно ? 'smooth' : 'auto', block: 'start' })
 }
 
@@ -179,77 +172,112 @@ onBeforeUnmount(() => {
       <div class="sys__titles">
         <h1>Как устроено</h1>
         <p class="sys__meta">
-          Одна настоящая вакансия проходит весь путь — от запроса к источнику до зарплатной медианы.
-          На каждом шаге видно, что система делает с ней и со всей базой. Все числа — живые.
-        </p>
-        <p v-if="сейчас" class="sys__now" aria-live="polite">
-          <BvStatus v-if="идётСбор" kind="run" label="Идёт сбор" />
-          {{ сейчас }}
+          Путь вакансии от запроса к источнику до зарплатной медианы — на одной настоящей вакансии из базы.
+          <template v-if="сейчас">{{ сейчас }}</template>
         </p>
       </div>
-      <BvButton :loading="состояние.loading.value || история.loading.value" @click="обновить()">Обновить числа</BvButton>
+      <div class="sys__actions">
+        <BvStatus v-if="идётСбор" kind="run" label="Идёт сбор" />
+        <BvButton :loading="состояние.loading.value || история.loading.value" @click="обновить()">Обновить числа</BvButton>
+      </div>
     </header>
 
-    <div v-if="состояние.error.value && !состояние.data.value" class="sys__state">
-      <p class="sys__state-title">Состояние систем не получено</p>
-      <p class="sys__state-text">{{ состояние.error.value }}</p>
-      <BvButton :loading="состояние.loading.value" @click="обновить()">Повторить</BvButton>
-    </div>
+    <BvBanner
+      v-if="состояние.error.value && !состояние.data.value"
+      kind="error"
+      title="Состояние систем не получено"
+      :text="состояние.error.value"
+    >
+      <template #actions>
+        <BvButton size="sm" :loading="состояние.loading.value" @click="обновить()">Повторить</BvButton>
+      </template>
+    </BvBanner>
 
     <template v-else>
-      <BvCard title="Весь путь одной схемой">
-        <SystemPipeline :state="состояние.data.value" :loading="состояние.loading.value" />
-      </BvCard>
-
-      <p v-if="история.error.value && !история.data.value" class="sys__warn" role="alert">
-        Данные для глав не получены: {{ история.error.value }} Главы ниже показаны без примеров.
-      </p>
-
-      <div class="sys__body">
-        <aside class="sys__rail">
-          <StoryRail :chapters="ГЛАВЫ" :active="активная" :hero="герой" :facts="факты" @go="перейти" />
-        </aside>
-
-        <div class="sys__chapters">
-          <StoryChapter v-bind="ГЛАВЫ[0]" :playing="идёт('collect')" @replay="повторить('collect')">
-            <SceneCollect :ref="сцены.collect" :data="история.data.value?.['сбор'] ?? null" :hero-query="герой?.['запрос'] ?? ''" />
-          </StoryChapter>
-
-          <StoryChapter v-bind="ГЛАВЫ[1]" :playing="идёт('parse')" @replay="повторить('parse')">
-            <SceneParse :ref="сцены.parse" :hero="герой" />
-          </StoryChapter>
-
-          <StoryChapter v-bind="ГЛАВЫ[2]" :playing="идёт('clean')" @replay="повторить('clean')">
-            <SceneClean :ref="сцены.clean" :data="история.data.value?.['очистка'] ?? null" />
-          </StoryChapter>
-
-          <StoryChapter v-bind="ГЛАВЫ[3]" :playing="идёт('store')" @replay="повторить('store')">
-            <SceneStore :ref="сцены.store" :hero="герой" />
-          </StoryChapter>
-
-          <StoryChapter v-bind="ГЛАВЫ[4]" :replayable="false">
-            <p v-if="смысл" class="sys__model"><BvStatus :kind="смысл.kind" :label="смысл.label" /></p>
-            <p class="sys__lead">
-              Слова ловят точные названия — «Corona», «1С», — которые модель смысла размывает. Смысл ловит синонимы
-              и перефразы, которых в тексте буквально нет. Ни один способ не лучше другого на всех запросах, поэтому
-              работают оба.
-            </p>
-            <SearchExplainer :measure="состояние.data.value?.['замер'] ?? null" @explained="состояние.load()" />
-          </StoryChapter>
-
-          <StoryChapter v-bind="ГЛАВЫ[5]" :playing="идёт('salary')" @replay="повторить('salary')">
-            <SceneSalary :ref="сцены.salary" :data="история.data.value?.['зарплаты'] ?? null" />
-          </StoryChapter>
-
-          <StoryChapter v-bind="ГЛАВЫ[6]" :playing="идёт('watch')" @replay="повторить('watch')">
-            <FailureFlow
-              :ref="сцены.watch"
-              :watchdog="состояние.data.value?.['надзор'] ?? null"
-              :guard="история.data.value?.['защита'] ?? null"
-            />
-          </StoryChapter>
-        </div>
+      <!-- Тот же ряд плиток, которым открываются рабочие экраны. -->
+      <div class="st-grid st-grid--kpi">
+        <BvKpiTile
+          no-trend
+          label="Вакансий в базе"
+          :value="число(база?.['вакансий'])"
+          :note="база ? `активных ${num(база['активных'])}` : ''"
+          :loading="загрузка"
+        />
+        <BvKpiTile
+          no-trend
+          label="Навыков в словаре"
+          :value="число(разбор?.['навыков_в_словаре'])"
+          :note="разбор ? `и ${num(разбор['написаний'])} вариантов написания` : ''"
+          :loading="загрузка"
+        />
+        <BvKpiTile
+          no-trend
+          label="Вакансий в поиске"
+          :value="число(поиск?.['документов'])"
+          :note="поиск ? `векторов смысла ${num(поиск['векторов'])}` : ''"
+          :loading="загрузка"
+        />
+        <BvKpiTile
+          no-trend
+          label="Сборов"
+          :value="число(сбор?.['запусков'])"
+          :note="сбор ? `из них удачных ${num(сбор['удачных'])}` : ''"
+          :loading="загрузка"
+        />
       </div>
+
+      <!-- Лента глав стоит под шапкой при прокрутке: по ней видно, где ты, и можно перейти. -->
+      <div class="sys__nav" data-print-hide>
+        <BvSegmented :model-value="активная" :options="РАЗДЕЛЫ" label="Главы: путь вакансии" @update:model-value="перейти" />
+      </div>
+
+      <BvBanner
+        v-if="герой"
+        kind="info"
+        :title="`Вакансия-пример: ${герой['название']}`"
+        :text="`${[герой['компания'], герой['регион']].filter(Boolean).join(' · ')}. На ней показаны разбор и хранение; найдена запросом «${герой['запрос']}».`"
+      />
+      <BvBanner
+        v-else-if="история.error.value"
+        kind="error"
+        title="Данные для глав не получены"
+        :text="`${история.error.value} Главы ниже показаны без примеров.`"
+      />
+
+      <StoryChapter v-bind="ГЛАВЫ[0]" :playing="идёт('collect')" @replay="повторить('collect')">
+        <SceneCollect :ref="сцены.collect" :data="история.data.value?.['сбор'] ?? null" :hero-query="герой?.['запрос'] ?? ''" />
+      </StoryChapter>
+
+      <StoryChapter v-bind="ГЛАВЫ[1]" :playing="идёт('parse')" @replay="повторить('parse')">
+        <SceneParse :ref="сцены.parse" :hero="герой" />
+      </StoryChapter>
+
+      <StoryChapter v-bind="ГЛАВЫ[2]" :playing="идёт('clean')" @replay="повторить('clean')">
+        <SceneClean :ref="сцены.clean" :data="история.data.value?.['очистка'] ?? null" />
+      </StoryChapter>
+
+      <StoryChapter v-bind="ГЛАВЫ[3]" :playing="идёт('store')" @replay="повторить('store')">
+        <SceneStore :ref="сцены.store" :hero="герой" />
+      </StoryChapter>
+
+      <StoryChapter v-bind="ГЛАВЫ[4]" :replayable="false">
+        <template v-if="смысл" #aside>
+          <BvStatus :kind="смысл.kind" :label="смысл.label" />
+        </template>
+        <SearchExplainer :measure="состояние.data.value?.['замер'] ?? null" @explained="состояние.load()" />
+      </StoryChapter>
+
+      <StoryChapter v-bind="ГЛАВЫ[5]" :playing="идёт('salary')" @replay="повторить('salary')">
+        <SceneSalary :ref="сцены.salary" :data="история.data.value?.['зарплаты'] ?? null" />
+      </StoryChapter>
+
+      <StoryChapter v-bind="ГЛАВЫ[6]" :playing="идёт('watch')" @replay="повторить('watch')">
+        <FailureFlow
+          :ref="сцены.watch"
+          :watchdog="состояние.data.value?.['надзор'] ?? null"
+          :guard="история.data.value?.['защита'] ?? null"
+        />
+      </StoryChapter>
     </template>
   </section>
 </template>
@@ -258,7 +286,7 @@ onBeforeUnmount(() => {
 .sys {
   display: flex;
   flex-direction: column;
-  gap: var(--s-6);
+  gap: var(--s-8);
 }
 
 .sys__head {
@@ -276,99 +304,27 @@ onBeforeUnmount(() => {
   min-width: 0;
 }
 
-.sys__meta {
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-lh);
-  color: var(--c-text-secondary);
-}
+.sys__meta { color: var(--c-text-secondary); }
 
-.sys__now {
+.sys__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--s-2);
-  margin-top: var(--s-2);
-  font-size: var(--t-caption-size);
-  line-height: var(--t-caption-lh);
-  color: var(--c-text-muted);
-  max-width: none;
-}
-
-.sys__lead {
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-lh);
-  color: var(--c-text-secondary);
-  max-width: 78ch;
-}
-
-.sys__model { max-width: none; }
-
-.sys__warn {
-  font-size: var(--t-caption-size);
-  line-height: var(--t-caption-lh);
-  color: var(--c-status-err-text);
-  max-width: none;
-}
-
-/* Рельс глав слева, главы справа. Рельс не уезжает при прокрутке. */
-.sys__body {
-  display: grid;
-  grid-template-columns: 224px minmax(0, 1fr);
-  gap: var(--s-8);
-  align-items: start;
-}
-
-.sys__rail {
-  position: sticky;
-  top: calc(var(--h-header) + var(--s-6));
-  min-width: 0;
-  /* Рельс длиннее окна прокручивается сам, а не обрезается. */
-  max-height: calc(100vh - var(--h-header) - var(--s-12));
-  overflow-y: auto;
-  scrollbar-width: thin;
-}
-
-.sys__chapters {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-6);
-  min-width: 0;
-}
-
-.sys__state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: var(--s-3);
-  text-align: center;
-  padding: var(--s-12) var(--s-6);
 }
 
-.sys__state-title {
-  font-size: var(--t-h3-size);
-  font-weight: var(--w-medium);
-  color: var(--c-text);
+/* Лента глав липнет под шапку. Подложка — цвет холста: карточки
+   проезжают под ней, а не сквозь неё. */
+.sys__nav {
+  position: sticky;
+  top: var(--h-header);
+  z-index: 5;
+  display: flex;
+  margin: calc(var(--s-3) * -1) 0;
+  padding: var(--s-3) 0;
+  background: var(--c-canvas);
 }
 
-.sys__state-text {
-  font-size: var(--t-body-size);
-  line-height: var(--t-body-lh);
-  color: var(--c-text-muted);
-}
-
-/* Узкий экран: рельс — лентой под шапкой, на фоне страницы. */
-@media (max-width: 1199px) {
-  .sys__body { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
-
-  .sys__rail {
-    top: var(--h-header);
-    z-index: 5;
-    max-height: none;
-    overflow: visible;
-    margin-inline: calc(var(--s-2) * -1);
-    padding: var(--s-2);
-    background: var(--c-canvas);
-    box-shadow: inset 0 -1px 0 var(--c-border);
-  }
-}
+/* Главы отделены друг от друга заметнее, чем карточки внутри главы. */
+.sys :deep(.chapter) { margin-top: var(--s-6); }
 </style>

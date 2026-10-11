@@ -19,6 +19,10 @@ defineProps({
   trend: { type: Number, default: null },
   trendDirection: { type: String, default: null },
   trendUnavailable: { type: String, default: '' },
+  // Показатель, у которого нет прошлого периода вовсе: сколько навыков
+  // в словаре, сколько полей у строки. Прочерк тренда означал бы «сравнить
+  // не с чем сейчас» — а сравнивать здесь не с чем никогда.
+  noTrend: { type: Boolean, default: false },
   // Строка под числом: объём выборки или оговорка о его нехватке.
   note: { type: String, default: '' },
   loading: { type: Boolean, default: false }
@@ -29,7 +33,7 @@ defineProps({
   <div class="kpi card">
     <div class="kpi__head">
       <span class="label">{{ label }}</span>
-      <BvTrend :value="trend" :direction="trendDirection" :unavailable="trendUnavailable" />
+      <BvTrend v-if="!noTrend" :value="trend" :direction="trendDirection" :unavailable="trendUnavailable" />
     </div>
 
     <span v-if="loading" class="kpi__skeleton" role="status" aria-label="Значение загружается"></span>
