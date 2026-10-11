@@ -1,8 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import BvButton from '@/components/ui/BvButton.vue'
 import BvStatus from '@/components/ui/BvStatus.vue'
-import { useSteps } from '@/composables/useSteps'
+import { useScene } from '@/composables/useScene'
 import { dateTime, timeAgo } from '@/utils/format'
 
 // Что происходит, когда сбор падает.
@@ -16,11 +15,17 @@ import { dateTime, timeAgo } from '@/utils/format'
 // ли они.
 const props = defineProps({
   // state['надзор'] из /api/system/state.
-  watchdog: { type: Object, default: null }
+  watchdog: { type: Object, default: null },
+  // story['защита'] из /api/system/story: пороги ограничения входа.
+  guard: { type: Object, default: null }
 })
 
 const ШАГОВ = 4
-const { шаг, идёт, запустить } = useSteps(ШАГОВ, { пауза: 1000 })
+// Цепочка проигрывается, когда до неё докрутили; повтор — из шапки главы.
+const сцена = useScene(ШАГОВ, { пауза: 1100, готово: () => Boolean(props.watchdog) })
+const { корень, шаг, идёт } = сцена
+
+defineExpose({ повторить: сцена.повторить, идёт })
 
 const телеграм = computed(() => Boolean(props.watchdog?.['телеграм_настроен']))
 const оповещения = computed(() => props.watchdog?.['оповещения'] ?? [])
@@ -56,7 +61,7 @@ const цепочка = computed(() => [
 </script>
 
 <template>
-  <div class="fail">
+  <div ref="корень" class="fail">
     <ol class="fail__chain" aria-label="Что происходит при отказе сбора">
       <li
         v-for="(звено, i) in цепочка"
@@ -79,9 +84,6 @@ const цепочка = computed(() => [
       <p class="fail__note">
         Это демонстрация на примере: настоящего отказа нет, сообщение не отправляется.
       </p>
-      <BvButton :disabled="идёт" @click="запустить()">
-        {{ шаг > 0 ? 'Показать ещё раз' : 'Показать по шагам' }}
-      </BvButton>
     </div>
 
     <section class="fail__real" aria-label="Последние оповещения">
@@ -99,6 +101,16 @@ const цепочка = computed(() => [
           <BvStatus :kind="запись['доставлено'] ? 'ok' : 'stop'" :label="запись['доставлено'] ? 'Доставлено' : 'Не доставлено'" />
         </li>
       </ul>
+    </section>
+
+    <section v-if="guard" class="fail__real" aria-label="Защита входа">
+      <h3 class="fail__title">Кто может сюда попасть</h3>
+      <p class="fail__note">
+        <template v-if="guard['вход_по_паролю']">Вход закрыт паролем. </template>
+        <template v-else>Пароль на вход не задан — продукт открыт каждому, кто знает адрес. </template>
+        После {{ guard['неудач'] }} неудачных попыток за {{ guard['окно_минут'] }} минут адрес закрывается на
+        {{ guard['закрыт_минут'] }} минут: перебор пароля упирается в это ограничение, а не в его длину.
+      </p>
     </section>
   </div>
 </template>

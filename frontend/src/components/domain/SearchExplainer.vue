@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BvBarList from '@/components/charts/BvBarList.vue'
 import BvButton from '@/components/ui/BvButton.vue'
 import BvField from '@/components/ui/BvField.vue'
@@ -16,10 +16,23 @@ import { num, plural } from '@/utils/format'
 // «Вакансии»: объяснение, которое считает иначе, объясняло бы не его.
 //
 // Шаги раскрываются по очереди один раз — порядок и есть объяснение.
+//
+// Слияние показано перелётом: строки итога прилетают со своих мест в
+// двух списках. Связь между строкой итога и её местами в списках
+// нарисована линией. Раньше при наведении исходные строки просто
+// подсвечивались, и это читалось как сбой — «выделение перескочило на
+// другую строку»: подсветка без линии не говорит, что строки связаны.
 const props = defineProps({
   // Последний замер на эталоне (state['замер']) — числа качества.
-  measure: { type: Object, default: null }
+  measure: { type: Object, default: null },
+  // Разобрать пример, когда до блока докрутили: пустое поле ничего не
+  // объясняет, а нажмут «Разобрать» не все.
+  autoplay: { type: Boolean, default: true }
 })
+
+// Разбор поднимает модель смысла, если она ещё не поднята: экран по
+// этому событию перечитывает её состояние.
+const emit = defineEmits(['explained'])
 
 const ПРИМЕРЫ = ['питон разработчик', 'дизайнр интерьера', '3д макс мебель', 'рисовать баннеры для соцсетей']
 const ШАГОВ = 3
@@ -29,18 +42,195 @@ const разбор = useApi((текст, options) => system.explain(текст, 
 const { шаг, запустить } = useSteps(ШАГОВ, { пауза: 900 })
 
 const данные = computed(() => разбор.data.value)
-// Какая вакансия выделена: по ней видно, откуда она пришла в итог.
-const выделена = ref('')
+
+// Какая вакансия выделена: от её мест в списках к строке итога идёт
+// линия. Наведение показывает связь на время, нажатие закрепляет её —
+// на сенсорном экране наведения нет.
+const наведена = ref('')
+const закреплена = ref('')
+const выделена = computed(() => наведена.value || закреплена.value)
+
+const корень = ref(null)
+const холст = ref(null)
+const линии = ref([])
+let призраки = []
+let наблюдатель = null
+
+const безДвижения = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
+function убратьПризраков() {
+  призраки.forEach((призрак) => призрак.remove())
+  призраки = []
+}
 
 async function разобрать(текст = запрос.value) {
   const чистый = (текст || '').trim()
   if (!чистый) return
   запрос.value = чистый
-  выделена.value = ''
+  наведена.value = ''
+  закреплена.value = ''
+  убратьПризраков()
   шаг.value = 0
   const ответ = await разбор.load(чистый)
-  if (ответ) запустить()
+  if (!ответ) return
+  emit('explained')
+  запустить()
 }
+
+const строка = (список, ид) =>
+  холст.value?.querySelector(`[data-list="${список}"][data-id="${CSS.escape(String(ид))}"]`) ?? null
+
+// Радиус поворота линии и отступ желоба от края блока.
+const ПОВОРОТ = 6
+const ЖЕЛОБ = 7
+
+/**
+ * Линии от мест вакансии в двух списках к её строке в итоге.
+ *
+ * Идут по желобам по краям блока: от списка «по словам» — по левому,
+ * от списка «по смыслу» — по правому. Так линия не пересекает ни одной
+ * строки, и расклад работает одинаково, стоят списки рядом или друг
+ * под другом.
+ */
+function провести() {
+  const ид = выделена.value
+  const цель = ид ? строка('итог', ид) : null
+  if (!цель || !холст.value) {
+    линии.value = []
+    return
+  }
+  const рамка = холст.value.getBoundingClientRect()
+  const ц = цель.getBoundingClientRect()
+  const y2 = ц.top + ц.height / 2 - рамка.top
+
+  линии.value = [['слова', 1], ['смысл', -1]].flatMap(([список, к]) => {
+    const исток = строка(список, ид)
+    if (!исток) return []
+    const и = исток.getBoundingClientRect()
+    const слева = к === 1
+    const желоб = слева ? ЖЕЛОБ : рамка.width - ЖЕЛОБ
+    const x1 = (слева ? и.left : и.right) - рамка.left
+    const x2 = (слева ? ц.left : ц.right) - рамка.left
+    const y1 = и.top + и.height / 2 - рамка.top
+    const у = желоб + к * ПОВОРОТ
+    return [{
+      ключ: `${ид}-${список}`,
+      путь: `M ${x1} ${y1} H ${у} Q ${желоб} ${y1} ${желоб} ${y1 + ПОВОРОТ} V ${y2 - ПОВОРОТ} Q ${желоб} ${y2} ${у} ${y2} H ${x2}`,
+      x1, y1, x2, y2
+    }]
+  })
+}
+
+watch(выделена, () => nextTick(провести))
+
+/**
+ * Слияние перелётом: строки итога прилетают из списков.
+ *
+ * Копия исходной строки летит со своего места на место в итоге и
+ * растворяется, а под ней проявляется настоящая строка. Вакансия,
+ * найденная обоими способами, собирается из двух копий — в этом и
+ * состоит слияние.
+ */
+function слить() {
+  const первые = итог.value['первые']
+  if (!холст.value || !первые.length) return
+  if (безДвижения() || !Element.prototype.animate) {
+    закреплена.value = лучшаяДляПоказа()
+    return
+  }
+  убратьПризраков()
+  const рамка = холст.value.getBoundingClientRect()
+  const ход = { duration: 950, easing: 'cubic-bezier(0.45, 0, 0.2, 1)' }
+  let последняя = null
+
+  первые.forEach((запись, i) => {
+    const цель = строка('итог', запись['ид'])
+    if (!цель) return
+    const ц = цель.getBoundingClientRect()
+    const задержка = 250 + i * 130
+    const истоки = ['слова', 'смысл'].map((список) => строка(список, запись['ид'])).filter(Boolean)
+
+    for (const исток of истоки) {
+      const и = исток.getBoundingClientRect()
+      const призрак = исток.cloneNode(true)
+      призрак.classList.add('exp__ghost')
+      призрак.classList.remove('is-marked')
+      призрак.removeAttribute('data-list')
+      призрак.setAttribute('aria-hidden', 'true')
+      Object.assign(призрак.style, {
+        left: `${и.left - рамка.left}px`, top: `${и.top - рамка.top}px`, width: `${и.width}px`, height: `${и.height}px`
+      })
+      холст.value.appendChild(призрак)
+      призраки.push(призрак)
+      призрак.animate(
+        [
+          { transform: 'none', width: `${и.width}px`, opacity: 0 },
+          { transform: 'none', width: `${и.width}px`, opacity: 1, offset: 0.12 },
+          {
+            transform: `translate(${ц.left - и.left}px, ${ц.top - и.top}px)`,
+            width: `${ц.width}px`, opacity: 1, offset: 0.86
+          },
+          { transform: `translate(${ц.left - и.left}px, ${ц.top - и.top}px)`, width: `${ц.width}px`, opacity: 0 }
+        ],
+        { ...ход, delay: задержка, fill: 'both' }
+      ).onfinish = () => призрак.remove()
+    }
+
+    // Настоящая строка проявляется под прилетевшей копией. Той, что
+    // пришла с места ниже показанных, лететь неоткуда — она опускается.
+    последняя = цель.animate(
+      истоки.length
+        ? [{ opacity: 0 }, { opacity: 0, offset: 0.72 }, { opacity: 1 }]
+        : [{ opacity: 0, transform: 'translateY(-8px)' }, { opacity: 1, transform: 'none' }],
+      { ...ход, delay: задержка, fill: 'backwards' }
+    )
+  })
+
+  // Перелёт кончился — одна связь остаётся нарисованной: приём виден и
+  // тем, кто не догадается навести.
+  if (последняя) {
+    последняя.onfinish = () => {
+      if (!закреплена.value) закреплена.value = лучшаяДляПоказа()
+    }
+  }
+}
+
+// Строка, на которой связь нагляднее всего: найденная обоими способами.
+function лучшаяДляПоказа() {
+  const первые = итог.value['первые']
+  const обоими = первые.find((запись) => строка('слова', запись['ид']) && строка('смысл', запись['ид']))
+  const одним = первые.find((запись) => строка('слова', запись['ид']) || строка('смысл', запись['ид']))
+  return (обоими ?? одним)?.['ид'] ?? ''
+}
+
+watch(шаг, (номер) => {
+  if (номер === 3) nextTick(слить)
+})
+
+function закрепить(ид) {
+  закреплена.value = закреплена.value === ид ? '' : ид
+}
+
+onMounted(() => {
+  window.addEventListener('resize', провести)
+  if (!props.autoplay || typeof IntersectionObserver === 'undefined' || !корень.value) return
+  наблюдатель = new IntersectionObserver(
+    ([запись]) => {
+      if (!запись.isIntersecting) return
+      наблюдатель.disconnect()
+      // Пример с опечаткой: на нём видны и исправление, и оба способа.
+      if (!данные.value && !разбор.loading.value) разобрать(ПРИМЕРЫ[1])
+    },
+    { rootMargin: '0px 0px -25% 0px', threshold: 0 }
+  )
+  наблюдатель.observe(корень.value)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', провести)
+  наблюдатель?.disconnect()
+  убратьПризраков()
+})
 
 // Группы запроса: внутри группы — варианты одного и того же, между
 // группами — «и».
@@ -64,17 +254,17 @@ function вклад(место) {
 // Какую долю оценки дал каждый список — шириной частей полосы. Сами
 // вклады — сотые доли единицы: как множитель роста они оставляли полосу
 // почти пустой.
-function доли(строка) {
-  const слова = вклад(строка['место_по_словам'])
-  const смысл = вклад(строка['место_по_смыслу'])
+function доли(запись) {
+  const слова = вклад(запись['место_по_словам'])
+  const смысл = вклад(запись['место_по_смыслу'])
   const сумма = слова + смысл || 1
   return { слова: `${(слова / сумма) * 100}%`, смысл: `${(смысл / сумма) * 100}%` }
 }
 
-function откуда(строка) {
+function откуда(запись) {
   const части = []
-  if (строка['место_по_словам']) части.push(`слова №${строка['место_по_словам']}`)
-  if (строка['место_по_смыслу']) части.push(`смысл №${строка['место_по_смыслу']}`)
+  if (запись['место_по_словам']) части.push(`слова №${запись['место_по_словам']}`)
+  if (запись['место_по_смыслу']) части.push(`смысл №${запись['место_по_смыслу']}`)
   return части.join(' + ')
 }
 
@@ -100,7 +290,7 @@ const качество = computed(() => {
 </script>
 
 <template>
-  <div class="exp">
+  <div ref="корень" class="exp">
     <form class="exp__form" @submit.prevent="разобрать()">
       <BvField
         v-model="запрос"
@@ -121,14 +311,14 @@ const качество = computed(() => {
 
     <p v-if="разбор.error.value" class="exp__error" role="alert">{{ разбор.error.value }}</p>
 
-    <div v-if="данные" class="exp__steps" aria-live="polite">
+    <div v-if="данные" ref="холст" class="exp__steps" aria-live="polite">
       <!-- Шаг 1 · разбор запроса -->
       <section v-if="шаг >= 1" class="exp__step">
         <h3 class="exp__step-title"><span class="exp__num">1</span> Запрос разобран</h3>
         <div class="exp__groups">
           <template v-for="(варианты, i) in группы" :key="i">
             <span v-if="i > 0" class="exp__and">и</span>
-            <span class="exp__group">
+            <span class="exp__group" :style="{ '--i': i }">
               <template v-for="(вариант, j) in варианты" :key="вариант">
                 <span v-if="j > 0" class="exp__or">или</span>
                 <span class="exp__term">{{ вариант }}</span>
@@ -162,17 +352,23 @@ const качество = computed(() => {
             <p v-if="!слова['первые'].length" class="exp__empty">Слов запроса в вакансиях нет.</p>
             <ol v-else class="exp__rows">
               <li
-                v-for="строка in слова['первые']"
-                :key="строка['ид']"
-                class="exp__row"
-                :class="{ 'is-marked': выделена === строка['ид'] }"
+                v-for="(запись, i) in слова['первые']"
+                :key="запись['ид']"
+                class="exp__row exp__row--source"
+                :class="{ 'is-marked': выделена === запись['ид'] }"
+                :style="{ '--i': i }"
+                data-list="слова"
+                :data-id="запись['ид']"
+                @mouseenter="наведена = запись['ид']"
+                @mouseleave="наведена = ''"
+                @click="закрепить(запись['ид'])"
               >
-                <span class="exp__place">{{ строка['место_по_словам'] }}</span>
+                <span class="exp__place">{{ запись['место_по_словам'] }}</span>
                 <span class="exp__name">
-                  {{ строка['название'] }}
-                  <span class="exp__company">{{ строка['компания'] }}</span>
+                  {{ запись['название'] }}
+                  <span class="exp__company">{{ запись['компания'] }}</span>
                 </span>
-                <span class="exp__why">{{ строка['почему'] }}</span>
+                <span class="exp__why">{{ запись['почему'] }}</span>
               </li>
             </ol>
           </div>
@@ -185,19 +381,25 @@ const качество = computed(() => {
             <p v-if="оСмысле" class="exp__empty">{{ оСмысле }}</p>
             <ol v-else class="exp__rows">
               <li
-                v-for="строка in смысл['первые']"
-                :key="строка['ид']"
-                class="exp__row"
-                :class="{ 'is-marked': выделена === строка['ид'] }"
+                v-for="(запись, i) in смысл['первые']"
+                :key="запись['ид']"
+                class="exp__row exp__row--source"
+                :class="{ 'is-marked': выделена === запись['ид'] }"
+                :style="{ '--i': i }"
+                data-list="смысл"
+                :data-id="запись['ид']"
+                @mouseenter="наведена = запись['ид']"
+                @mouseleave="наведена = ''"
+                @click="закрепить(запись['ид'])"
               >
-                <span class="exp__place">{{ строка['место_по_смыслу'] }}</span>
+                <span class="exp__place">{{ запись['место_по_смыслу'] }}</span>
                 <span class="exp__name">
-                  {{ строка['название'] }}
-                  <span class="exp__company">{{ строка['компания'] }}</span>
+                  {{ запись['название'] }}
+                  <span class="exp__company">{{ запись['компания'] }}</span>
                 </span>
                 <!-- Близость — полосой: по числу 0,634 не видно, много это или мало. -->
-                <span class="exp__near" :title="`близость ${дробь(строка['близость'])}`">
-                  <span class="exp__near-bar" :style="{ width: `${Math.round((строка['близость'] ?? 0) * 100)}%` }"></span>
+                <span class="exp__near" :title="`близость ${дробь(запись['близость'])}`">
+                  <span class="exp__near-bar" :style="{ width: `${Math.round((запись['близость'] ?? 0) * 100)}%` }"></span>
                 </span>
               </li>
             </ol>
@@ -210,47 +412,60 @@ const качество = computed(() => {
       </section>
 
       <!-- Шаг 3 · слияние -->
-      <section v-if="шаг >= 3" class="exp__step">
+      <section v-if="шаг >= 3" class="exp__step exp__step--merge">
         <h3 class="exp__step-title"><span class="exp__num">3</span> Списки слиты по местам</h3>
         <p v-if="!итог['первые'].length" class="exp__empty">
           Ничего не найдено: слов запроса в вакансиях нет, и по смыслу ни одна не подошла.
         </p>
         <template v-else>
-          <TransitionGroup tag="ol" name="exp-merge" class="exp__rows exp__rows--merged" appear>
+          <ol class="exp__rows exp__rows--merged">
             <li
-              v-for="(строка, i) in итог['первые']"
-              :key="строка['ид']"
+              v-for="(запись, i) in итог['первые']"
+              :key="запись['ид']"
               class="exp__row exp__row--merged"
-              :class="{ 'is-marked': выделена === строка['ид'] }"
-              :style="{ '--i': i }"
+              :class="{ 'is-marked': выделена === запись['ид'] }"
+              data-list="итог"
+              :data-id="запись['ид']"
               tabindex="0"
-              @mouseenter="выделена = строка['ид']"
-              @mouseleave="выделена = ''"
-              @focus="выделена = строка['ид']"
-              @blur="выделена = ''"
+              @mouseenter="наведена = запись['ид']"
+              @mouseleave="наведена = ''"
+              @focus="наведена = запись['ид']"
+              @blur="наведена = ''"
+              @click="закрепить(запись['ид'])"
+              @keydown.enter.prevent="закрепить(запись['ид'])"
+              @keydown.space.prevent="закрепить(запись['ид'])"
             >
               <span class="exp__place">{{ i + 1 }}</span>
               <span class="exp__name">
-                {{ строка['название'] }}
-                <span class="exp__company">{{ строка['компания'] }}</span>
+                {{ запись['название'] }}
+                <span class="exp__company">{{ запись['компания'] }}</span>
               </span>
-              <span class="exp__from">{{ откуда(строка) }}</span>
+              <span class="exp__from">{{ откуда(запись) }}</span>
               <!-- Из чего сложилась оценка: вклад каждого списка одной полосой. -->
               <span class="exp__score" aria-hidden="true">
-                <span class="exp__score-part exp__score-part--words" :style="{ width: доли(строка).слова }"></span>
-                <span class="exp__score-part exp__score-part--sense" :style="{ width: доли(строка).смысл }"></span>
+                <span class="exp__score-part exp__score-part--words" :style="{ width: доли(запись).слова }"></span>
+                <span class="exp__score-part exp__score-part--sense" :style="{ width: доли(запись).смысл }"></span>
               </span>
             </li>
-          </TransitionGroup>
+          </ol>
           <p class="exp__note">
             Каждый список даёт вакансии 1 / ({{ данные.k }} + место), вклады складываются: найденное обоими способами
             встаёт выше найденного одним. Полоса справа — чья доля в оценке: тёмная часть от слов, светлая от смысла.
-            Наведите на строку — она подсветится в списках выше.
+            Линия показывает, с каких мест строка пришла в итог: слева — из списка по словам, справа — по смыслу.
+            Наведите на любую строку или нажмите на неё, чтобы увидеть её путь.
             Всего найдено {{ num(итог['найдено']) }} {{ plural(итог['найдено'], 'вакансия', 'вакансии', 'вакансий') }}
             за {{ данные['мс'] }} мс.
           </p>
         </template>
       </section>
+
+      <svg v-if="линии.length" class="exp__wires" aria-hidden="true">
+        <g v-for="линия in линии" :key="линия.ключ">
+          <path class="exp__wire" :d="линия.путь" pathLength="1" />
+          <circle class="exp__wire-end" :cx="линия.x1" :cy="линия.y1" r="3" />
+          <circle class="exp__wire-end exp__wire-end--to" :cx="линия.x2" :cy="линия.y2" r="3" />
+        </g>
+      </svg>
     </div>
 
     <!-- Качество: чем и на чём меряли. Без оговорок число обещало бы
@@ -305,10 +520,55 @@ const качество = computed(() => {
   color: var(--c-status-err-text);
 }
 
+/* По краям блока — желоба, по которым идут линии связи. */
 .exp__steps {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--s-6);
+  padding-inline: var(--s-4);
+}
+
+/* Линии связи: от мест в списках к строке итога. */
+.exp__wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.exp__wire {
+  fill: none;
+  stroke: var(--c-text);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: exp-draw 380ms var(--ease-standard) forwards;
+}
+
+.exp__wire-end { fill: var(--c-text); }
+.exp__wire-end--to {
+  opacity: 0;
+  animation: exp-dot 120ms var(--ease-standard) 340ms forwards;
+}
+
+@keyframes exp-draw { to { stroke-dashoffset: 0; } }
+@keyframes exp-dot { to { opacity: 1; } }
+
+/* Копия строки, летящая из списка в итог. */
+.exp__ghost {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  pointer-events: none;
+  background: var(--c-surface);
+  box-shadow: var(--border-strong);
+  will-change: transform, width;
+  /* Копия не повторяет появление строки, с которой снята. */
+  animation: none;
 }
 
 .exp__step {
@@ -322,6 +582,18 @@ const качество = computed(() => {
 @keyframes exp-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
+}
+
+/* Шаг слияния не въезжает целиком: его строки прилетают из списков, и
+   их места замеряются сразу, без поправки на собственное движение. */
+.exp__step--merge { animation: none; }
+
+/* Группы запроса и строки списков появляются по одной. */
+.exp__group,
+.exp__and,
+.exp__row--source {
+  animation: exp-in var(--dur-enter) var(--ease-enter) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 120ms);
 }
 
 .exp__step-title {
@@ -391,6 +663,7 @@ const качество = computed(() => {
 }
 
 .exp__list-title {
+  margin: 0;
   display: flex;
   align-items: baseline;
   gap: var(--s-2);
@@ -477,10 +750,10 @@ const качество = computed(() => {
   background: var(--c-text-secondary);
 }
 
-.exp__row--merged {
-  grid-template-columns: 24px minmax(0, 1fr) auto 72px;
-  cursor: default;
-}
+.exp__row--source,
+.exp__row--merged { cursor: pointer; }
+
+.exp__row--merged { grid-template-columns: 24px minmax(0, 1fr) auto 72px; }
 
 .exp__row--merged:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
@@ -499,12 +772,14 @@ const качество = computed(() => {
 .exp__score-part--words { background: var(--c-text); }
 .exp__score-part--sense { background: var(--c-text-muted); }
 
-/* Слияние: строки встают на места по одной, сверху вниз. Один раз. */
-.exp-merge-enter-active {
-  transition: opacity var(--dur-enter) var(--ease-enter), transform var(--dur-enter) var(--ease-enter);
-  transition-delay: calc(var(--i) * 110ms);
+/* Близость растёт от нуля: длина полосы — мера, и её рост читается как измерение. */
+.exp__near-bar {
+  transform-origin: left center;
+  animation: exp-grow 600ms var(--ease-enter) both;
+  animation-delay: 260ms;
 }
-.exp-merge-enter-from { opacity: 0; transform: translateY(-10px); }
+
+@keyframes exp-grow { from { transform: scaleX(0); } }
 
 .exp__quality {
   display: flex;
@@ -525,9 +800,18 @@ const качество = computed(() => {
   .exp__company { display: none; }
 }
 
+@media (max-width: 767px) {
+  .exp__steps { padding-inline: var(--s-3); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .exp__step { animation: none; }
-  .exp-merge-enter-active { transition: none; }
+  .exp__step,
+  .exp__group,
+  .exp__and,
+  .exp__row--source,
+  .exp__near-bar { animation: none; }
+  .exp__wire { animation: none; stroke-dashoffset: 0; }
+  .exp__wire-end--to { animation: none; opacity: 1; }
   .exp__row { transition: none; }
 }
 </style>

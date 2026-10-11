@@ -1,27 +1,35 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BvButton from '@/components/ui/BvButton.vue'
 import BvCard from '@/components/ui/BvCard.vue'
 import BvStatus from '@/components/ui/BvStatus.vue'
 import FailureFlow from '@/components/domain/FailureFlow.vue'
 import SearchExplainer from '@/components/domain/SearchExplainer.vue'
 import SystemPipeline from '@/components/domain/SystemPipeline.vue'
+import SceneClean from '@/components/domain/story/SceneClean.vue'
+import SceneCollect from '@/components/domain/story/SceneCollect.vue'
+import SceneParse from '@/components/domain/story/SceneParse.vue'
+import SceneSalary from '@/components/domain/story/SceneSalary.vue'
+import SceneStore from '@/components/domain/story/SceneStore.vue'
+import StoryChapter from '@/components/domain/story/StoryChapter.vue'
+import StoryRail from '@/components/domain/story/StoryRail.vue'
 import { system } from '@/api/endpoints'
 import { useApi } from '@/composables/useApi'
-import { timeAgo } from '@/utils/format'
+import { num, plural, timeAgo } from '@/utils/format'
 
-// «Как устроено»: что происходит в продукте и как работают его системы.
+// «Как устроено»: что продукт делает с вакансией, шаг за шагом.
 //
-// Не рабочий экран, а объясняющий. Три вопроса, на которые раньше
-// отвечал только код: какой путь проходит вакансия, почему поиск нашёл
-// именно это и что будет, если сбор упадёт. На каждый — схема с
-// живыми числами: они приходят с сервера, а не нарисованы.
+// Не рабочий экран, а объясняющий. Одна настоящая вакансия из базы
+// проходит семь глав — сбор, разбор, очистку, хранение, поиск,
+// аналитику, надзор, — и каждая глава показывает свой шаг на её
+// данных и на числах всей базы. Сверху — тот же путь одной схемой.
 //
-// Правило экрана — движение означает событие. Поток по схеме идёт,
-// пока идёт сбор; объясняющие анимации проигрываются один раз по
-// действию. Бесконечных анимаций в системе нет, и здесь тоже.
+// Сцена главы проигрывается сама, когда до неё докрутили, один раз и
+// останавливается на итоге. Непрерывно движется только то, что
+// действительно идёт: поток по схеме во время сбора.
 
 const состояние = useApi((options) => system.state(options))
+const история = useApi((options) => system.story(options))
 
 // Пока идёт сбор, числа меняются каждую минуту — экран спрашивает их
 // снова. В покое опроса нет: спрашивать раз в три секунды то, что
@@ -52,18 +60,14 @@ function приВозврате() {
   if (document.visibilityState === 'visible') состояние.load()
 }
 
-onMounted(() => {
+function обновить() {
   состояние.load()
-  document.addEventListener('visibilitychange', приВозврате)
-})
-
-onBeforeUnmount(() => {
-  остановитьОпрос()
-  document.removeEventListener('visibilitychange', приВозврате)
-})
+  история.load()
+}
 
 const сбор = computed(() => состояние.data.value?.['сбор'] ?? null)
 const поиск = computed(() => состояние.data.value?.['поиск'] ?? null)
+const герой = computed(() => история.data.value?.['герой'] ?? null)
 
 // Одна строка под заголовком: что система делает прямо сейчас.
 const сейчас = computed(() => {
@@ -87,6 +91,86 @@ const смысл = computed(() => {
   if (п['отказ_модели']) return { kind: 'stop', label: 'Модель недоступна — только слова' }
   return { kind: 'idle', label: 'Модель поднимется при первом поиске' }
 })
+
+// Главы в порядке пути вакансии. Вопрос — тот, на который глава отвечает.
+const ГЛАВЫ = [
+  { id: 'collect', number: 1, title: 'Сбор', question: 'Откуда берутся вакансии и что принёс каждый запрос последнего сбора.' },
+  { id: 'parse', number: 2, title: 'Разбор', question: 'Что система читает из текста одной вакансии — и где именно.' },
+  { id: 'clean', number: 3, title: 'Очистка', question: 'Что из собранного не попадает в список и числа. Ничего не удаляется.' },
+  { id: 'store', number: 4, title: 'Хранение', question: 'В каком виде вакансия лежит в базе и кому нужен каждый вид.' },
+  { id: 'search', number: 5, title: 'Поиск', question: 'Почему по запросу находится именно это: слова и смысл ищут порознь, списки сливаются.' },
+  { id: 'salary', number: 6, title: 'Аналитика', question: 'Почему в зарплатах стоит медиана, а не средняя.' },
+  { id: 'watch', number: 7, title: 'Надзор', question: 'Что произойдёт, если сбор упадёт, и кто об этом узнает.' }
+]
+
+// Что система узнала о вакансии-примере на каждом шаге — строкой в рельсе.
+const факты = computed(() => {
+  const г = герой.value
+  if (!г) return {}
+  const з = г['зарплата'] ?? {}
+  const х = г['хранение'] ?? {}
+  const распределение = история.data.value?.['зарплаты']
+  const рубли = з['от_руб'] != null ? `≈ ${num(Math.round(з['от_руб']))} ₽` : ''
+  const навыков = г['навыки']?.length ?? 0
+  return {
+    collect: г['запрос'] ? `найдена запросом «${г['запрос']}»` : '',
+    parse: [`${навыков} ${plural(навыков, 'навык', 'навыка', 'навыков')}`, рубли].filter(Boolean).join(' · '),
+    clean: 'активна и найдена по запросу — остаётся в списке',
+    store: `${х['полей']} ${plural(х['полей'], 'поле', 'поля', 'полей')} · ${num(х['байт_сжато'])} байт текста`
+      + (х['размерность'] ? ` · вектор из ${num(х['размерность'])} чисел` : ''),
+    search: х['размерность'] ? 'лежит в двух индексах: слова и смысл' : 'лежит в индексе слов',
+    salary: з['в_распределении'] && распределение
+      ? `её ${рубли} — одна из ${num(распределение['вакансий'])} зарплат распределения`
+      : 'в распределение зарплат не входит'
+  }
+})
+
+// --- какая глава сейчас читается -----------------------------------------
+
+const активная = ref(ГЛАВЫ[0].id)
+let кадр = null
+
+function определитьГлаву() {
+  кадр = null
+  // Читается та глава, чей заголовок последним прошёл верхнюю треть окна.
+  const черта = window.innerHeight * 0.38
+  let найдена = ГЛАВЫ[0].id
+  for (const глава of ГЛАВЫ) {
+    const узел = document.getElementById(`chapter-${глава.id}`)
+    if (узел && узел.getBoundingClientRect().top <= черта) найдена = глава.id
+  }
+  активная.value = найдена
+}
+
+function приПрокрутке() {
+  if (кадр === null) кадр = requestAnimationFrame(определитьГлаву)
+}
+
+function перейти(ид) {
+  const плавно = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  document.getElementById(`chapter-${ид}`)?.scrollIntoView({ behavior: плавно ? 'smooth' : 'auto', block: 'start' })
+}
+
+// --- сцены ---------------------------------------------------------------
+
+const сцены = { collect: ref(null), parse: ref(null), clean: ref(null), store: ref(null), salary: ref(null), watch: ref(null) }
+const идёт = (ид) => Boolean(сцены[ид]?.value?.идёт)
+const повторить = (ид) => сцены[ид]?.value?.повторить()
+
+onMounted(() => {
+  обновить()
+  document.addEventListener('visibilitychange', приВозврате)
+  window.addEventListener('scroll', приПрокрутке, { passive: true })
+  window.addEventListener('resize', приПрокрутке, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  остановитьОпрос()
+  if (кадр !== null) cancelAnimationFrame(кадр)
+  document.removeEventListener('visibilitychange', приВозврате)
+  window.removeEventListener('scroll', приПрокрутке)
+  window.removeEventListener('resize', приПрокрутке)
+})
 </script>
 
 <template>
@@ -95,43 +179,77 @@ const смысл = computed(() => {
       <div class="sys__titles">
         <h1>Как устроено</h1>
         <p class="sys__meta">
-          Что происходит с вакансией от источника до списка, почему поиск находит именно это
-          и что будет, если сбор упадёт. Числа на схемах — живые.
+          Одна настоящая вакансия проходит весь путь — от запроса к источнику до зарплатной медианы.
+          На каждом шаге видно, что система делает с ней и со всей базой. Все числа — живые.
         </p>
         <p v-if="сейчас" class="sys__now" aria-live="polite">
           <BvStatus v-if="идётСбор" kind="run" label="Идёт сбор" />
           {{ сейчас }}
         </p>
       </div>
-      <BvButton :loading="состояние.loading.value" @click="состояние.load()">Обновить числа</BvButton>
+      <BvButton :loading="состояние.loading.value || история.loading.value" @click="обновить()">Обновить числа</BvButton>
     </header>
 
     <div v-if="состояние.error.value && !состояние.data.value" class="sys__state">
       <p class="sys__state-title">Состояние систем не получено</p>
       <p class="sys__state-text">{{ состояние.error.value }}</p>
-      <BvButton :loading="состояние.loading.value" @click="состояние.load()">Повторить</BvButton>
+      <BvButton :loading="состояние.loading.value" @click="обновить()">Повторить</BvButton>
     </div>
 
     <template v-else>
-      <BvCard title="Путь вакансии">
+      <BvCard title="Весь путь одной схемой">
         <SystemPipeline :state="состояние.data.value" :loading="состояние.loading.value" />
       </BvCard>
 
-      <BvCard title="Как работает поиск">
-        <template v-if="смысл" #actions>
-          <BvStatus :kind="смысл.kind" :label="смысл.label" />
-        </template>
-        <p class="sys__lead">
-          Поиск идёт двумя способами сразу. Слова ловят точные названия — «Corona», «1С», — которые модель
-          смысла размывает. Смысл ловит синонимы и перефразы, которых в тексте буквально нет. Списки
-          сливаются по местам.
-        </p>
-        <SearchExplainer :measure="состояние.data.value?.['замер'] ?? null" />
-      </BvCard>
+      <p v-if="история.error.value && !история.data.value" class="sys__warn" role="alert">
+        Данные для глав не получены: {{ история.error.value }} Главы ниже показаны без примеров.
+      </p>
 
-      <BvCard title="Если сбор упадёт">
-        <FailureFlow :watchdog="состояние.data.value?.['надзор'] ?? null" />
-      </BvCard>
+      <div class="sys__body">
+        <aside class="sys__rail">
+          <StoryRail :chapters="ГЛАВЫ" :active="активная" :hero="герой" :facts="факты" @go="перейти" />
+        </aside>
+
+        <div class="sys__chapters">
+          <StoryChapter v-bind="ГЛАВЫ[0]" :playing="идёт('collect')" @replay="повторить('collect')">
+            <SceneCollect :ref="сцены.collect" :data="история.data.value?.['сбор'] ?? null" :hero-query="герой?.['запрос'] ?? ''" />
+          </StoryChapter>
+
+          <StoryChapter v-bind="ГЛАВЫ[1]" :playing="идёт('parse')" @replay="повторить('parse')">
+            <SceneParse :ref="сцены.parse" :hero="герой" />
+          </StoryChapter>
+
+          <StoryChapter v-bind="ГЛАВЫ[2]" :playing="идёт('clean')" @replay="повторить('clean')">
+            <SceneClean :ref="сцены.clean" :data="история.data.value?.['очистка'] ?? null" />
+          </StoryChapter>
+
+          <StoryChapter v-bind="ГЛАВЫ[3]" :playing="идёт('store')" @replay="повторить('store')">
+            <SceneStore :ref="сцены.store" :hero="герой" />
+          </StoryChapter>
+
+          <StoryChapter v-bind="ГЛАВЫ[4]" :replayable="false">
+            <p v-if="смысл" class="sys__model"><BvStatus :kind="смысл.kind" :label="смысл.label" /></p>
+            <p class="sys__lead">
+              Слова ловят точные названия — «Corona», «1С», — которые модель смысла размывает. Смысл ловит синонимы
+              и перефразы, которых в тексте буквально нет. Ни один способ не лучше другого на всех запросах, поэтому
+              работают оба.
+            </p>
+            <SearchExplainer :measure="состояние.data.value?.['замер'] ?? null" @explained="состояние.load()" />
+          </StoryChapter>
+
+          <StoryChapter v-bind="ГЛАВЫ[5]" :playing="идёт('salary')" @replay="повторить('salary')">
+            <SceneSalary :ref="сцены.salary" :data="история.data.value?.['зарплаты'] ?? null" />
+          </StoryChapter>
+
+          <StoryChapter v-bind="ГЛАВЫ[6]" :playing="идёт('watch')" @replay="повторить('watch')">
+            <FailureFlow
+              :ref="сцены.watch"
+              :watchdog="состояние.data.value?.['надзор'] ?? null"
+              :guard="история.data.value?.['защита'] ?? null"
+            />
+          </StoryChapter>
+        </div>
+      </div>
     </template>
   </section>
 </template>
@@ -177,11 +295,44 @@ const смысл = computed(() => {
 }
 
 .sys__lead {
-  margin-bottom: var(--s-5);
   font-size: var(--t-body-size);
   line-height: var(--t-body-lh);
   color: var(--c-text-secondary);
   max-width: 78ch;
+}
+
+.sys__model { max-width: none; }
+
+.sys__warn {
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-lh);
+  color: var(--c-status-err-text);
+  max-width: none;
+}
+
+/* Рельс глав слева, главы справа. Рельс не уезжает при прокрутке. */
+.sys__body {
+  display: grid;
+  grid-template-columns: 224px minmax(0, 1fr);
+  gap: var(--s-8);
+  align-items: start;
+}
+
+.sys__rail {
+  position: sticky;
+  top: calc(var(--h-header) + var(--s-6));
+  min-width: 0;
+  /* Рельс длиннее окна прокручивается сам, а не обрезается. */
+  max-height: calc(100vh - var(--h-header) - var(--s-12));
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sys__chapters {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
+  min-width: 0;
 }
 
 .sys__state {
@@ -203,5 +354,21 @@ const смысл = computed(() => {
   font-size: var(--t-body-size);
   line-height: var(--t-body-lh);
   color: var(--c-text-muted);
+}
+
+/* Узкий экран: рельс — лентой под шапкой, на фоне страницы. */
+@media (max-width: 1199px) {
+  .sys__body { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); }
+
+  .sys__rail {
+    top: var(--h-header);
+    z-index: 5;
+    max-height: none;
+    overflow: visible;
+    margin-inline: calc(var(--s-2) * -1);
+    padding: var(--s-2);
+    background: var(--c-canvas);
+    box-shadow: inset 0 -1px 0 var(--c-border);
+  }
 }
 </style>

@@ -15,6 +15,8 @@ export const overview = {
 // Экран «Как устроено»: живое состояние систем и поиск по шагам.
 export const system = {
   state: (options) => get('/system/state', {}, options),
+  // Данные глав: вакансия-пример и то, что система делает с ней на каждом шаге.
+  story: (options) => get('/system/story', {}, options),
   // Тот же поиск, что на «Вакансиях», с выдачей промежуточного: разбор
   // запроса, два списка и их слияние.
   explain: (q, options) => get('/search/explain', { q }, options)
