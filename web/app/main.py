@@ -2,11 +2,12 @@
 Минимальная версия веб-приложения HH.ru Analytics.
 """
 
-from fastapi import FastAPI, Query, BackgroundTasks, HTTPException, Request
+from fastapi import Body, FastAPI, Query, BackgroundTasks, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pathlib import Path
+import json
 import os
 import sys
 import time
@@ -801,6 +802,126 @@ def _исход_последнего_запуска(storage) -> Optional[dict]:
     return итог
 
 
+# =============================================================================
+# Слой понимания текста: состояние и кандидаты в словарь
+#
+# Модель здесь не вызывается: она работает офлайн, прогоном по базе.
+# Экран показывает, что прогон нашёл, и принимает решение человека.
+# =============================================================================
+
+def _замеры_навыков() -> dict:
+    """Последние замеры извлечения — из файла, который пишет сам замер."""
+    файл = Path(_app_settings.db_path).parent / "замер_навыков.json"
+    if not файл.exists():
+        return {}
+    try:
+        return json.loads(файл.read_text(encoding="utf-8")).get("замеры", {})
+    except (OSError, ValueError):
+        return {}
+
+
+@app.get("/api/ai/state")
+def состояние_слоя():
+    """
+    Слой понимания текста одним ответом: включён ли, чем разбирает,
+    сколько вакансий ждёт, сколько кандидатов накоплено и что показал
+    замер. Качество не прячется в журнале.
+    """
+    import sqlite3
+
+    from src import ai
+    from src.ai import кандидаты, кэш, модели, прогон
+
+    итог = {"включён": ai.включён(), "порог_работодателей": кандидаты.ПОРОГ_РАБОТОДАТЕЛЕЙ, "замеры": _замеры_навыков()}
+    try:
+        кандидат = модели.выбранный()
+        версия = f"{кандидат.версия(модели.версия_рантайма())}|{прогон.ВЕРСИЯ_ПРОМПТА}"
+        итог.update({"модель": кандидат.имя, "описание_модели": кандидат.описание, "версия": версия})
+    except KeyError as e:
+        итог.update({"модель": None, "версия": "", "ошибка_настройки": str(e)})
+        return итог
+
+    conn = sqlite3.connect(f"file:{_app_settings.db_path}?mode=ro", uri=True)
+    try:
+        итог["в_очереди"] = прогон.сколько_ждёт(conn, версия)
+        итог["разобрано"] = conn.execute(
+            "SELECT COUNT(*) FROM vacancies WHERE COALESCE(ai_version, '') != ''").fetchone()[0]
+        итог["кандидаты"] = кандидаты.сводка(conn)
+        итог["траты"] = кэш.траты(conn)
+    except sqlite3.OperationalError as e:
+        итог["ошибка_базы"] = str(e)
+    finally:
+        conn.close()
+    return итог
+
+
+@app.get("/api/ai/candidates")
+def кандидаты_в_словарь(status: str = "new", limit: int = Query(100, ge=1, le=500)):
+    """
+    Кандидаты в словарь навыков: название, число встреч, число разных
+    работодателей и цитаты, из которых кандидат получен. Новые
+    показываются от порога в три работодателя — опечатка одного
+    объявления до человека не доходит.
+    """
+    import sqlite3
+
+    from src.ai import кандидаты
+
+    if status not in (кандидаты.НОВЫЙ, кандидаты.ПОДТВЕРЖДЁН, кандидаты.ОТКЛОНЁН):
+        raise HTTPException(400, "Состояние кандидата: new, confirmed или rejected")
+    conn = sqlite3.connect(f"file:{_app_settings.db_path}?mode=ro", uri=True)
+    try:
+        return {"кандидаты": кандидаты.список(conn, статус=status, предел=limit), "сводка": кандидаты.сводка(conn)}
+    except sqlite3.OperationalError:
+        return {"кандидаты": [], "сводка": {"новых": 0, "ждут_решения": 0, "подтверждено": 0, "отклонено": 0}}
+    finally:
+        conn.close()
+
+
+@app.post("/api/ai/candidates/decide")
+def решить_кандидата(payload: dict = Body(...)):
+    """
+    Решение человека по кандидату: подтвердить (навык уходит в словарь и
+    дальше находится без модели) или отклонить (больше не предлагается).
+    """
+    import sqlite3
+
+    from src.ai import кандидаты
+
+    имя = str(payload.get("ключ") or "").strip()
+    решение = payload.get("решение")
+    if not имя or решение not in ("confirm", "reject"):
+        raise HTTPException(400, "Нужны ключ кандидата и решение: confirm или reject")
+
+    conn = sqlite3.connect(_app_settings.db_path, timeout=30)
+    try:
+        if решение == "reject":
+            принято = кандидаты.отклонить(conn, имя)
+        else:
+            try:
+                принято = кандидаты.подтвердить(
+                    conn, имя,
+                    раздел=(payload.get("раздел") or None),
+                    название=(str(payload.get("название") or "").strip() or None),
+                )
+            except ValueError as e:
+                raise HTTPException(400, str(e))
+        if not принято:
+            raise HTTPException(404, "Такого кандидата нет")
+        conn.commit()
+        if решение == "confirm":
+            # Подсказки поиска собраны по прежнему словарю.
+            try:
+                from src.search import служба as поиск
+
+                getattr(поиск, "сбросить_словарь", lambda: None)()
+            except Exception:
+                pass
+        return {"принято": True, "сводка": кандидаты.сводка(conn)}
+    finally:
+        conn.close()
+
+
 @app.get("/api/system/state")
 def состояние_систем():
     """
@@ -986,6 +1107,10 @@ def get_vacancies(
         # список выглядит как повтор одного и того же по ошибке.
         размеры = размеры_групп(df)
 
+        from src import ai
+
+        слой_включён = ai.включён()
+
         items = []
         for _, row in df_page.iterrows():
             item = {}
@@ -998,6 +1123,16 @@ def get_vacancies(
                 else:
                     val = val
                 item[col] = val
+            # Навыки модели уходят на экран разобранными и только при
+            # включённом слое: выключение должно выключать и показ.
+            найденное = item.pop("ai_skills", None)
+            if слой_включён and найденное:
+                try:
+                    item["ai_skills"] = json.loads(найденное)
+                except (TypeError, ValueError):
+                    pass
+            if not слой_включён:
+                item.pop("ai_version", None)
             if not размеры.empty:
                 ключ = (row.get("vacancy_name"), row.get("employer_name"))
                 item["копий"] = int(размеры.get(ключ, 1))

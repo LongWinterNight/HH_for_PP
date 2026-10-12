@@ -22,6 +22,13 @@ export const system = {
   explain: (q, options) => get('/search/explain', { q }, options)
 }
 
+// Слой понимания текста: что нашла модель и что с этим решил человек.
+export const ai = {
+  state: (options) => get('/ai/state', {}, options),
+  candidates: (status, options) => get('/ai/candidates', { status }, options),
+  decide: (body, options) => post('/ai/candidates/decide', body, options)
+}
+
 export const dashboard = {
   summary: (options) => get('/dashboard', {}, options)
 }

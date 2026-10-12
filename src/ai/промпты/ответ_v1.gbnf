@@ -1,0 +1,5 @@
+root ::= lang "\n" line{0,40}
+line ::= field "|" field "|" kind "|" [1-9] ( "|" field )? "\n"
+kind ::= "tool" | "tech" | "method" | "lang" | "soft"
+lang ::= [a-z]{2,3}
+field ::= [^|\n\x00-\x1F]{1,100}

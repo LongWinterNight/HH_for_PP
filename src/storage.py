@@ -212,6 +212,15 @@ class VacancyModel(Base):
     # правило, по которому она узнаётся, приближённое (src/relevance.py).
     off_query = Column(Integer, default=0, index=True)
 
+    # Навыки, найденные моделью (миграция 022). Лежат отдельно от навыков
+    # словаря и в частоты не входят: модель не пишет числа в аналитику
+    # (решение S9‑6a). JSON: название, цитата из текста, вид — человек
+    # видит, из чего навык получен. `ai_version` — чем извлечено: модель,
+    # квант, рантайм и промпт; без неё прошлое не объяснить после смены
+    # любого из них.
+    ai_skills = Column(Text)
+    ai_version = Column(String(200))
+
     # Каким запросом найдена. Запросов может быть несколько: одна
     # вакансия попадает и в «Python», и в «Backend developer».
     source_keyword = Column(String(500))
@@ -593,6 +602,81 @@ def _разобрать_запросы(сырое: Optional[str]) -> Optional[Li
     if not isinstance(значение, list):
         return None
     return [str(з).strip() for з in значение if str(з).strip()]
+
+
+class AiExtractionModel(Base):
+    """
+    Что модель уже разобрала (миграция 022).
+
+    Один текст с одной версией модели и промпта разбирается один раз:
+    без этого повторный прогон стоит столько же, сколько первый. Ответ
+    хранится целиком — пересчитать разбор после правки проверок можно
+    без повторного вызова модели.
+    """
+
+    __tablename__ = "ai_extractions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    text_hash = Column(String(64), nullable=False)
+    model_version = Column(String(200), nullable=False)
+    prompt_version = Column(String(100), nullable=False)
+    response = Column(Text, nullable=False)
+    tokens_in = Column(Integer, default=0)
+    tokens_out = Column(Integer, default=0)
+    # Модель локальная и денег не стоит: цена вызова — время.
+    duration_ms = Column(Integer, default=0)
+    skills_count = Column(Integer, default=0)
+    rejected_count = Column(Integer, default=0)
+    # Метка прогона: по ней траты складываются по прогонам.
+    run_tag = Column(String(40))
+    created_at = Column(DateTime, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("text_hash", "model_version", "prompt_version", name="uq_ai_extraction"),
+    )
+
+
+class SkillCandidateModel(Base):
+    """
+    Кандидат в словарь навыков (миграция 022).
+
+    Главный продукт слоя: найденное у трёх разных работодателей и
+    подтверждённое человеком становится обычной позицией словаря и
+    дальше находится без модели.
+    """
+
+    __tablename__ = "skill_candidates"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # Название в нижнем регистре — по нему кандидат узнаётся: «Figma» и
+    # «figma» не должны стать двумя кандидатами.
+    name_key = Column(String(200), nullable=False, unique=True)
+    name = Column(String(200), nullable=False)
+    kind = Column(String(30))
+    # new / confirmed / rejected
+    status = Column(String(20), nullable=False, default="new")
+    # В какой раздел словаря ушёл подтверждённый: hard / soft / tools.
+    section = Column(String(20))
+    decided_at = Column(DateTime)
+    created_at = Column(DateTime, nullable=False)
+
+
+class SkillCandidateHitModel(Base):
+    """
+    Где кандидат встречен (миграция 022).
+
+    Одна строка на пару «кандидат — вакансия». По таблице считаются и
+    число встреч, и число разных работодателей; повторный прогон по тем
+    же вакансиям счётчиков не увеличивает.
+    """
+
+    __tablename__ = "skill_candidate_hits"
+
+    name_key = Column(String(200), primary_key=True)
+    vacancy_id = Column(String(50), primary_key=True)
+    employer = Column(String(500))
+    quote = Column(String(300))
+    created_at = Column(DateTime, nullable=False)
 
 
 class AppSettingsModel(Base):
