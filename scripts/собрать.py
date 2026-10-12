@@ -50,6 +50,18 @@ def main(аргументы: list | None = None) -> int:
 
     logger = get_logger("сбор_по_расписанию")
 
+    # Сбор на базе, отставшей от кода, упал бы посреди работы — на
+    # первой записи в изменённую таблицу.
+    from src import schema_check
+
+    расхождения = schema_check.проверить()
+    if расхождения:
+        что_делать = schema_check.объяснение(расхождения, settings.db_path)
+        if not параметры.проверить:
+            сообщить(Отказ(причина="schema", подробности=что_делать))
+        print(что_делать)
+        return НЕ_НАСТРОЕНО
+
     storage = VacancyStorage()
     try:
         настройки = storage.get_collection_settings()

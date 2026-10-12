@@ -67,6 +67,22 @@ def разобрать_оборвавшиеся_сборы():
 
     поиск.прогреть()
 
+    # База сверяется с моделями до первого запроса к ней: отставшая база
+    # иначе скажет о себе словами `no such column` посреди работы.
+    try:
+        from src import schema_check
+
+        расхождения = schema_check.проверить()
+        if расхождения:
+            from src.alerts import Отказ, сообщить
+
+            сообщить(Отказ(
+                причина="schema",
+                подробности=schema_check.объяснение(расхождения, _app_settings.db_path),
+            ))
+    except Exception as e:
+        logger.warning(f"Сверка базы с моделями не выполнена: {e}")
+
     storage = VacancyStorage()
     try:
         # Порог ноль: на старте любая запись «running» — след прошлого
