@@ -72,6 +72,9 @@ export const collection = {
   history: (options) => get('/parser/history', {}, options),
   // Расписание сбора и то, держится ли оно.
   schedule: (options) => get('/schedule', {}, options),
+  // Чего не хватает в базе и какие запросы это закрыли бы.
+  suggestions: (options) => get('/collection/suggestions', {}, options),
+  decideSuggestion: (body, options) => post('/collection/suggestions/decide', body, options),
   // Во что обойдётся сбор. Считает сервер: цена зависит от его настроек
   // — паузы между запросами и того, включена ли резка на срезы.
   estimate: (params, options) => get('/parser/estimate', params, options),

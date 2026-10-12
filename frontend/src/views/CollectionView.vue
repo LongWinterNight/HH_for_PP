@@ -65,6 +65,31 @@ const toast = useToast()
 const status = useCollectionStatus()
 const history = useApi((options) => collection.history(options))
 
+// Чего не хватает в базе. Профессии, которые набрались попутно, по
+// чужим запросам: в базе они есть случайно и неполно. Предложение —
+// только строка в списке запросов; сбор по ней запускает человек.
+const пробелы = useApi((options) => collection.suggestions(options))
+const предложения = computed(() => пробелы.data.value?.['предложения'] ?? [])
+const тонкие = computed(() => пробелы.data.value?.['тонкие_запросы'] ?? [])
+const решается = ref('')
+
+async function решитьПредложение(предложение, решение) {
+  решается.value = предложение['ключ']
+  try {
+    const ответ = await collection.decideSuggestion({ 'ключ': предложение['ключ'], 'решение': решение })
+    if (решение === 'accept') {
+      keywords.value = [...ответ.search_queries]
+      запросыСохранены.value = true
+      toast.success(`«${ответ['запрос']}» в списке запросов`, 'Сбор по нему начнётся, когда вы его запустите')
+    }
+    пробелы.load()
+  } catch (e) {
+    toast.error('Решение не записано', e.message || 'Повторите позже', { label: 'Повторить', run: () => решитьПредложение(предложение, решение) })
+  } finally {
+    решается.value = ''
+  }
+}
+
 // Расписание сбора. Ставит его команда на компьютере, где живёт
 // продукт; экран показывает, что обещано и выполняется ли обещание.
 const расписание = useApi((options) => collection.schedule(options))
@@ -115,6 +140,7 @@ onMounted(async () => {
   status.startPolling()
   history.load()
   расписание.load()
+  пробелы.load()
 
   const saved = await settingsApi.load()
   email.value = saved?.email || ''
@@ -713,6 +739,45 @@ function durationOf(run) {
       <span v-if="startError" class="col__error">{{ startError }}</span>
     </div>
 
+    <BvCard v-if="предложения.length || тонкие.length" title="Чего не хватает в базе">
+      <template #actions>
+        <span class="col__note">считается по базе, сбор сам не начинается</span>
+      </template>
+
+      <BvTable v-if="предложения.length" label="Предложенные запросы" sticky-first>
+        <thead>
+          <tr>
+            <th>Запрос</th>
+            <th class="col-num">Уже в базе</th>
+            <th class="col-num">Работодателей</th>
+            <th>Почему предложен</th>
+            <th>Решение</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="предложение in предложения" :key="предложение['ключ']">
+            <td><span class="col__suggest">{{ предложение['запрос'] }}</span></td>
+            <td class="col-num">{{ num(предложение['вакансий']) }}</td>
+            <td class="col-num">{{ num(предложение['работодателей']) }}</td>
+            <td><span class="col__reason">{{ предложение['основание'] }}</span></td>
+            <td>
+              <div class="col__decide">
+                <BvButton size="sm" :loading="решается === предложение['ключ']" :disabled="Boolean(решается)" @click="решитьПредложение(предложение, 'accept')">В запросы</BvButton>
+                <BvButton size="sm" variant="quiet" :disabled="Boolean(решается)" @click="решитьПредложение(предложение, 'reject')">Не нужно</BvButton>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </BvTable>
+
+      <p v-if="тонкие.length" class="col__note">
+        Тонкая выборка — меньше {{ пробелы.data.value['порог_тонкой_выборки'] }} активных вакансий:
+        <template v-for="(запрос, i) in тонкие" :key="запрос['запрос']">
+          <template v-if="i > 0">, </template>«{{ запрос['запрос'] }}» — {{ num(запрос['вакансий']) }}
+        </template>. Числа по таким запросам ненадёжны.
+      </p>
+    </BvCard>
+
     <BvCard title="Сбор по расписанию">
       <template #actions>
         <BvStatus
@@ -872,6 +937,30 @@ function durationOf(run) {
   margin: 0;
   font-size: var(--t-body-size);
   color: var(--c-text);
+}
+
+/* Ячейки предложений: раскладка — во вложенных блоках, ширину колонок
+   считает таблица. */
+.col__suggest {
+  display: block;
+  min-width: 150px;
+  color: var(--c-text);
+  font-weight: var(--w-medium);
+}
+
+.col__reason {
+  display: block;
+  min-width: 260px;
+  max-width: 520px;
+  font-size: var(--t-caption-size);
+  line-height: var(--t-caption-lh);
+  color: var(--c-text-secondary);
+}
+
+.col__decide {
+  display: flex;
+  gap: var(--s-2);
+  white-space: nowrap;
 }
 
 /* Команда — то, что набирают дословно: моноширинным и без переноса посреди слова. */

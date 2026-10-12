@@ -2036,6 +2036,69 @@ def start_parser(
 # API для последнего парсинга и настроек
 # =============================================================================
 
+@app.get("/api/collection/suggestions")
+def предложения_запросов():
+    """
+    Чего не хватает в базе: профессии, которые набрались попутно и ни
+    одним запросом не собираются, и запросы с тонкой выборкой. У каждого
+    предложения названо основание. Сбор отсюда не запускается.
+    """
+    import sqlite3
+
+    from src import gaps
+
+    запросы = _настройки_сбора().get("search_queries") or []
+    conn = sqlite3.connect(_app_settings.db_path, timeout=30)
+    try:
+        return {
+            "предложения": gaps.обновить(conn, запросы),
+            "тонкие_запросы": gaps.найти(conn, запросы)["тонкие_запросы"],
+            "принято": gaps.предложения(conn, статус=gaps.ПРИНЯТО, предел=20),
+            "порог_тонкой_выборки": gaps.ТОНКАЯ_ВЫБОРКА,
+        }
+    except sqlite3.OperationalError as e:
+        logger.warning(f"Пробелы базы не посчитаны: {e}")
+        return {"предложения": [], "тонкие_запросы": [], "принято": [], "порог_тонкой_выборки": gaps.ТОНКАЯ_ВЫБОРКА}
+    finally:
+        conn.close()
+
+
+@app.post("/api/collection/suggestions/decide")
+def решить_предложение(payload: dict = Body(...)):
+    """
+    Решение человека по предложенному запросу. Принятый дописывается в
+    список запросов сбора — и только: сбор по нему человек запускает
+    сам, кнопкой, как и по остальным.
+    """
+    import sqlite3
+
+    from src import gaps
+    from src.storage import VacancyStorage
+
+    ключ = str(payload.get("ключ") or "").strip()
+    решение = payload.get("решение")
+    if not ключ or решение not in ("accept", "reject"):
+        raise HTTPException(400, "Нужны ключ предложения и решение: accept или reject")
+
+    conn = sqlite3.connect(_app_settings.db_path, timeout=30)
+    try:
+        запрос = gaps.решить(conn, ключ, принять=решение == "accept")
+    finally:
+        conn.close()
+    if запрос is None:
+        raise HTTPException(404, "Такого предложения нет или по нему уже решено")
+
+    запросы = list(_настройки_сбора().get("search_queries") or [])
+    if запрос and запрос.lower() not in {з.lower() for з in запросы}:
+        запросы.append(запрос)
+        storage = VacancyStorage()
+        try:
+            storage.save_collection_settings(search_queries=запросы)
+        finally:
+            storage.close()
+    return {"принято": решение == "accept", "запрос": запрос, "search_queries": запросы}
+
+
 @app.get("/api/schedule")
 def расписание_сбора():
     """
