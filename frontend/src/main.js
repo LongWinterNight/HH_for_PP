@@ -13,4 +13,32 @@ import '@/styles/fonts.css'
 import '@/styles/tokens.css'
 import '@/styles/touch.css'
 
+// Вкладка, открытая до пересборки интерфейса, держит адреса файлов
+// прежней сборки: при переходе на экран, который ещё не загружался,
+// файла уже нет. Страница перезагружается и получает новую сборку —
+// один раз: если файла нет и после этого, дело не в старой вкладке, и
+// перезагружать по кругу нельзя.
+const ПЕРЕЗАГРУЖЕНО = 'bv:перезагружено-после-сборки'
+
+window.addEventListener('vite:preloadError', (event) => {
+  let уже = false
+  try {
+    уже = sessionStorage.getItem(ПЕРЕЗАГРУЖЕНО) === '1'
+    sessionStorage.setItem(ПЕРЕЗАГРУЖЕНО, '1')
+  } catch {
+    // Хранилище недоступно — перезагрузки по кругу не избежать, значит не перезагружаем.
+    уже = true
+  }
+  if (уже) return
+  event.preventDefault()
+  window.location.reload()
+})
+
+router.isReady().then(() => {
+  // Экран открылся — сборка свежая; следующая пересборка снова получит свою перезагрузку.
+  window.setTimeout(() => {
+    try { sessionStorage.removeItem(ПЕРЕЗАГРУЖЕНО) } catch { /* хранилища нет */ }
+  }, 10000)
+})
+
 createApp(App).use(router).mount('#app')

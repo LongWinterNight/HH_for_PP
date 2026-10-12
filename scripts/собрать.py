@@ -39,6 +39,7 @@ def main(аргументы: list | None = None) -> int:
     разбор.add_argument("--страниц", type=int, default=None, help="страниц выдачи на запрос (по умолчанию из настроек)")
     разбор.add_argument("--дней", type=int, default=None, help="глубина поиска в днях (по умолчанию из настроек)")
     разбор.add_argument("--без-копии", action="store_true", help="не снимать копию базы перед сбором")
+    разбор.add_argument("--ждать", type=float, default=20, help="сколько минут ждать недоступный источник (по умолчанию 20)")
     параметры = разбор.parse_args(аргументы)
 
     from src import collection_run, schedule
@@ -87,6 +88,37 @@ def main(аргументы: list | None = None) -> int:
             return ЗАНЯТО
     finally:
         storage.close()
+
+    # Сбор догоняет пропущенный запуск сразу после включения компьютера,
+    # когда сеть или прокси ещё не поднялись. Переждать дешевле, чем
+    # потерять день; отказ по ключу или почте ждать бессмысленно.
+    from src.api_client import HHAPIClient
+
+    проверка = collection_run.дождаться_источника(
+        HHAPIClient(email=почта, delay=настройки["request_delay"]),
+        ждать_минут=параметры.ждать,
+    )
+    if not проверка["доступно"]:
+        logger.error(f"Сбор по расписанию не начат: {проверка['причина']} — {проверка['подробности']}")
+        # Попытка записывается в историю: «сбора не было» и «сбор не
+        # смог начаться» — разные вещи, и вторую видно только так.
+        storage = VacancyStorage()
+        try:
+            запуск = storage.create_parser_run(
+                запросы, max_pages=страниц, days_back=дней, is_incremental=True, use_cache=True,
+                source=collection_run.РАСПИСАНИЕ,
+            )
+            storage.complete_parser_run(
+                запуск, status=collection_run.ОТКАЗ,
+                error_message=проверка["подробности"], error_type=проверка["причина"],
+            )
+        finally:
+            storage.close()
+        сообщить(Отказ(
+            причина=проверка["причина"], подробности=проверка["подробности"], запуск=запуск, запросы=запросы,
+        ))
+        print(f"Сбор №{запуск} не начат: источник недоступен ({проверка['причина']}).")
+        return ОТКАЗ
 
     if not параметры.без_копии:
         try:

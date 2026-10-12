@@ -142,6 +142,21 @@ class _Сборщик:
         pass
 
 
+class _Клиент:
+    """Клиент источника без сети: доступ отвечает заготовленным."""
+
+    ДОСТУПЕН = {"доступно": True, "задержка_мс": 1, "причина": None, "подробности": ""}
+    НЕТ_СЕТИ = {"доступно": False, "задержка_мс": 1, "причина": "network", "подробности": "Источник недоступен: ProxyError"}
+    # Ответы на проверки доступа по очереди; кончились — «доступен».
+    ответы: list = []
+
+    def __init__(self, **параметры):
+        self.параметры = параметры
+
+    def проверить_доступ(self):
+        return self.ответы.pop(0) if self.ответы else dict(self.ДОСТУПЕН)
+
+
 @pytest.fixture
 def без_сети(monkeypatch, tmp_path):
     """Сбор без источника и без настоящих оповещений."""
@@ -151,7 +166,8 @@ def без_сети(monkeypatch, tmp_path):
 
     отправлено = []
     monkeypatch.setattr(src.collector, "VacancyCollector", _Сборщик)
-    monkeypatch.setattr(src.api_client, "HHAPIClient", lambda **параметры: SimpleNamespace(**параметры))
+    monkeypatch.setattr(src.api_client, "HHAPIClient", _Клиент)
+    monkeypatch.setattr(_Клиент, "ответы", [])
     monkeypatch.setattr(src.alerts, "сообщить", lambda отказ, **прочее: отправлено.append(отказ))
     monkeypatch.setattr(VacancyStorage, "refresh_currency_rates", lambda self: None)
     monkeypatch.setattr(_Сборщик, "ошибка", None)
@@ -210,6 +226,100 @@ class TestПроведениеСбора:
         assert исход.запуск is not None
 
 
+class TestИсточникМолчит:
+    """
+    Первый же запуск по расписанию пришёлся на минуту после включения
+    компьютера: прокси ещё не поднялся, все запросы упали, а сбор
+    записался удачным с нулём вакансий и стал «последним удачным».
+    """
+
+    МОЛЧАНИЕ = {
+        "unique": 0, "new": 0, "updated": 0, "качество": {},
+        "by_keyword": {
+            "Python": {"errors": 3, "pages": 0, "взято": 0},
+            "LLM": {"errors": 3, "pages": 0, "взято": 0},
+        },
+    }
+
+    def test_ни_одного_ответа_это_отказ_а_не_ноль_вакансий(self, storage, без_сети, monkeypatch):
+        monkeypatch.setattr(_Сборщик, "итог", self.МОЛЧАНИЕ)
+
+        исход = collection_run.провести(["Python", "LLM"], email="a@b.c", пауза=0.1, источник=collection_run.РАСПИСАНИЕ)
+
+        assert исход.статус == collection_run.ОТКАЗ and исход.причина == "network"
+        запись = storage.get_parser_runs_history()[0]
+        assert запись["status"] == "error"
+        assert storage.get_last_parser_run(only_successful=True) is None, "«последним удачным» он быть не должен"
+        assert [отказ.причина for отказ in без_сети] == ["network"]
+
+    def test_честный_ноль_отказом_не_считается(self):
+        # Источник ответил, что вакансий нет: ошибок не было.
+        assert collection_run.источник_молчал({"by_keyword": {"редкость": {"errors": 0, "pages": 1, "взято": 0}}}) is False
+
+    def test_один_упавший_запрос_сбор_не_роняет(self):
+        итог = {"by_keyword": {
+            "Python": {"errors": 3, "pages": 0, "взято": 0},
+            "LLM": {"errors": 0, "pages": 2, "взято": 150},
+        }}
+        assert collection_run.источник_молчал(итог) is False
+
+    def test_остановленный_сбор_не_превращается_в_отказ_сети(self, storage, без_сети, monkeypatch):
+        monkeypatch.setattr(_Сборщик, "итог", self.МОЛЧАНИЕ)
+        monkeypatch.setattr(_Сборщик, "остановить_сразу", True)
+
+        исход = collection_run.провести(["Python"], email="a@b.c", пауза=0.1)
+
+        assert исход.статус == collection_run.ОСТАНОВЛЕН
+
+    def test_сеть_пережидается(self):
+        клиент = _Клиент()
+        клиент.ответы = [dict(_Клиент.НЕТ_СЕТИ), dict(_Клиент.НЕТ_СЕТИ)]
+        паузы = []
+
+        проверка = collection_run.дождаться_источника(клиент, ждать_минут=20, пауза=60, спать=паузы.append)
+
+        assert проверка["доступно"] is True and паузы == [60, 60]
+
+    def test_отказ_ключа_не_пережидается(self):
+        клиент = _Клиент()
+        клиент.ответы = [{"доступно": False, "задержка_мс": 1, "причина": "token_rejected", "подробности": "403"}]
+        паузы = []
+
+        проверка = collection_run.дождаться_источника(клиент, спать=паузы.append)
+
+        assert проверка["причина"] == "token_rejected" and паузы == [], "ключ сам не починится"
+
+    def test_ожидание_не_бесконечно(self):
+        клиент = _Клиент()
+        клиент.ответы = [dict(_Клиент.НЕТ_СЕТИ) for _ in range(50)]
+        паузы = []
+
+        проверка = collection_run.дождаться_источника(клиент, ждать_минут=0.01, пауза=60, спать=паузы.append)
+
+        assert проверка["доступно"] is False and паузы == []
+
+    def test_сборщик_не_перебирает_страницы_после_отказа_сети(self, tmp_path):
+        from src.collector import ПУСТЫХ_ОТВЕТОВ_ПОДРЯД, VacancyCollector
+
+        class МолчащийКлиент:
+            delay = 0
+            поиски = 0
+
+            def search_vacancies(self, keyword, page=0, per_page=100, **_):
+                self.поиски += 1
+                return None  # так клиент отвечает на ошибку сети
+
+        клиент = МолчащийКлиент()
+        сборщик = VacancyCollector(
+            client=клиент, output_dir=tmp_path / "raw", max_pages=10, days_back=30,
+            use_cache=False, incremental=True, резать_упёршиеся=False,
+        )
+        итог = сборщик.collect_all(keywords=["Python"], save_raw=False)
+
+        assert клиент.поиски == ПУСТЫХ_ОТВЕТОВ_ПОДРЯД, "десять страниц по десять секунд ожидания перебирать незачем"
+        assert collection_run.источник_молчал(итог) is True
+
+
 class TestКоманда:
 
     def _настроить(self, storage, запросы, почта="человек@example.com"):
@@ -246,6 +356,18 @@ class TestКоманда:
         assert _Сборщик.последний.параметры["incremental"] is True
         запись = storage.get_parser_runs_history()[0]
         assert запись["keywords"] == ["Python", "LLM"] and запись["source"] == "schedule"
+
+    def test_источник_недоступен_сбор_не_начат_но_попытка_записана(self, storage, без_сети, monkeypatch):
+        import importlib
+
+        self._настроить(storage, ["Python"])
+        monkeypatch.setattr(_Клиент, "ответы", [dict(_Клиент.НЕТ_СЕТИ) for _ in range(5)])
+        команда = importlib.import_module("scripts.собрать")
+
+        assert команда.main(["--без-копии", "--ждать", "0"]) == команда.ОТКАЗ
+        запись = storage.get_parser_runs_history()[0]
+        assert (запись["status"], запись["source"]) == ("error", "schedule")
+        assert [отказ.причина for отказ in без_сети] == ["network"]
 
     def test_отказ_даёт_ненулевой_код(self, storage, без_сети, monkeypatch):
         import importlib
