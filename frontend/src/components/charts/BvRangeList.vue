@@ -52,6 +52,7 @@ function сумма(значение) {
 </script>
 
 <template>
+  <div class="ranges-box">
   <ul class="ranges">
     <li v-for="строка in items" :key="строка.label" class="ranges__item">
       <component
@@ -87,16 +88,36 @@ function сумма(значение) {
       </component>
     </li>
   </ul>
+  </div>
 </template>
 
 <style scoped>
+/* Обёртка меряет ширину: по ней, а не по экрану, список решает, как
+   ему встать. Мерить саму сетку нельзя — контейнер не может зависеть от
+   собственного содержимого. */
+.ranges-box {
+  container: ranges / inline-size;
+  min-width: 0;
+}
+
+/* Колонки заданы один раз на весь список, строки берут их через subgrid.
+   Пока сетка была у каждой строки своя, колонка полосы подстраивалась
+   под ширину числа в этой строке, и шкала у строк выходила разной —
+   вилки, которые список обещает сравнить взглядом, были несравнимы. */
 .ranges {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
+  display: grid;
+  grid-template-columns: minmax(80px, 170px) minmax(120px, 1fr) auto minmax(56px, auto);
+  column-gap: var(--s-3);
+  row-gap: var(--s-1);
+}
+
+.ranges__item {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
 }
 
 .ranges__row {
@@ -106,9 +127,9 @@ function сумма(значение) {
   box-sizing: border-box;
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(80px, 170px) minmax(120px, 1fr) auto minmax(56px, auto);
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
   align-items: center;
-  gap: var(--s-3);
   padding: var(--s-2) var(--s-2);
   border: none;
   background: transparent;
@@ -206,16 +227,25 @@ function сумма(значение) {
 
 .is-weak .ranges__label { color: var(--c-text-quiet); }
 
-/* На узком экране подпись занимает свою строку целиком: усечённое
-   название сферы не опознаётся. */
-@media (max-width: 640px) {
-  .ranges__row {
-    grid-template-columns: minmax(40px, 1fr) auto auto;
-    row-gap: var(--s-1);
-  }
+/* В узком месте подпись занимает свою строку целиком: усечённое
+   название сферы не опознаётся. Меряется ширина списка, а не экрана:
+   карточка в трёхколоночной сетке на широком экране уже телефона, и по
+   ширине экрана список в ней не перестраивался — «по N» выходило за край. */
+@container ranges (max-width: 480px) {
+  /* Две колонки: «по N» уходит наверх, к подписи, и полоса получает
+     его место — в три колонки от неё оставалось полсотни точек. */
+  .ranges { grid-template-columns: minmax(40px, 1fr) auto; }
 
+  .ranges__row { row-gap: var(--s-1); }
+  .ranges__n { grid-area: 1 / 2; }
+  .ranges__track { grid-area: 2 / 1; }
+  .ranges__value { grid-area: 2 / 2; }
+
+  /* Подпись идёт на всю строку и оставляет справа место под «по N»:
+     в одной первой колонке она переносилась при свободной строке. */
   .ranges__label {
-    grid-column: 1 / -1;
+    grid-area: 1 / 1 / 2 / -1;
+    padding-right: 5.5em;
     white-space: normal;
   }
 }

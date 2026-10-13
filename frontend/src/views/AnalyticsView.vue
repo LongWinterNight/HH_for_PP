@@ -5,15 +5,14 @@ import BvCard from '@/components/ui/BvCard.vue'
 import BvSegmented from '@/components/ui/BvSegmented.vue'
 import BvSelect from '@/components/ui/BvSelect.vue'
 import BvTable from '@/components/ui/BvTable.vue'
-import BvChartFrame from '@/components/charts/BvChartFrame.vue'
 import BvPrintMeta from '@/components/ui/BvPrintMeta.vue'
+import ExperienceExplorer from '@/components/domain/ExperienceExplorer.vue'
 import RegionExplorer from '@/components/domain/RegionExplorer.vue'
 import SalaryExplorer from '@/components/domain/SalaryExplorer.vue'
-import BvStackedBar from '@/components/charts/BvStackedBar.vue'
 import { analytics } from '@/api/endpoints'
 import { useApi } from '@/composables/useApi'
 import { useHeaderMeta } from '@/composables/useHeaderMeta'
-import { money, num, vacancies as vacanciesCount } from '@/utils/format'
+import { num, vacancies as vacanciesCount } from '@/utils/format'
 import { MIN_SAMPLE } from '@/utils/dataRules'
 
 // Аналитика: распределение зарплат, регионы, опыт и сводка по валютам.
@@ -59,16 +58,6 @@ const salarySample = computed(() => (
     ? (dist.data.value?.salary_sample_rub ?? 0)
     : (dist.data.value?.salary_sample ?? 0)
 ))
-const stats = computed(() => (
-  вРублях.value
-    ? (dist.data.value?.salary_stats_rub ?? null)
-    : (dist.data.value?.salary_stats ?? null)
-))
-
-// Валюта, в которой подписаны числа на экране: в рублёвом виде это
-// всегда рубль, каким бы ни был выбор в списке валют.
-const активнаяВалюта = computed(() => (вРублях.value ? 'RUB' : currency.value))
-
 const rateDate = computed(() => {
   const raw = dist.data.value?.rate_date
   if (!raw) return null
@@ -178,62 +167,27 @@ const currencyRows = computed(() => {
     />
 
     <div class="an__grid">
-      <!-- Окно раскрывается на месте: срезы, зарплатные уровни и состав
-           корзины. Вид зарплат и валюту задаёт экран, остальное — окно. -->
+      <!-- Разбор открывается окном поверх страницы: срезы, зарплатные
+           уровни и состав корзины. Вид зарплат и валюту задаёт экран. -->
       <SalaryExplorer :basis="salaryView" :currency="currency" :rate-date="rateDate || ''" />
 
       <!-- Одно окно на всю географию: зарплата и число вакансий по
-           городам, а в раскрытом виде — страны, регионы и города. -->
+           городам, а в окне разбора — страны, регионы и города. -->
       <RegionExplorer :basis="salaryView" :currency="currency" :rate-date="rateDate || ''" />
 
-      <BvChartFrame
-        title="Требуемый опыт"
-        subtitle="доли целого"
-        :loading="dist.loading.value"
-        :error="dist.error.value"
-        :sample="totalVacancies || null"
-        :height="220"
+      <!-- Одно окно на опыт: вилки зарплат по уровням и доли вакансий.
+           Числа прежней карточки «Что известно о зарплатах» — его первая
+           строка «Вся выборка». -->
+      <ExperienceExplorer
+        :basis="salaryView"
+        :currency="currency"
+        :rate-date="rateDate || ''"
+        :counts="experience"
+        :total="totalVacancies"
+        :counts-loading="dist.loading.value"
+        :counts-error="dist.error.value || ''"
         @retry="dist.load()"
-      >
-        <BvStackedBar :items="experience" />
-      </BvChartFrame>
-
-      <BvCard title="Что известно о зарплатах">
-        <template #actions>
-          <span class="an__scope">{{ вРублях ? 'все валюты · RUB' : currency }}</span>
-        </template>
-
-        <div v-if="stats" class="an__stats">
-          <div class="an__stat">
-            <span class="label">Медиана</span>
-            <span class="metric">{{ money(stats.median, активнаяВалюта) }}</span>
-            <span class="an__stat-note">
-              половина вакансий предлагает больше, половина меньше<template
-                v-if="вРублях && rateDate"> · по курсу ЦБ на {{ rateDate }}</template>
-            </span>
-          </div>
-          <div class="an__stat">
-            <span class="label">Половина вакансий</span>
-            <span class="an__stat-range">{{ num(Math.round(stats.q1)) }} — {{ num(Math.round(stats.q3)) }}</span>
-            <span class="an__stat-note">средняя не показывается: её тянут выбросы</span>
-          </div>
-        </div>
-
-        <!-- Пока ответ не пришёл, данных не «мало» — их ещё нет. Сервер
-             считает распределение секунды, и всё это время карточка
-             утверждала «меньше 5 вакансий» при полутора тысячах. -->
-        <p v-else-if="dist.loading.value" class="an__stat-note">Считаем…</p>
-
-        <p v-else class="an__stat-note">
-          <template v-if="вРублях">
-            Вакансий с рублёвым эквивалентом меньше {{ MIN_SAMPLE }} —
-          </template>
-          <template v-else>
-            В валюте {{ currency }} меньше {{ MIN_SAMPLE }} вакансий с указанной зарплатой —
-          </template>
-          числа по такой выборке ничего не значат.
-        </p>
-      </BvCard>
+      />
     </div>
 
     <BvCard title="Зарплаты по валютам">
@@ -305,27 +259,6 @@ const currencyRows = computed(() => {
   gap: var(--gap-grid);
 }
 
-.an__stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-  gap: var(--s-6);
-}
-
-.an__stat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-}
-
-.an__stat-range {
-  font-size: var(--t-h2-size);
-  line-height: var(--t-h2-lh);
-  font-weight: var(--w-strong);
-  color: var(--c-text);
-  white-space: nowrap;
-}
-
-.an__stat-note,
 .an__note {
   font-size: var(--t-caption-size);
   line-height: var(--t-caption-lh);
@@ -350,11 +283,6 @@ const currencyRows = computed(() => {
   flex-wrap: wrap;
   align-items: flex-end;
   gap: var(--s-3);
-}
-
-.an__scope {
-  font-size: var(--t-caption-size);
-  color: var(--c-text-muted);
 }
 
 .an__weak { color: var(--c-text-quiet); }
