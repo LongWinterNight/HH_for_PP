@@ -666,10 +666,10 @@ function downloadXlsx() {
             <tr>
               <th>Вакансия</th>
               <th class="col-num">Зарплата</th>
-              <th>Регион</th>
-              <th>Опыт</th>
+              <th class="col-area">Регион</th>
+              <th class="col-exp">Опыт</th>
               <th class="col-when">Опубликована</th>
-              <th>Навыки</th>
+              <th class="col-skills">Навыки</th>
             </tr>
           </thead>
           <tbody>
@@ -715,6 +715,19 @@ function downloadXlsx() {
                     ещё в {{ копийУ(v) - 1 }} {{ городов(копийУ(v) - 1) }}
                   </span>
                 </span>
+                <!-- Сведения свёрнутых колонок. Когда таблице тесно —
+                     открыта панель вакансии или экран узкий, — колонки
+                     не прокручиваются вбок, а переезжают сюда. Какие
+                     именно показаны, решает ширина таблицы (стили ниже). -->
+                <span class="vac__folded">
+                  <span v-if="v.area" class="vac__in vac__in--area">{{ v.area }}</span>
+                  <span v-if="v.experience" class="vac__in vac__in--exp">{{ v.experience }}</span>
+                  <span v-if="v.published_at" class="vac__in vac__in--when" :title="dateTime(v.published_at)">{{ timeAgo(v.published_at) }}</span>
+                </span>
+                <div v-if="skillsOf(v).shown.length" class="vac__skills vac__in vac__in--skills">
+                  <BvChip v-for="s in skillsOf(v).shown" :key="s">{{ s }}</BvChip>
+                  <BvChip v-if="skillsOf(v).more" variant="count">+{{ skillsOf(v).more }}</BvChip>
+                </div>
                 </div>
               </td>
               <td class="col-num" :title="salaryTitleOf(v)">
@@ -739,8 +752,8 @@ function downloadXlsx() {
                 </template>
                 <span v-else class="vac__empty">не указана</span>
               </td>
-              <td>{{ v.area }}</td>
-              <td class="vac__exp">{{ v.experience || '—' }}</td>
+              <td class="col-area">{{ v.area }}</td>
+              <td class="vac__exp col-exp">{{ v.experience || '—' }}</td>
               <!-- Срок, а не дата: при сортировке «сначала новые» порядок
                    должен читаться в самой строке, а «01.09.2026» через
                    месяц ничего не говорит о свежести. Точная дата — в
@@ -751,7 +764,7 @@ function downloadXlsx() {
                 </span>
                 <span v-else class="vac__empty">дата неизвестна</span>
               </td>
-              <td>
+              <td class="col-skills">
                 <div class="vac__skills">
                   <BvChip v-for="s in skillsOf(v).shown" :key="s">{{ s }}</BvChip>
                   <BvChip v-if="skillsOf(v).more" variant="count">+{{ skillsOf(v).more }}</BvChip>
@@ -932,6 +945,82 @@ function downloadXlsx() {
   flex-direction: column;
   gap: var(--s-4);
   min-width: 0;
+  /* Список меряет свою ширину: по ней таблица решает, какие колонки
+     показать. Ширина экрана тут не годится — панель вакансии забирает
+     у списка 380 точек на любом экране. */
+  container: vaclist / inline-size;
+}
+
+/* Таблице тесно — колонки сворачиваются в строку компании, а не уходят
+   под прокрутку вбок. Раньше шесть колонок требовали 1052 точки при
+   любой ширине, и с открытой панелью «Опубликована» и «Навыки»
+   оказывались за краем. Порядок сворачивания — от того, что есть в
+   панели и реже нужно при сравнении строк, к тому, что нужно чаще:
+   срок, опыт, регион, навыки. */
+.vac__folded {
+  display: none;
+  flex-wrap: wrap;
+  gap: 2px var(--s-2);
+  font-size: var(--t-caption-size);
+  color: var(--c-text-muted);
+}
+
+.vac__in,
+.vac__skills.vac__in--skills { display: none; }
+
+/* Точка стоит после сведения, а не перед ним: сворачиваются колонки с
+   конца, срок публикации — первым, и он же в строке последний. Видимые
+   сведения поэтому всегда идут подряд до конца строки, и точка после
+   каждого, кроме последнего, встаёт верно при любом их числе. */
+.vac__folded .vac__in:not(:last-child)::after {
+  content: '·';
+  margin-left: var(--s-2);
+  color: var(--c-text-quiet);
+}
+
+/* Пороги посчитаны по самым широким строкам базы, а не по удачной
+   выборке: название 272, зарплата с эквивалентом до 130, регион 133,
+   опыт 157, срок 127, навыки 272. По выборке с короткими навыками всё
+   помещалось и при меньшей ширине, а на общем списке прокрутка
+   возвращалась. */
+@container vaclist (max-width: 1100px) {
+  .vac__folded { display: flex; }
+  .col-when { display: none; }
+  .vac__in--when { display: inline; }
+}
+
+@container vaclist (max-width: 970px) {
+  .col-exp { display: none; }
+  .vac__in--exp { display: inline; }
+}
+
+@container vaclist (max-width: 815px) {
+  .col-area { display: none; }
+  .vac__in--area { display: inline; }
+  /* Название с подстрокой переносится, и держать под него 240 точек
+     уже незачем. Селектор с тегом — чтобы перекрыть общее правило ниже. */
+  td.vac__name { min-width: 200px; }
+}
+
+@container vaclist (max-width: 640px) {
+  .col-skills { display: none; }
+
+  /* Под названием чипы переносятся: в одну строку они держали бы
+     ширину колонки и возвращали прокрутку. */
+  .vac__skills.vac__in--skills {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: none;
+    margin-top: var(--s-1);
+    /* Ширину колонки блок не задаёт: один длинный навык («Работа с
+       дебиторской задолженностью») иначе распирал её на 270 точек. Он
+       усекается многоточием, как и в колонке навыков. */
+    contain: inline-size;
+  }
+
+  .vac__in--skills :deep(.chip) { max-width: 100%; }
+
+  td.vac__name { min-width: 0; }
 }
 
 .vac__state {
@@ -1094,7 +1183,7 @@ function downloadXlsx() {
   align-items: center;
   gap: var(--s-1);
   min-width: 0;
-  max-width: 280px;
+  max-width: 240px;
   /* Колонка сжимается, когда открыта панель вакансии: без обрезки
      чипы вылезали бы за правый край таблицы. */
   overflow: hidden;
