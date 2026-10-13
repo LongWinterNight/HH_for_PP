@@ -1,13 +1,15 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import BvBarList from '@/components/charts/BvBarList.vue'
 import BvChartFrame from '@/components/charts/BvChartFrame.vue'
 import BvRangeList from '@/components/charts/BvRangeList.vue'
 import BvButton from '@/components/ui/BvButton.vue'
 import BvField from '@/components/ui/BvField.vue'
+import BvModal from '@/components/ui/BvModal.vue'
 import BvSegmented from '@/components/ui/BvSegmented.vue'
 import { analytics } from '@/api/endpoints'
 import { useApi } from '@/composables/useApi'
+import { useWindowRoute } from '@/composables/useWindowRoute'
 import { money, num, percent } from '@/utils/format'
 import { MIN_SAMPLE } from '@/utils/dataRules'
 
@@ -18,8 +20,10 @@ import { MIN_SAMPLE } from '@/utils/dataRules'
 // кратком виде переключатель «Зарплата / Вакансии» выбирает, что
 // показывают полосы.
 //
-// В сетке — десять городов с наибольшей выборкой. «Разобрать» раскрывает
-// окно на всю ширину: три уровня территорий — страны, регионы, города, —
+// В сетке — десять городов с наибольшей выборкой, и карточка остаётся
+// такой всегда. «Разобрать» открывает окно поверх страницы (раньше
+// карточка раскрывалась на месте и сдвигала соседей): три уровня
+// территорий — страны, регионы, города, —
 // переход от страны к её регионам и от региона к его городам, и портрет
 // выбранной территории: сколько платят, сколько вакансий, какое место
 // она занимает среди соседей и из чего состоит.
@@ -38,7 +42,7 @@ const props = defineProps({
 const ПЕРВЫХ = 10
 const ПОРЦИЯ = 15
 
-const открыто = ref(false)
+const { open: открыто, show: открыть, hide: закрыть } = useWindowRoute('regions')
 // Что показывают полосы краткого вида: медиану зарплаты или число вакансий.
 const показатель = ref('salary')
 const показатели = [
@@ -133,9 +137,18 @@ const уровеньВыбранного = computed(() => {
 })
 const подписьВыбранной = computed(() => (уровеньВыбранного.value === уровень.value ? выбрано.value.label : ''))
 
+// В одну колонку портрет стоит над списком, и выбор строки менял бы
+// числа за краем экрана. Поэтому там окно после выбора прокручивается к
+// портрету: выбрал — увидел ответ.
+const портрет = ref(null)
+const ОДНА_КОЛОНКА = '(max-width: 960px)'
+
 function выбрать(строка) {
   const полная = списокУровня.value.find((т) => т.label === строка.label) ?? строка
   выбрано.value = таЖе(выбрано.value, полная) ? null : полная
+  if (выбрано.value && window.matchMedia?.(ОДНА_КОЛОНКА).matches) {
+    nextTick(() => портрет.value?.scrollIntoView({ block: 'start' }))
+  }
 }
 
 function кУровню(новый) {
@@ -247,11 +260,13 @@ const основа = computed(() => (
   props.basis === 'rub' ? `Рублёвый эквивалент${props.rateDate ? ` по курсу ЦБ на ${props.rateDate}` : ''}` : валюта.value
 ))
 
+const подзаголовокОкна = computed(() => {
+  if (!данные.value) return ''
+  return `${основа.value} · ${num(страны.value.length)} стран, ${num(области.value.length)} регионов, ${num(города.value.length)} городов`
+})
+
 const подзаголовок = computed(() => {
   if (!данные.value) return ''
-  if (открыто.value) {
-    return `${основа.value} · ${num(страны.value.length)} стран, ${num(области.value.length)} регионов, ${num(города.value.length)} городов`
-  }
   if (показатель.value === 'count') {
     return `пять городов с наибольшим числом вакансий и остальные · всего ${num(города.value.length)} городов в ${num(страны.value.length)} странах`
   }
@@ -272,32 +287,34 @@ const словоУровня = computed(() => ({ country: 'страны', region
 </script>
 
 <template>
-  <div class="rx" :class="{ 'rx--open': открыто }">
+  <div class="rx">
     <BvChartFrame
       title="Регионы"
       :subtitle="подзаголовок"
       :loading="гео.loading.value && !данные"
       :error="данные ? '' : гео.error.value"
-      :sample="открыто || !данные ? null : ((показатель === 'count' ? всего : объёмПервых) || null)"
+      :sample="данные ? ((показатель === 'count' ? всего : объёмПервых) || null) : null"
       :height="260"
       empty-text="Ни в одном городе не набралось достаточно вакансий с зарплатой. Соберите больше данных."
       @retry="гео.load()"
     >
       <template #actions>
-        <BvButton size="sm" :aria-expanded="открыто" data-print-hide @click="открыто = !открыто">
-          {{ открыто ? 'Свернуть' : 'Разобрать' }}
-        </BvButton>
+        <BvButton size="sm" aria-haspopup="dialog" data-print-hide @click="открыть">Разобрать</BvButton>
       </template>
 
       <!-- Краткий вид: полосы, а не кольцо — длину сравнивают точно.
            Переключатель выбирает, что они показывают. -->
-      <div v-if="!открыто" class="rx__brief">
+      <div class="rx__brief">
         <BvSegmented v-model="показатель" :options="показатели" label="Что показывать по регионам" data-print-hide />
         <BvBarList v-if="показатель === 'salary'" :items="первые" :format="деньги" />
         <BvBarList v-else :items="поЧислу" :total="всего" />
       </div>
+    </BvChartFrame>
 
-      <div v-else class="rx__body">
+    <!-- Разбор: окно поверх страницы. Уровень, путь и выбранная территория
+         живут в компоненте, поэтому закрытие окна их не сбрасывает. -->
+    <BvModal :open="открыто" size="xl" title="Регионы" :subtitle="подзаголовокОкна" @close="закрыть">
+      <div class="rx__body">
         <div class="rx__cols">
           <section class="rx__block">
             <header class="rx__head">
@@ -342,7 +359,7 @@ const словоУровня = computed(() => ({ country: 'страны', region
             <p class="rx__note">{{ подписьСписка }}</p>
           </section>
 
-          <section class="rx__block">
+          <section ref="портрет" class="rx__block rx__block--portrait">
             <header class="rx__head">
               <div class="rx__titles">
                 <h4 class="rx__title">{{ выбрано ? выбрано.label : 'Вся база' }}</h4>
@@ -415,15 +432,12 @@ const словоУровня = computed(() => ({ country: 'страны', region
           Одна вакансия, размещённая в нескольких городах, в регионе и в стране считается один раз.
         </p>
       </div>
-    </BvChartFrame>
+    </BvModal>
   </div>
 </template>
 
 <style scoped>
 .rx { min-width: 0; }
-
-/* Раскрытое окно занимает всю ширину сетки экрана. */
-.rx--open { grid-column: 1 / -1; }
 
 .rx__brief {
   display: flex;
@@ -549,7 +563,22 @@ const словоУровня = computed(() => ({ country: 'страны', region
   max-width: none;
 }
 
+/* Список территорий длиннее окна, портрет — нет. Пока список
+   прокручивается, портрет выбранной территории остаётся на виду: иначе
+   строку выбирали бы внизу, а читать ответ возвращались наверх. */
+@media (min-width: 961px) {
+  .rx__block--portrait {
+    position: sticky;
+    top: 0;
+    align-self: start;
+  }
+}
+
 @media (max-width: 960px) {
   .rx__cols { grid-template-columns: minmax(0, 1fr); }
+
+  /* В одной колонке портрет стоит первым: окно открывается с ответа, а
+     после выбора строки прокручивается к нему обратно. */
+  .rx__block--portrait { order: -1; }
 }
 </style>

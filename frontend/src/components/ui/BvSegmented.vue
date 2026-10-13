@@ -31,8 +31,16 @@ watch(
   () => props.modelValue,
   async () => {
     await nextTick()
-    const активный = корень.value?.querySelector('.is-active')
-    активный?.scrollIntoView({ inline: 'nearest', block: 'nearest' })
+    const группа = корень.value
+    const активный = группа?.querySelector('.is-active')
+    if (!активный) return
+    // Прокручивается сама группа, а не scrollIntoView: тот двигает и всех
+    // предков, и окно разбора при открытии уезжало к самому нижнему
+    // переключателю.
+    const рамка = группа.getBoundingClientRect()
+    const пункт = активный.getBoundingClientRect()
+    if (пункт.left < рамка.left) группа.scrollLeft -= рамка.left - пункт.left
+    else if (пункт.right > рамка.right) группа.scrollLeft += пункт.right - рамка.right
   },
   { immediate: true }
 )

@@ -6,21 +6,30 @@ import BvColumnChart from '@/components/charts/BvColumnChart.vue'
 import BvRangeList from '@/components/charts/BvRangeList.vue'
 import BvButton from '@/components/ui/BvButton.vue'
 import BvChip from '@/components/ui/BvChip.vue'
+import BvModal from '@/components/ui/BvModal.vue'
 import BvSegmented from '@/components/ui/BvSegmented.vue'
 import BvSelect from '@/components/ui/BvSelect.vue'
 import SalaryTrend from '@/components/domain/SalaryTrend.vue'
 import { analytics } from '@/api/endpoints'
 import { useApi } from '@/composables/useApi'
+import { useWindowRoute } from '@/composables/useWindowRoute'
 import { money, num, vacancies as vacanciesCount } from '@/utils/format'
 import { MIN_SAMPLE } from '@/utils/dataRules'
 
-// Окно «Распределение зарплат»: краткий ответ в сетке и разбор на месте.
+// Окно «Распределение зарплат»: краткий ответ в сетке и разбор в окне
+// поверх страницы.
 //
-// В сетке окно отвечает на один вопрос — как распределены зарплаты и где
-// середина. «Разобрать» раскрывает его на всю ширину, не оверлеем:
-// аналитику сравнивают с соседними блоками, а оверлей их закрывает.
+// В сетке карточка отвечает на один вопрос — как распределены зарплаты и
+// где середина, — и остаётся такой всегда. «Разобрать» открывает окно
+// поверх экрана. Раньше карточка раскрывалась на месте: соседние окна
+// уезжали вниз, экран вырастал втрое, а краткий ответ пропадал на всё
+// время разбора.
 //
-// В раскрытом окне три слоя над одной выборкой:
+// Карточка и окно показывают один ответ сервера. Поэтому после закрытия
+// окна карточка называет срез, до которого её сузили: гистограмма сорока
+// вакансий новичков не должна выглядеть гистограммой всей базы.
+//
+// В окне три слоя над одной выборкой:
 //   срезы   — чем сузить: период, опыт, сфера, формат работы;
 //   уровни  — с чем сравнить: вилки по опыту, сфере, формату, региону;
 //   состав  — что внутри выбранной корзины.
@@ -35,7 +44,7 @@ const props = defineProps({
   rateDate: { type: String, default: '' }
 })
 
-const открыто = ref(false)
+const { open: открыто, show: открыть, hide: закрыть } = useWindowRoute('salary')
 
 const период = ref('all')
 const опыт = ref('')
@@ -180,21 +189,31 @@ const подписьУровней = computed(() => {
   return части.join(' · ')
 })
 
-const подзаголовок = computed(() => {
-  if (!данные.value) return ''
-  const основа = props.basis === 'rub'
+const основа = computed(() => (
+  props.basis === 'rub'
     ? `Рублёвый эквивалент${props.rateDate ? ` по курсу ЦБ на ${props.rateDate}` : ''}`
     : валюта.value
-  if (!открыто.value) {
-    // Свёрнутое окно со срезами обязано их назвать: иначе гистограмма по
-    // сорока вакансиям новичков выглядит как гистограмма всей базы.
-    const срезы = чипы.value.map((ч) => ч.текст).join(', ')
-    return срезы ? `${основа} · срез: ${срезы}` : `${основа}, границы корзин посчитаны по данным`
-  }
+))
+
+const подзаголовокКарточки = computed(() => {
+  if (!данные.value) return ''
+  const срезы = чипы.value.map((ч) => ч.текст).join(', ')
+  return срезы ? `${основа.value} · срез: ${срезы}` : `${основа.value}, границы корзин посчитаны по данным`
+})
+
+const подзаголовокОкна = computed(() => {
+  if (!данные.value) return ''
   const всего = данные.value.slice_total ?? 0
   const считаем = срез.loading.value ? ' · считаем…' : ''
-  return `${основа} · ${vacanciesCount(выборка.value)} с зарплатой из ${num(всего)} в срезе${считаем}`
+  return `${основа.value} · ${vacanciesCount(выборка.value)} с зарплатой из ${num(всего)} в срезе${считаем}`
 })
+
+// Столбец карточки — вход в разбор: окно открывается сразу на корзине,
+// на которую нажали.
+function открытьНаКорзине(номер) {
+  корзина.value = номер
+  открыть()
+}
 
 const подписьМедианы = computed(() => {
   if (!числа.value.median) return ''
@@ -208,52 +227,79 @@ const пустойТекст = computed(() => {
 </script>
 
 <template>
-  <div class="sx" :class="{ 'sx--open': открыто }">
+  <div class="sx">
     <BvChartFrame
       title="Распределение зарплат"
-      :subtitle="подзаголовок"
+      :subtitle="подзаголовокКарточки"
       :loading="перваяЗагрузка"
       :error="данные ? '' : срез.error.value"
-      :sample="открыто || !данные ? null : выборка"
+      :sample="данные ? выборка : null"
       :height="260"
+      :empty-text="пустойТекст"
       @retry="срез.load()"
     >
       <template #actions>
-        <BvButton
-          size="sm"
-          :aria-expanded="открыто"
-          data-print-hide
-          @click="открыто = !открыто"
-        >{{ открыто ? 'Свернуть' : 'Разобрать' }}</BvButton>
+        <BvButton size="sm" aria-haspopup="dialog" data-print-hide @click="открыть">Разобрать</BvButton>
       </template>
 
       <div class="sx__body" :class="{ 'is-busy': срез.loading.value }" :aria-busy="срез.loading.value">
-        <div v-if="открыто" class="sx__filters" data-print-hide>
-          <BvSegmented v-model="период" :options="периоды" label="Период публикации" />
-          <BvSelect v-model="опыт" label="Опыт" :options="вариантыОпыта" />
-          <BvSelect v-model="сфера" label="Сфера" :options="вариантыСфер" />
-          <BvSelect v-model="формат" label="Формат работы" :options="вариантыФорматов" />
+        <div class="sx__chart">
+          <BvColumnChart
+            :labels="подписиКорзин"
+            :values="высотыКорзин"
+            :marker-index="номерМедианной"
+            selectable
+            :tooltip-lines="подсказкаКорзины"
+            :label="`Распределение зарплат, ${валюта}. ${подписьМедианы}`"
+            @select="открытьНаКорзине"
+          />
         </div>
+        <p class="sx__median">
+          <span class="sx__marker" aria-hidden="true"></span>{{ подписьМедианы }}
+        </p>
+      </div>
+    </BvChartFrame>
 
-        <div v-if="открыто && чипы.length" class="sx__chips">
-          <BvChip
-            v-for="чип in чипы"
-            :key="чип.ключ"
-            variant="filter"
-            removable
-            :remove-label="`Снять срез «${чип.текст}»`"
-            @remove="чип.снять()"
-          >{{ чип.текст }}</BvChip>
-          <BvButton variant="quiet" size="sm" data-print-hide @click="сбросить">Сбросить срезы</BvButton>
+    <!-- Разбор: окно поверх страницы. Срезы стоят в панели над прокруткой —
+         какая выборка на экране, видно из любого места окна. -->
+    <BvModal
+      :open="открыто"
+      size="xl"
+      title="Распределение зарплат"
+      :subtitle="подзаголовокОкна"
+      @close="закрыть"
+    >
+      <template #toolbar>
+        <div class="sx__tools">
+          <div class="sx__filters">
+            <BvSegmented v-model="период" :options="периоды" label="Период публикации" />
+            <BvSelect v-model="опыт" label="Опыт" :options="вариантыОпыта" />
+            <BvSelect v-model="сфера" label="Сфера" :options="вариантыСфер" />
+            <BvSelect v-model="формат" label="Формат работы" :options="вариантыФорматов" />
+          </div>
+
+          <div v-if="чипы.length" class="sx__chips">
+            <BvChip
+              v-for="чип in чипы"
+              :key="чип.ключ"
+              variant="filter"
+              removable
+              :remove-label="`Снять срез «${чип.текст}»`"
+              @remove="чип.снять()"
+            >{{ чип.текст }}</BvChip>
+            <BvButton variant="quiet" size="sm" @click="сбросить">Сбросить срезы</BvButton>
+          </div>
         </div>
+      </template>
 
+      <div class="sx__body" :class="{ 'is-busy': срез.loading.value }" :aria-busy="срез.loading.value">
         <template v-if="достаточно">
-          <div class="sx__chart">
+          <div class="sx__chart sx__chart--tall">
             <BvColumnChart
               :labels="подписиКорзин"
               :values="высотыКорзин"
               :marker-index="номерМедианной"
-              :selected-index="открыто ? (выбранная?.index ?? null) : null"
+              :selected-index="выбранная?.index ?? null"
               :tooltip-lines="подсказкаКорзины"
               :label="`Распределение зарплат, ${валюта}. ${подписьМедианы}`"
               @select="корзина = $event"
@@ -263,11 +309,11 @@ const пустойТекст = computed(() => {
             <span class="sx__marker" aria-hidden="true"></span>{{ подписьМедианы }}
           </p>
 
-          <div v-if="открыто" class="sx__blocks">
+          <div class="sx__blocks">
             <section class="sx__block">
               <header class="sx__block-head">
                 <h4 class="sx__block-title">Зарплатные уровни</h4>
-                <BvSegmented v-model="измерение" :options="измерения" label="Разбить по" data-print-hide />
+                <BvSegmented v-model="измерение" :options="измерения" label="Разбить по" />
               </header>
               <BvRangeList
                 v-if="уровни.items.length"
@@ -291,7 +337,6 @@ const пустойТекст = computed(() => {
                   label="Корзина"
                   hide-label
                   :options="вариантыКорзин"
-                  data-print-hide
                   @update:model-value="корзина = Number($event)"
                 />
               </header>
@@ -336,16 +381,12 @@ const пустойТекст = computed(() => {
           <BvButton v-if="чипы.length" size="md" @click="сбросить">Сбросить срезы</BvButton>
         </div>
       </div>
-    </BvChartFrame>
+    </BvModal>
   </div>
 </template>
 
 <style scoped>
 .sx { min-width: 0; }
-
-/* Раскрытое окно занимает всю ширину сетки экрана: блоки разбора не
-   помещаются в одну колонку, а соседние окна остаются на месте ниже. */
-.sx--open { grid-column: 1 / -1; }
 
 .sx__body {
   display: flex;
@@ -358,6 +399,13 @@ const пустойТекст = computed(() => {
 /* Пока сервер считает новый срез, прежние числа приглушены: они уже не
    отвечают выбранным срезам, но убрать их значило бы дёрнуть страницу. */
 .sx__body.is-busy { opacity: 0.55; }
+
+.sx__tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+  min-width: 0;
+}
 
 .sx__filters {
   display: flex;
@@ -381,7 +429,8 @@ const пустойТекст = computed(() => {
   min-width: 0;
 }
 
-.sx__chart--low { height: 200px; }
+/* В окне графику отдано больше высоты: он здесь главный. */
+.sx__chart--tall { height: 280px; }
 
 .sx__median,
 .sx__note {

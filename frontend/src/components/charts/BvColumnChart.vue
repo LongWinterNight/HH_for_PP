@@ -26,6 +26,9 @@ const props = defineProps({
   // второй жёлтый столбец отменил бы смысл первого. Выбор показан самой
   // тёмной ступенью шкалы.
   selectedIndex: { type: Number, default: null },
+  // Столбцы нажимаются, хотя выбранного нет: краткая карточка, где
+  // нажатие открывает разбор на этом столбце.
+  selectable: { type: Boolean, default: false },
   // Свои строки подсказки по номеру столбца — когда столбец значит
   // больше, чем одно число: диапазон корзины, доля, объём.
   tooltipLines: { type: Function, default: null }
@@ -58,7 +61,7 @@ const data = computed(() => ({
   }]
 }))
 
-const выбирается = computed(() => props.selectedIndex !== null)
+const выбирается = computed(() => props.selectable || props.selectedIndex !== null)
 
 const options = computed(() => ({
   scales: baseScales({ unit: props.unit }),

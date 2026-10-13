@@ -16,11 +16,14 @@ const props = defineProps({
   open: { type: Boolean, default: false },
   title: { type: String, required: true },
   subtitle: { type: String, default: '' },
-  // Ширина модалки: обычная для формы, широкая для карточки данных.
+  // Ширина модалки: обычная для формы, широкая для карточки данных,
+  // «xl» — окно разбора аналитики: две колонки графиков и списков.
+  // У «xl» высота постоянна: срез меняет объём содержимого, и окно,
+  // которое при этом прыгает по высоте, уводит кнопки из-под курсора.
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['md', 'lg'].includes(v)
+    validator: (v) => ['md', 'lg', 'xl'].includes(v)
   },
   // Нажатие по затемнению закрывает. Отключается там, где в модалке
   // есть незавершённый ввод.
@@ -46,7 +49,9 @@ watch(() => props.open, async (isOpen) => {
     opener?.focus?.()
     opener = null
   }
-})
+// immediate: окно, открытое ссылкой, показано уже при первой отрисовке —
+// без этого у него не было бы ни Esc, ни ловушки фокуса.
+}, { immediate: true })
 
 onBeforeUnmount(detach)
 
@@ -103,7 +108,7 @@ function onKeydown(event) {
       <div
         ref="dialog"
         class="modal"
-        :class="`modal--${size}`"
+        :class="[`modal--${size}`, { 'modal--tools': $slots.toolbar }]"
         role="dialog"
         aria-modal="true"
         :aria-label="title"
@@ -116,6 +121,12 @@ function onKeydown(event) {
           </div>
           <BvIconButton label="Закрыть" @click="$emit('close')">✕</BvIconButton>
         </header>
+
+        <!-- Панель срезов: стоит над прокруткой, чтобы при любом месте
+             в окне было видно, какая выборка на экране. -->
+        <div v-if="$slots.toolbar" class="modal__toolbar">
+          <slot name="toolbar" />
+        </div>
 
         <div class="modal__body">
           <slot />
@@ -159,6 +170,14 @@ function onKeydown(event) {
 .modal--md { max-width: 520px; }
 .modal--lg { max-width: 760px; }
 
+.modal--xl {
+  max-width: 1180px;
+  height: 90vh;
+  height: 90dvh;
+}
+
+.modal--xl .modal__body { flex: 1 1 auto; }
+
 .modal__head {
   display: flex;
   align-items: flex-start;
@@ -186,6 +205,16 @@ function onKeydown(event) {
 .modal__subtitle {
   font-size: var(--t-caption-size);
   color: var(--c-text-muted);
+}
+
+/* Выше тела по слоям: выпадающий список среза раскрывается поверх
+   графика, а не под него. */
+.modal__toolbar {
+  position: relative;
+  z-index: 1;
+  padding: var(--s-4) var(--s-6);
+  background: var(--c-surface-raised);
+  box-shadow: inset 0 -1px 0 var(--c-border);
 }
 
 /* Прокручивается только тело: шапка с заголовком и кнопки остаются
@@ -218,5 +247,24 @@ function onKeydown(event) {
     height: 100dvh;
     border-radius: 0;
   }
+
+  /* На телефоне панель срезов занимает пол-экрана, и закреплённой она
+     оставила бы от графика полоску. Здесь прокручивается окно целиком,
+     а на месте остаётся только шапка с крестиком. */
+  .modal--tools { overflow-y: auto; }
+  .modal--tools > * { flex: 0 0 auto; }
+  .modal--tools .modal__body { overflow: visible; }
+
+  .modal--tools .modal__head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--c-surface-raised);
+  }
+
+  /* Окну разбора на телефоне нужна вся ширина: в нём графики и вилки. */
+  .modal--xl .modal__head,
+  .modal--xl .modal__toolbar,
+  .modal--xl .modal__body { padding-left: var(--s-4); padding-right: var(--s-4); }
 }
 </style>
