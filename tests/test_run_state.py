@@ -294,3 +294,38 @@ def _состарить(хранилище, run_id: int, минут: int) -> Non
             text("UPDATE parser_runs SET heartbeat_at = :t WHERE id = :id"),
             {"t": datetime.now() - timedelta(minutes=минут), "id": run_id},
         )
+
+
+class TestПоследнийЗапуск:
+    """
+    Что экран считает «последним запуском».
+
+    13.10.2026 сбор по расписанию отказал из-за неподнятого прокси, после
+    него прошли два удачных — а баннер «Источник недоступен» остался.
+    Одна из двух причин была здесь: последним считался запуск с самой
+    поздней датой завершения, и идущий сбор в этот счёт не попадал.
+    """
+
+    def test_идущий_сбор_новее_отказа(self, хранилище):
+        отказ = хранилище.create_parser_run(keywords=["Python"])
+        хранилище.complete_parser_run(отказ, status="error", error_message="ProxyError", error_type="network")
+        идёт = хранилище.create_parser_run(keywords=["Python"])
+
+        последний = хранилище.get_last_parser_run(only_successful=False)
+
+        assert последний["id"] == идёт and последний["status"] == "running"
+
+    def test_удачный_сбор_после_отказа_снимает_отказ(self, хранилище):
+        отказ = хранилище.create_parser_run(keywords=["Python"])
+        хранилище.complete_parser_run(отказ, status="error", error_message="ProxyError", error_type="network")
+        удачный = хранилище.create_parser_run(keywords=["Python"])
+        хранилище.complete_parser_run(удачный, status="completed", vacancies_collected=10)
+
+        assert хранилище.get_last_parser_run(only_successful=False)["status"] == "completed"
+
+    def test_последний_удачный_идущим_сбором_не_заслоняется(self, хранилище):
+        удачный = хранилище.create_parser_run(keywords=["Python"])
+        хранилище.complete_parser_run(удачный, status="completed", vacancies_collected=10)
+        хранилище.create_parser_run(keywords=["Python"])
+
+        assert хранилище.get_last_parser_run(only_successful=True)["id"] == удачный

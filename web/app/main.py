@@ -28,6 +28,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Логгер
 from src.copies import без_копий, размеры_групп, сколько_копий
+from src.data_cache import запомнить
 from src.budget import оценка
 from src.выборка import Фильтры, отобрать, словами
 from src.coverage import сводка_недобора
@@ -170,8 +171,26 @@ app.add_middleware(
 # Статика собранного интерфейса. Имена файлов в сборке содержат хеш
 # содержимого, поэтому их можно кешировать надолго — в отличие от
 # index.html, который отдаётся ниже и меняется при каждом развёртывании.
+class ФайлыСОтпечатком(StaticFiles):
+    """
+    Файлы сборки, которые браузер вправе хранить год и не переспрашивать.
+
+    В имени каждого файла — отпечаток его содержимого: изменился файл —
+    изменилось имя, и по старому адресу ничего другого не появится. Без
+    срока хранения браузер при каждом открытии сайта спрашивал сервер о
+    каждом из восьмидесяти файлов, не изменился ли он. На этой машине
+    это незаметно, через интернет — основная доля ожидания.
+    """
+
+    async def get_response(self, path, scope):
+        ответ = await super().get_response(path, scope)
+        if ответ.status_code == 200:
+            ответ.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return ответ
+
+
 if (FRONTEND_DIST / "assets").exists():
-    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
+    app.mount("/assets", ФайлыСОтпечатком(directory=str(FRONTEND_DIST / "assets")), name="assets")
 
 # Настройки пользователя — инициализируем из .env при старте
 def _настройки_сбора() -> dict:
@@ -395,6 +414,14 @@ class ОтметкаАктивности(BaseHTTPMiddleware):
 
 
 app.add_middleware(ОтметкаАктивности)
+
+# Сжатие ответов. Добавлено последним, то есть стоит снаружи остальных
+# слоёв и сжимает всё, что они отдали: справочник профессий — 146 КБ
+# текста — уезжает в несколько раз меньшим. Мелкие ответы не трогаются:
+# на них сжатие дороже выигрыша.
+from starlette.middleware.gzip import GZipMiddleware  # noqa: E402
+
+app.add_middleware(GZipMiddleware, minimum_size=1024)
 PUBLIC_PATHS.add(ПУТЬ_ЗАНЯТОСТИ)
 
 
@@ -674,59 +701,10 @@ def trend_of(current, previous):
     return {"trend_percent": round(abs(change), 1), "trend_direction": direction}
 
 
-def salary_histogram(values, bins=7):
-    """Корзины зарплат внутри одной валюты.
-
-    Границы считаются по самим данным, а не задаются словами «50k-100k»:
-    те же корзины для узбекских сумов бессмысленны — там вся выборка
-    попадёт в последнюю. Верхняя граница обрезается 95-м перцентилем,
-    иначе одна вакансия с опечаткой растягивает шкалу на весь график,
-    и остальные корзины схлопываются в первый столбец.
-    """
-    clean = values.dropna()
-    if len(clean) < MIN_SAMPLE:
-        return []
-
-    low = float(clean.min())
-    high = float(clean.quantile(0.95))
-    if high <= low:
-        high = float(clean.max())
-    if high <= low:
-        return [{"label": format_short(low), "count": int(len(clean)), "from": low, "to": low}]
-
-    step = (high - low) / bins
-    result = []
-    for i in range(bins):
-        start = low + step * i
-        end = low + step * (i + 1)
-        last = i == bins - 1
-        count = int(((clean >= start) & (clean <= end)).sum()) if last else int(((clean >= start) & (clean < end)).sum())
-        result.append({
-            "label": format_short(start) + ("+" if last else ""),
-            "count": count,
-            "from": start,
-            "to": end
-        })
-
-    # Всё, что выше 95-го перцентиля, досыпается в последнюю корзину:
-    # эти вакансии существуют, и терять их нельзя.
-    tail = int((clean > high).sum())
-    if tail and result:
-        result[-1]["count"] += tail
-        result[-1]["label"] = format_short(result[-1]["from"]) + "+"
-
-    return result
-
-
-def format_short(value):
-    """Короткая подпись оси: 120 000 -> «120 тыс», 8 000 000 -> «8 млн».
-    Ось графика — единственное место системы, где число сокращается."""
-    value = float(value)
-    if abs(value) >= 1_000_000:
-        return f"{value / 1_000_000:.1f}".replace(".0", "") + " млн"
-    if abs(value) >= 1_000:
-        return f"{value / 1_000:.0f} тыс"
-    return f"{value:.0f}"
+# Корзины зарплат и короткие подписи оси живут в `src/salary_slice.py`:
+# ими пользуется и этот файл, и срез зарплат окна аналитики, а расчёт,
+# лежащий в обработчике запроса, без веб-сервера не проверить.
+from src.salary_slice import format_short, salary_histogram  # noqa: E402,F401
 
 
 # =============================================================================
@@ -741,7 +719,10 @@ def index_response():
     """
     index = FRONTEND_DIST / "index.html"
     if index.exists():
-        return FileResponse(index)
+        # Страница, в отличие от файлов сборки, имени не меняет: её
+        # браузер обязан перепроверять, иначе после пересборки он
+        # открывал бы старую страницу со ссылками на файлы, которых нет.
+        return FileResponse(index, headers={"Cache-Control": "no-cache"})
 
     from fastapi.responses import HTMLResponse
     return HTMLResponse(
@@ -985,8 +966,14 @@ def получить_состояние_базы():
     storage = VacancyStorage()
     try:
         последний = storage.get_last_parser_run(only_successful=True)
+        сводка = storage.get_active_summary()
         return {
             "vacancies": storage.get_vacancy_count(),
+            # Активные и найденные по запросу — то, по чему считаются
+            # графики, — и их счёт по валютам. Экраны берут эти числа
+            # отсюда, а не из расчёта дашборда.
+            "active": сводка["active"],
+            "currencies": сводка["currencies"],
             # Сколько вакансий скрыто как найденные не по запросу. Число
             # названо, чтобы скрытое не выглядело потерянным.
             "off_query": storage.get_off_query_count(),
@@ -1161,6 +1148,7 @@ def get_vacancies(
         storage.close()
 
 @app.get("/api/dashboard")
+@запомнить
 def get_dashboard():
     """Дашборд с расширенной статистикой."""
     from src.storage import VacancyStorage
@@ -1307,6 +1295,7 @@ def get_dashboard():
         storage.close()
 
 @app.get("/api/analytics/advanced")
+@запомнить
 def get_analytics():
     """Расширенная аналитика + распределение."""
     from src.storage import VacancyStorage
@@ -1367,99 +1356,8 @@ def get_analytics():
     finally:
         storage.close()
 
-def медиана_по_месяцам(df, колонка_суммы: str, месяцев: int = 12):
-    """
-    Помесячная медиана зарплаты одной величины.
-
-    Группировка идёт по дате публикации: вопрос «сколько платят» —
-    про момент, когда работодатель это предлагал, а не про день, когда
-    вакансию увидел сбор.
-
-    Месяц с выборкой меньше `MIN_SAMPLE` отдаётся пустым значением, но со
-    своим объёмом: медиана по трём вакансиям — не медиана рынка, а линия,
-    проведённая через такую точку, выглядит так же уверенно, как через
-    восемьдесят. Пустое значение линия не соединяет (`spanGaps: false`) —
-    разрыв в данных остаётся разрывом.
-    """
-    сейчас = pd.Timestamp.now()
-    сетка = pd.period_range(end=сейчас.to_period("M"), periods=месяцев, freq="M")
-
-    ряд = []
-    группы = {}
-
-    if df is not None and not df.empty and "published_at" in df.columns:
-        даты = pd.to_datetime(df["published_at"], errors="coerce", utc=True, format="mixed")
-        рабочая = df.assign(_месяц=даты.dt.tz_localize(None).dt.to_period("M"))
-        рабочая = рабочая[рабочая["_месяц"].notna() & рабочая[колонка_суммы].notna()]
-        группы = {месяц: группа[колонка_суммы] for месяц, группа in рабочая.groupby("_месяц")}
-
-    for месяц in сетка:
-        значения = группы.get(месяц)
-        объём = int(len(значения)) if значения is not None else 0
-        достаточно = объём >= MIN_SAMPLE
-        ряд.append({
-            "month": str(месяц),
-            "label": месяц.strftime("%m.%Y"),
-            "median": float(значения.median()) if достаточно else None,
-            "sample": объём,
-        })
-
-    return ряд
-
-
-def _регионы_в_ответ(результат):
-    """Пара «список, счётчики» — в один объект ответа."""
-    регионы, счётчики = результат
-    если_пусто = {"small": 0, "beyond": 0}
-    return {"items": регионы, **(счётчики if isinstance(счётчики, dict) else если_пусто)}
-
-
-def медиана_по_регионам(df, колонка_суммы: str, предел: int = 10):
-    """
-    Медиана зарплаты по регионам, от больших выборок к малым.
-
-    Рынок в Москве и в Ташкенте — разные рынки, и общая медиана их
-    смешивает. Разрез по регионам отвечает на вопрос «сколько платят
-    здесь», ради которого продукт и нужен.
-
-    Регион с выборкой меньше `MIN_SAMPLE` в список не попадает: медиана
-    по трём вакансиям — не зарплата региона, а случайность, и показывать
-    её рядом с медианой по шестистам значило бы уравнять их в правах.
-    Сколько таких регионов осталось за списком — считается отдельно и
-    говорится вслух.
-
-    Порядок — по объёму выборки, а не по величине медианы: список
-    отвечает на вопрос «где данных достаточно», а сортировка по деньгам
-    поставила бы первым регион с пятью вакансиями.
-    """
-    if df is None or df.empty or "area" not in df.columns:
-        return [], 0
-
-    рабочая = df[df[колонка_суммы].notna() & df["area"].notna()]
-    if рабочая.empty:
-        return [], 0
-
-    группы = рабочая.groupby("area")[колонка_суммы]
-    сводка = pd.DataFrame({"median": группы.median(), "sample": группы.size()})
-
-    достаточные = сводка[сводка["sample"] >= MIN_SAMPLE].sort_values(
-        "sample", ascending=False
-    )
-    малых = int((сводка["sample"] < MIN_SAMPLE).sum())
-
-    регионы = [
-        {"area": str(область), "median": float(строка["median"]), "sample": int(строка["sample"])}
-        for область, строка in достаточные.head(предел).iterrows()
-    ]
-
-    # Длинный хвост не забивает экран: регионов бывает две сотни, а
-    # сравнить взглядом можно десяток.
-    за_пределом = max(0, len(достаточные) - предел)
-
-    return регионы, {"small": малых, "beyond": за_пределом}
-
-
 @app.get("/api/analytics/distribution")
+@запомнить
 def get_distribution(currency: str = "RUB"):
     """Распределение вакансий по категориям.
 
@@ -1479,7 +1377,6 @@ def get_distribution(currency: str = "RUB"):
                 "experience": {},
                 "employment": {},
                 "salary_distribution": {},
-                "top_areas": {},
                 "salary_stats": {},
                 "salary_stats_kzt": {},
                 "salary_stats_usd": {},
@@ -1550,11 +1447,6 @@ def get_distribution(currency: str = "RUB"):
                 "q3": float(эквивалент_чистый.quantile(0.75)),
             }
 
-        # Топ регионов
-        top_areas = {}
-        if "area" in df.columns:
-            top_areas = df["area"].value_counts().head(10).to_dict()
-
         # Статистика по выбранной валюте. Средняя не отдаётся: её тянут
         # выбросы, и правило системы допускает только медиану.
         salary_stats = {}
@@ -1598,20 +1490,10 @@ def get_distribution(currency: str = "RUB"):
             "salary_histogram": salary_histogram_bins,
             "salary_currency": currency,
             "salary_sample": salary_sample,
-            "top_areas": top_areas,
             "salary_stats": salary_stats,
             "salary_stats_by_currency": salary_stats_by_currency,
             # Рублёвый вид приезжает тем же ответом: это вид, а не срез,
             # и переключение не должно ходить на сервер.
-            # Помесячная медиана: в выбранной валюте и в эквиваленте.
-            # Оба ряда едут одним ответом — переключение вида не должно
-            # ходить на сервер.
-            "median_by_region": _регионы_в_ответ(медиана_по_регионам(currency_df, "salary_from")),
-            "median_by_region_rub": _регионы_в_ответ(
-                медиана_по_регионам(все_правдоподобные, "salary_from_rub")
-            ),
-            "median_by_month": медиана_по_месяцам(currency_df, "salary_from"),
-            "median_by_month_rub": медиана_по_месяцам(все_правдоподобные, "salary_from_rub"),
             "salary_histogram_rub": histogram_rub,
             "salary_sample_rub": int(len(эквивалент_чистый)),
             "salary_stats_rub": stats_rub,
@@ -1621,6 +1503,72 @@ def get_distribution(currency: str = "RUB"):
         }
     finally:
         storage.close()
+
+@app.get("/api/analytics/salary")
+@запомнить
+def get_salary_slice(
+    basis: str = "currency",
+    currency: str = "RUB",
+    period: str = "all",
+    experience: str = "",
+    sphere: str = "",
+    format: str = "",
+    area: str = "",
+    by: str = "experience",
+    bucket: Optional[int] = None,
+    step: str = "week",
+    compare: str = "",
+):
+    """
+    Срез зарплат для раскрытого окна «Распределение зарплат».
+
+    Один ответ на всё окно: гистограмма среза, зарплатные уровни по
+    выбранному измерению, состав корзины и ряд во времени. Блоки
+    окна описывают одну и ту же выборку, и собирать их из четырёх
+    запросов значило бы на мгновение показывать числа разных срезов
+    рядом. Незнакомое значение среза даёт пустой срез, а не ошибку:
+    ссылка с устаревшим названием сферы не должна ронять экран.
+    """
+    from src import salary_slice
+    from src.storage import VacancyStorage
+
+    срез = salary_slice.Срез(
+        вид="rub" if basis in ("rub", "equivalent") else "currency",
+        валюта=currency, период=period, опыт=experience, сфера=sphere, формат=format, регион=area,
+    )
+    storage = VacancyStorage()
+    try:
+        df = storage.get_all_vacancies()
+        ответ = salary_slice.собрать(df, срез, по=by, корзина=bucket, шаг=step, сравнить=compare)
+        ответ["rate_date"] = _курс_для_ответа() if срез.в_рублях else None
+        return ответ
+    finally:
+        storage.close()
+
+
+@app.get("/api/analytics/geo")
+@запомнить
+def get_geo(basis: str = "currency", currency: str = "RUB"):
+    """
+    География зарплат для окна «Медиана по регионам»: страны, регионы и
+    города одним ответом.
+
+    Уровни приезжают вместе — их меньше пятисот строк, — и экран
+    переходит от страны к её регионам и городам без запроса. Других
+    измерений здесь нет намеренно: окно отвечает только на вопросы
+    географии.
+    """
+    from src import geo_slice
+    from src.storage import VacancyStorage
+
+    storage = VacancyStorage()
+    try:
+        ответ = geo_slice.собрать(storage.get_all_vacancies(), вид=basis, валюта=currency)
+        ответ["rate_date"] = _курс_для_ответа() if ответ["basis"] == "equivalent" else None
+        return ответ
+    finally:
+        storage.close()
+
 
 @app.get("/api/parser/status")
 def parser_status():
@@ -2037,6 +1985,7 @@ def start_parser(
 # =============================================================================
 
 @app.get("/api/collection/suggestions")
+@запомнить
 def предложения_запросов():
     """
     Чего не хватает в базе: профессии, которые набрались попутно и ни
@@ -2127,6 +2076,7 @@ def get_last_parser_run():
         storage.close()
 
 @app.get("/api/parser/history")
+@запомнить
 def get_parser_history(limit: int = 20):
     """Получить историю запусков парсера."""
     from src.storage import VacancyStorage
@@ -2701,7 +2651,17 @@ def _счёт_вакансий_по_профессиям(df, профессии)
     словаря и всё равно будет ошибаться на английских названиях, которых
     в выдаче половина.
     """
+    from collections import Counter
+
     названия = df["vacancy_name"].fillna("").str.lower().tolist() if not df.empty else []
+    # Одинаковые названия считаются один раз, с кратностью: «менеджер по
+    # продажам» встречается сотни раз, а проверять его достаточно однажды.
+    кратность = Counter(названия)
+    уникальные = list(кратность)
+    # Все названия одной строкой — для быстрого вопроса «встречается ли
+    # это имя хоть где-нибудь». Перевод строки в названиях профессий не
+    # встречается, поэтому имя не может совпасть на стыке двух названий.
+    весь_текст = "\n".join(уникальные)
 
     счёт = {}
     for профессия in профессии:
@@ -2709,8 +2669,18 @@ def _счёт_вакансий_по_профессиям(df, профессии)
         if not имя:
             счёт[профессия.get("key")] = 0
             continue
+        # Шаблон требует, чтобы имя стояло в названии буквально, — значит
+        # без этой подстроки совпадения быть не может. У девяти профессий
+        # из десяти вакансий в базе нет вовсе, и прежде ради этого нуля
+        # шаблон примерялся к каждому названию: 1 339 профессий на 6 500
+        # названий, почти семь секунд после каждого сбора и перезапуска.
+        if имя not in весь_текст:
+            счёт[профессия["key"]] = 0
+            continue
         шаблон = re.compile(r"(?<!\w)" + re.escape(имя) + r"\w{0,2}(?!\w)")
-        счёт[профессия["key"]] = sum(1 for название in названия if шаблон.search(название))
+        счёт[профессия["key"]] = sum(
+            кратность[название] for название in уникальные if имя in название and шаблон.search(название)
+        )
 
     return счёт
 
@@ -2719,8 +2689,7 @@ def _профессии_с_числами():
     """
     Профессии справочника с актуальным числом вакансий.
 
-    Полный проход по 1339 профессиям занимает около секунды, поэтому
-    результат кэшируется до следующего изменения базы: ключом служит
+    Результат запоминается до следующего изменения базы: ключом служит
     объём базы и момент последнего сбора.
     """
     from src.storage import VacancyStorage
@@ -2774,6 +2743,7 @@ def _load_professions_catalog():
     return _professions_catalog_cache
 
 @app.get("/api/professions/list")
+@запомнить
 def get_professions_list(
     domain: Optional[str] = None,
     sphere: Optional[str] = None,
@@ -2964,6 +2934,7 @@ _autocomplete_cache = {}
 _cache_ttl = 300  # 5 минут
 
 @app.get("/api/analytics/kpi")
+@запомнить
 def get_kpi_metrics(
     period: Optional[str] = Query("all_time", description="Период: today|week|month|quarter|year|all_time"),
     domain: Optional[str] = Query(None, description="Домен профессии"),
@@ -3137,6 +3108,7 @@ def get_kpi_metrics(
         storage.close()
 
 @app.get("/api/analytics/new-by-month")
+@запомнить
 def new_vacancies_by_month(months: int = 12):
     """
     Сколько новых вакансий приносил каждый месяц.
@@ -3201,6 +3173,7 @@ def new_vacancies_by_month(months: int = 12):
 
 
 @app.get("/api/analytics/top-skills")
+@запомнить
 def get_top_skills(
     type: str = Query("hard", pattern="^(hard|soft|tools|employer)$"),
     limit: int = Query(20, ge=1, le=100),

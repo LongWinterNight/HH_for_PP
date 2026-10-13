@@ -182,7 +182,7 @@ const отказ = computed(() => объяснитьОтказ(state.value?.erro
 // памяти приложения, и после перезапуска экран выглядел так, будто
 // ничего не случилось. Исход последнего запуска читается из базы — тем
 // же запросом, что и шапка.
-const { состояниеБазы } = useHeaderMeta()
+const { состояниеБазы, обновить: обновитьШапку } = useHeaderMeta()
 const прежнийОтказ = computed(() => {
   const запуск = состояниеБазы.value?.last_run
   return запуск?.failed && !state.value?.error_message ? запуск : null
@@ -361,7 +361,10 @@ watch(isRunning, async (running, was) => {
   if (!was || running) return
 
   // Сбор закончился — обновляем историю: она и есть результат.
-  await history.load()
+  // И состояние шапки: оно обновляется при смене раздела, а человек
+  // после сбора остаётся здесь. Без этого удачный сбор оставлял на
+  // экране баннер прежнего отказа и метку «Сбор не удался».
+  await Promise.all([history.load(), обновитьШапку()])
 
   const last = history.data.value?.history?.[0]
   if (!last) return

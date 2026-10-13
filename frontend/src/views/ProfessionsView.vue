@@ -45,6 +45,11 @@ watch([search, domain], () => {
 
 const all = computed(() => list.data.value?.professions ?? [])
 
+// Пришёл ли справочник хоть раз. До этого экран не знает ни числа
+// профессий, ни сколько из них с данными, — и не вправе писать «0 из 0»:
+// полторы секунды ожидания выглядели как пустой справочник.
+const готово = computed(() => list.data.value !== null)
+
 // Сколько профессий не обещают пустоты. Считает сервер: на клиенте
 // лежит только показанная страница справочника.
 const withData = computed(() => list.data.value?.with_data ?? 0)
@@ -121,7 +126,7 @@ function collect(profession) {
          большинства профессий их нет. -->
     <BvBanner
       kind="info"
-      :title="`Данные есть по ${withData} профессиям из ${num(catalogTotal)}`"
+      :title="готово ? `Данные есть по ${withData} профессиям из ${num(catalogTotal)}` : 'Считаем, по каким профессиям есть данные…'"
       text="Справочник перечисляет профессии рынка целиком — он нужен и тому, кто ещё выбирает направление. База наполняется сборами по конкретным запросам, поэтому у большинства профессий вакансий пока нет. Выберите профессию и запустите сбор, чтобы они появились."
     />
 
@@ -147,7 +152,18 @@ function collect(profession) {
               <th class="col-num">Навыков</th>
             </tr>
           </thead>
-          <tbody>
+          <!-- Пока справочник не пришёл, таблица держит свою высоту
+               строками-заглушками: пустая шапка без строк читалась как
+               «профессий нет», а появление данных сдвигало страницу. -->
+          <tbody v-if="!готово" role="status" aria-label="Справочник загружается">
+            <tr v-for="i in perPage" :key="i" aria-hidden="true">
+              <td><span class="prof__skel" :style="{ width: `${40 + ((i * 29) % 45)}%` }"></span></td>
+              <td><span class="prof__skel" :style="{ width: `${30 + ((i * 17) % 40)}%` }"></span></td>
+              <td class="col-num"><span class="prof__skel prof__skel--num"></span></td>
+              <td class="col-num"><span class="prof__skel prof__skel--num"></span></td>
+            </tr>
+          </tbody>
+          <tbody v-else>
             <tr
               v-for="p in pageItems"
               :key="p.key"
@@ -445,4 +461,15 @@ function collect(profession) {
   color: var(--c-text-muted);
   max-width: none;
 }
+
+/* Заглушка значения — та же серая полоса, что у плиток и графиков. */
+.prof__skel {
+  display: inline-block;
+  height: var(--s-3);
+  border-radius: var(--r-xs);
+  background: var(--track-bar);
+  vertical-align: middle;
+}
+
+.prof__skel--num { width: 48px; }
 </style>

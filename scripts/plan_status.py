@@ -27,6 +27,8 @@ from pathlib import Path
     Path(__file__).resolve().parents[1] / "docs" / "plan-parser-dashboard.md",
     Path(__file__).resolve().parents[1] / "docs" / "backlog-breakdown.md",
     Path(__file__).resolve().parents[1] / "docs" / "backlog-full.md",
+    # Закрытая часть бэклога: в репозитории её нет, на диске владельца есть.
+    Path(__file__).resolve().parents[1] / "docs" / "private" / "backlog-private.md",
 ]
 
 # В плане номера подзадач пишутся с неразрывным дефисом, а в командной

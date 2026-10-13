@@ -1336,11 +1336,20 @@ class VacancyStorage:
         if условия:
             query += " WHERE " + " AND ".join(условия)
 
-        try:
-            df = pd.read_sql_query(query, self.engine)
-            df = _разобрать_даты(df)
+        def загрузить() -> pd.DataFrame:
+            df = _разобрать_даты(pd.read_sql_query(query, self.engine))
             logger.debug(f"Загружено {len(df)} записей из БД")
             return df
+
+        # Таблица читается один раз на состояние базы: экран шлёт
+        # четыре-пять запросов сразу, и каждый читал её заново. Ошибка
+        # чтения в память не попадает — исключение выходит из загрузки
+        # раньше, чем таблица запоминается, иначе пустая таблица
+        # отдавалась бы до следующей записи в базу.
+        from src import data_cache
+
+        try:
+            return data_cache.таблица(self.db_path, (include_inactive, include_off_query), загрузить)
         except SQLAlchemyError as e:
             logger.error(f"Ошибка загрузки из БД: {e}")
             return pd.DataFrame()
@@ -1482,6 +1491,33 @@ class VacancyStorage:
         except SQLAlchemyError as e:
             logger.error(f"Ошибка получения количества: {e}")
             return 0
+
+    def get_active_summary(self) -> Dict[str, Any]:
+        """
+        Сколько вакансий сейчас в работе и как они делятся по валютам.
+
+        Два счётчика самой базы — без чтения таблицы в память. Нужны
+        экранам «Вакансии», «Аналитика» и «Отчёты»: прежде каждый из них
+        ради этих двух чисел запрашивал весь расчёт дашборда со
+        спарклайнами и топом навыков — секунду и больше на экран.
+
+        Условия те же, что у `get_all_vacancies` по умолчанию: активные и
+        найденные по запросу. Число обязано сходиться с тем, по чему
+        считаются графики.
+        """
+        условие = "COALESCE(is_active, 1) = 1 AND COALESCE(off_query, 0) = 0"
+        try:
+            with self.engine.connect() as соединение:
+                активных = соединение.exec_driver_sql(f"SELECT COUNT(*) FROM vacancies WHERE {условие}").scalar()
+                строки = соединение.exec_driver_sql(
+                    "SELECT salary_currency, COUNT(*) FROM vacancies "
+                    f"WHERE {условие} AND salary_currency IS NOT NULL AND salary_currency != '' "
+                    "GROUP BY salary_currency ORDER BY COUNT(*) DESC"
+                ).fetchall()
+            return {"active": int(активных or 0), "currencies": {str(код): int(число) for код, число in строки}}
+        except SQLAlchemyError as e:
+            logger.error(f"Ошибка подсчёта активных вакансий: {e}")
+            return {"active": 0, "currencies": {}}
 
     def get_vacancy_count(self) -> int:
         """
@@ -2312,7 +2348,12 @@ class VacancyStorage:
                 query = session.query(ParserRunModel)
                 if only_successful:
                     query = query.filter_by(status="completed")
-                query = query.order_by(ParserRunModel.completed_at.desc())
+                    query = query.order_by(ParserRunModel.completed_at.desc())
+                else:
+                    # Самый новый запуск, включая идущий: у него ещё нет
+                    # даты завершения, и по ней он оказался бы в конце —
+                    # «последним» оставался бы прежний отказ.
+                    query = query.order_by(ParserRunModel.id.desc())
 
                 run = query.first()
                 if not run:

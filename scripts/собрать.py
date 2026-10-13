@@ -39,7 +39,7 @@ def main(аргументы: list | None = None) -> int:
     разбор.add_argument("--страниц", type=int, default=None, help="страниц выдачи на запрос (по умолчанию из настроек)")
     разбор.add_argument("--дней", type=int, default=None, help="глубина поиска в днях (по умолчанию из настроек)")
     разбор.add_argument("--без-копии", action="store_true", help="не снимать копию базы перед сбором")
-    разбор.add_argument("--ждать", type=float, default=20, help="сколько минут ждать недоступный источник (по умолчанию 20)")
+    разбор.add_argument("--ждать", type=float, default=None, help="сколько минут ждать недоступный источник (по умолчанию 120)")
     параметры = разбор.parse_args(аргументы)
 
     from src import collection_run, schedule
@@ -108,7 +108,7 @@ def main(аргументы: list | None = None) -> int:
 
     проверка = collection_run.дождаться_источника(
         HHAPIClient(email=почта, delay=настройки["request_delay"]),
-        ждать_минут=параметры.ждать,
+        ждать_минут=параметры.ждать if параметры.ждать is not None else collection_run.ЖДАТЬ_ИСТОЧНИК_МИНУТ,
     )
     if not проверка["доступно"]:
         logger.error(f"Сбор по расписанию не начат: {проверка['причина']} — {проверка['подробности']}")

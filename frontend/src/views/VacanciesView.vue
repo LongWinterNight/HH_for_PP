@@ -14,11 +14,11 @@ import BvSegmented from '@/components/ui/BvSegmented.vue'
 import BvTable from '@/components/ui/BvTable.vue'
 import VacancyModal from '@/components/domain/VacancyModal.vue'
 import VacancyPanel from '@/components/domain/VacancyPanel.vue'
-import { dashboard, reports, suggest, vacancies as vacanciesApi } from '@/api/endpoints'
+import { reports, suggest, vacancies as vacanciesApi } from '@/api/endpoints'
 import { изАдреса, вАдрес, одинаковые } from '@/app/адрес'
 import { ПОЛЯ_ФИЛЬТРОВ, СХЕМА, СХЕМА_СРЕЗА } from '@/views/vacancies-адрес'
 import { useApi } from '@/composables/useApi'
-import { useScreenMeta } from '@/composables/useHeaderMeta'
+import { useHeaderMeta, useScreenMeta } from '@/composables/useHeaderMeta'
 import { useToast } from '@/composables/useToast'
 import { countOf, dateTime, money, moneyExact, moneyRub, num, plural, salaryPeriod, timeAgo } from '@/utils/format'
 
@@ -62,10 +62,10 @@ const sortOptions = computed(() => [
 ])
 
 const currencyOptions = computed(() => {
-  const raw = currencies.data.value?.vacancies_by_currency ?? {}
+  const raw = состояниеБазы.value?.currencies ?? {}
   const list = Object.entries(raw)
-    .sort((a, b) => b[1].sample - a[1].sample)
-    .map(([code, v]) => ({ value: code, label: `${code} · ${num(v.sample)}` }))
+    .sort((a, b) => b[1] - a[1])
+    .map(([code, count]) => ({ value: code, label: `${code} · ${num(count)}` }))
   return [{ value: '', label: 'Все валюты' }, ...list]
 })
 
@@ -121,7 +121,9 @@ const list = useApi((options) => {
   }, options)
 })
 
-const currencies = useApi((options) => dashboard.summary(options))
+// Счёт по валютам и число вакансий в работе — из сводки шапки. Прежде
+// ради них экран запрашивал расчёт дашборда: секунду из двух.
+const { состояниеБазы } = useHeaderMeta()
 
 // Источники в базе и их вакансии. Показываем выбор и подпись у строк,
 // только когда источников больше одного: до второго источника это
@@ -187,9 +189,8 @@ function записатьАдрес({ вИсторию = false } = {}) {
 onMounted(async () => {
   применитьАдрес()
   list.load()
-  const summary = await currencies.load()
-  allTotal.value = summary?.total_vacancies ?? null
 })
+
 
 // Переход «назад» и «вперёд» меняет адрес мимо экрана — состояние
 // подтягивается за ним.
@@ -312,7 +313,10 @@ const порядокПоЭквиваленту = computed(
 )
 
 // Сколько вакансий в базе всего — чтобы сказать, насколько сужен срез.
-const allTotal = ref(null)
+// Сколько вакансий в работе — из сводки шапки. Вычисляется, а не
+// присваивается: наблюдатель с немедленным запуском, стоявший выше
+// этого объявления, обращался к переменной до её появления и ронял экран.
+const allTotal = computed(() => состояниеБазы.value?.active ?? null)
 
 // Числа на экране относятся только к выбранным условиям. Пока это не
 // сказано, «найдено 51» читается как «в базе 51».

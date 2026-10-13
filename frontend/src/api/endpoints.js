@@ -38,6 +38,12 @@ export const analytics = {
   topSkills: (params, options) => get('/analytics/top-skills', params, options),
   advanced: (params, options) => get('/analytics/advanced', params, options),
   distribution: (params, options) => get('/analytics/distribution', params, options),
+  // Срез зарплат для раскрытого окна: гистограмма, уровни, состав корзины
+  // и месяцы одним ответом — блоки окна описывают одну выборку.
+  salary: (params, options) => get('/analytics/salary', params, options),
+  // География зарплат: страны, регионы и города одним ответом — переход
+  // между уровнями не ждёт сервера.
+  geo: (params, options) => get('/analytics/geo', params, options),
   // Прирост базы по месяцам: считается по дате первой встречи, а не по
   // дате публикации, — см. комментарий у эндпоинта.
   newByMonth: (params, options) => get('/analytics/new-by-month', params, options),

@@ -93,20 +93,27 @@ const note = computed(() => (props.sample === null ? null : sampleNote(props.sam
   min-width: 0;
 }
 
+/* Действия стоят справа от заголовка и не переносятся под него. С
+   переносом кнопка «Разобрать» при длинном подзаголовке оказывалась
+   третьей строкой шапки, между подзаголовком и графиком, и читалась как
+   часть данных. Сжимается заголовок: подзаголовок переносится по словам,
+   а кнопка остаётся там, где её ищут. */
 .chart__head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--s-4);
-  flex-wrap: wrap;
 }
 
 .chart__titles {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1 1 0;
   min-width: 0;
 }
+
+.chart__head > :deep(*:not(.chart__titles)) { flex: 0 0 auto; }
 
 .chart__title {
   font-size: var(--t-h3-size);

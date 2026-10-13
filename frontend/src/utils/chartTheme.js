@@ -7,7 +7,8 @@ import {
   PointElement,
   CategoryScale,
   LinearScale,
-  Tooltip
+  Tooltip,
+  Filler
 } from 'chart.js'
 import { num, plural } from '@/utils/format'
 
@@ -39,6 +40,32 @@ export function dataScale() {
 /** Маркер: одно значение на график — медиана, текущий период, выбранный ряд. */
 export function markerColor() {
   return token('--c-marker')
+}
+
+/**
+ * Вид ряда по его номеру — для графика с несколькими линиями и для
+ * подписей рядов рядом с ним: цвет в двух местах обязан совпадать.
+ *
+ * Рядов четыре, ступеней шкалы, различимых линией на белом, три.
+ * Четвёртый ряд берёт среднюю ступень и отличается формой — штрихом:
+ * светлейшая ступень линией почти не видна, а чужого цвета в графиках
+ * величин быть не должно.
+ */
+export function seriesStyle(index) {
+  const ступени = [token('--c-data-1'), token('--c-data-2'), token('--c-data-3')]
+  return index < 3
+    ? { color: ступени[index], dash: [] }
+    : { color: ступени[1], dash: [6, 4] }
+}
+
+/** Цвет токена с прозрачностью — для заливки вилки под линией. */
+export function withAlpha(color, alpha) {
+  const hex = color.trim()
+  if (/^#[0-9a-f]{6}$/i.test(hex)) {
+    const доля = Math.round(alpha * 255).toString(16).padStart(2, '0')
+    return `${hex}${доля}`
+  }
+  return hex
 }
 
 /**
@@ -81,7 +108,9 @@ export function setupCharts() {
     BarController, BarElement,
     LineController, LineElement, PointElement,
     CategoryScale, LinearScale,
-    Tooltip
+    Tooltip,
+    // Заливка между двумя линиями: вилка вокруг медианы.
+    Filler
   )
 
   const sans = token('--font-sans')

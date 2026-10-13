@@ -6,7 +6,8 @@ import BvCard from '@/components/ui/BvCard.vue'
 import BvModal from '@/components/ui/BvModal.vue'
 import BvStatus from '@/components/ui/BvStatus.vue'
 import BvTable from '@/components/ui/BvTable.vue'
-import { dashboard, reports } from '@/api/endpoints'
+import { reports } from '@/api/endpoints'
+import { useHeaderMeta } from '@/composables/useHeaderMeta'
 import { изАдреса, вАдрес } from '@/app/адрес'
 import { СХЕМА_СРЕЗА } from '@/views/vacancies-адрес'
 import { useApi } from '@/composables/useApi'
@@ -22,7 +23,8 @@ import { dateTime, num, plural, timeAgo, vacancies as vacanciesCount } from '@/u
 
 const toast = useToast()
 const list = useApi((options) => reports.list(options))
-const summary = useApi((options) => dashboard.summary(options))
+// Пуста ли база — из сводки шапки, без запроса расчёта дашборда.
+const { состояниеБазы } = useHeaderMeta()
 const building = ref(false)
 const buildError = ref('')
 
@@ -52,7 +54,6 @@ function обновитьСостав() {
 
 onMounted(() => {
   list.load()
-  summary.load()
   обновитьСостав()
 })
 
@@ -98,7 +99,7 @@ const пустойСрез = computed(() => состав.data.value?.вакан�
 
 // Кнопка сборки при пустой базе выключена: файл из нулевых строк
 // выглядит как поломка отчёта, а не как пустая база.
-const базаПуста = computed(() => summary.data.value?.total_vacancies === 0)
+const базаПуста = computed(() => состояниеБазы.value?.active === 0)
 
 const files = computed(() => list.data.value?.reports ?? [])
 
