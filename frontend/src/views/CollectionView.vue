@@ -4,9 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import BvBanner from '@/components/ui/BvBanner.vue'
 import BvButton from '@/components/ui/BvButton.vue'
 import BvCard from '@/components/ui/BvCard.vue'
-import BvCheckbox from '@/components/ui/BvCheckbox.vue'
 import BvChip from '@/components/ui/BvChip.vue'
-import BvConfirmDialog from '@/components/ui/BvConfirmDialog.vue'
 import BvField from '@/components/ui/BvField.vue'
 import BvProgress from '@/components/ui/BvProgress.vue'
 import BvStatus from '@/components/ui/BvStatus.vue'
@@ -32,16 +30,13 @@ const keywords = ref([])
 const newKeyword = ref('')
 const maxPages = ref('10')
 const daysBack = ref('30')
-const useCache = ref(true)
 
-// Инкрементальный режим включён по умолчанию, и это не мелочь: без него
-// сбор перезаписывает таблицу целиком. В API значение по умолчанию
-// обратное, поэтому интерфейс всегда передаёт его явно.
-const incremental = ref(true)
-// Глубокий сбор: запрос, упёршийся в предел выдачи, режется на срезы.
-// Включён по умолчанию — без него по популярному слову видно пятую часть
-// рынка. Снимают галочку, когда нужен быстрый поверхностный проход.
-const глубоко = ref(true)
+// Трёх прежних галочек здесь нет намеренно. Сбор всегда дописывает к
+// базе, пользуется кешем ответов и режет запросы, упёршиеся в предел
+// выдачи. Каждая из галочек позволяла испортить базу одним нажатием:
+// стереть её целиком, утроить число запросов к источнику или собрать
+// пятую часть рынка, — а пользы от выключения в обычной работе нет.
+// Сервер этих параметров тоже не принимает.
 
 const email = ref('')
 const emailSaved = ref(false)
@@ -51,7 +46,6 @@ const emailSaved = ref(false)
 // доходила — он всегда работал с задержкой по умолчанию.
 const requestDelay = ref('1')
 const delaySaved = ref(false)
-const confirmOpen = ref(false)
 const startError = ref('')
 
 // Запрос на запуск летит секунду-другую: без признака занятости кнопку
@@ -299,37 +293,24 @@ async function saveDelay() {
   delaySaved.value = true
 }
 
+// Добор — тот же сбор: он всегда глубокий и дописывающий, поэтому
+// достаёт то, что осталось за пределом выдачи, и ничего не стирает.
 function добрать() {
-  // Добор — тот же сбор, только заведомо глубокий и дописывающий: он
-  // достаёт то, что осталось за пределом выдачи, и ничего не стирает.
-  глубоко.value = true
-  incremental.value = true
   start()
 }
 
 function requestStart() {
-  startError.value = ''
-  // Выключенный инкрементальный режим — необратимое действие: сбор
-  // перезапишет таблицу целиком. Подтверждается вводом слова.
-  if (!incremental.value) {
-    confirmOpen.value = true
-    return
-  }
   start()
 }
 
 async function start() {
-  confirmOpen.value = false
   startError.value = ''
   starting.value = true
   try {
     await collection.start({
       keywords: keywords.value,
       max_pages: maxPages.value,
-      days_back: daysBack.value,
-      incremental: incremental.value,
-      use_cache: useCache.value,
-      глубоко: глубоко.value
+      days_back: daysBack.value
     })
     status.startPolling()
     // Сбор идёт минуты: о его начале сообщаем, чтобы уход на другой
@@ -695,36 +676,6 @@ function durationOf(run) {
             <BvField v-model="daysBack" label="Глубина поиска" suffix="дн" hint="hh.ru отдаёт вакансии за ограниченный срок." />
           </div>
 
-          <BvCheckbox v-model="incremental" label="Дописывать к базе, не стирая собранное" />
-          <BvCheckbox v-model="useCache" label="Использовать кеш ответов hh.ru" />
-          <BvCheckbox
-            v-model="глубоко"
-            label="Собирать глубоко: резать запросы, упёршиеся в предел выдачи"
-          />
-          <!-- Цена названа до запуска, а не после. Источник отдаёт не
-               больше 2000 вакансий на запрос, и резка — единственный
-               способ увидеть остальное; карточки внутри срезов не
-               запрашиваются, поэтому охват стоит минут, а не часов. -->
-          <BvBanner
-            v-if="!глубоко"
-            kind="info"
-            title="Сбор будет поверхностным"
-            text="По популярному запросу источник отдаст не больше 2000 вакансий, и остальное останется непрочитанным. Так быстрее, но по такой базе нельзя судить о рынке."
-          />
-
-          <!-- Предупреждение появляется ровно тогда, когда режим опасен,
-               и говорит, что именно будет потеряно. Закрыть его нельзя:
-               оно исчезает вместе с причиной. -->
-          <BvBanner
-            v-if="!incremental"
-            kind="warning"
-            title="Следующий сбор перезапишет базу целиком"
-            text="Собранные вакансии будут удалены и заменены результатом нового запроса. Действие подтверждается вводом слова."
-          >
-            <template #actions>
-              <BvButton size="md" @click="incremental = true">Включить дописывание</BvButton>
-            </template>
-          </BvBanner>
         </div>
       </BvCard>
     </div>
@@ -908,15 +859,6 @@ function durationOf(run) {
       </BvTable>
     </BvCard>
 
-    <BvConfirmDialog
-      :open="confirmOpen"
-      title="Перезаписать базу целиком?"
-      message="Инкрементальный режим выключен. Сбор удалит все собранные вакансии и заменит их результатом нового запроса. Отменить это будет нельзя."
-      word="перезаписать"
-      confirm-label="Перезаписать и запустить"
-      @confirm="start"
-      @cancel="confirmOpen = false"
-    />
   </section>
 </template>
 
