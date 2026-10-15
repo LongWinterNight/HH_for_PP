@@ -265,6 +265,23 @@ def поднятая_модель(фон: bool = False) -> str:
     return Path(путь).name
 
 
+def флаги_процесса(фон: bool) -> int:
+    """
+    Флаги запуска llama-server на Windows.
+
+    Без окна — всегда. Пока прогон запускали из консоли, сервер делил её
+    консоль и окна не было. Прогон, запущенный после сбора отдельным
+    процессом, консоли не имеет, и Windows открывала серверу свою — окно
+    выскакивало каждые три минуты, на каждой порции (15.10.2026).
+
+    Приоритет ниже обычного — в фоне: когда процессор нужен игре или
+    системе, модель ждёт. Вне Windows флагов нет, и функция даёт ноль.
+    """
+    без_окна = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    приоритет = getattr(subprocess, "BELOW_NORMAL_PRIORITY_CLASS", 0) if фон else 0
+    return без_окна | приоритет
+
+
 @contextmanager
 def сервер(
     кандидат: Optional[Кандидат] = None, потоков: int = 1, ждать_секунд: int = 600, фон: bool = False
@@ -300,15 +317,11 @@ def сервер(
     if not файл.exists():
         raise FileNotFoundError(f"Файл модели не найден: {файл}")
 
-    # Приоритет ниже обычного: когда процессор нужен игре или системе,
-    # модель ждёт. Вне Windows флага нет — там режим отличается только
-    # отказом от видеокарты и числом потоков.
-    приоритет = getattr(subprocess, "BELOW_NORMAL_PRIORITY_CLASS", 0) if фон else 0
-
     журнал = папка_рантайма(кандидат) / f"сервер_{кандидат.имя}{'_фон' if фон else ''}.log"
     with open(журнал, "w", encoding="utf-8", errors="replace") as вывод:
         процесс = subprocess.Popen(
-            команда_запуска(кандидат, потоков, фон), stdout=вывод, stderr=subprocess.STDOUT, creationflags=приоритет
+            команда_запуска(кандидат, потоков, фон), stdout=вывод, stderr=subprocess.STDOUT,
+            creationflags=флаги_процесса(фон),
         )
         try:
             срок = time.monotonic() + ждать_секунд

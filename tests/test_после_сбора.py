@@ -91,3 +91,21 @@ class TestПослеСбора:
         assert after_collection.разбор(запуск) == 12345
         assert "--сам" in вызов["команда"], "карту или процессор прогон выбирает сам"
         assert вызов["kw"]["stdin"] is subprocess.DEVNULL
+
+
+class TestОкноМодели:
+
+    def test_сервер_модели_запускается_без_окна(self):
+        """Прогон без консоли открывал серверу модели окно на каждой порции."""
+        import subprocess
+        import sys
+
+        from src.ai import модели
+
+        if sys.platform != "win32":
+            assert модели.флаги_процесса(True) == 0
+            return
+        assert модели.флаги_процесса(False) & subprocess.CREATE_NO_WINDOW
+        assert модели.флаги_процесса(True) & subprocess.CREATE_NO_WINDOW
+        assert модели.флаги_процесса(True) & subprocess.BELOW_NORMAL_PRIORITY_CLASS, "в фоне — приоритет ниже обычного"
+        assert not модели.флаги_процесса(False) & subprocess.BELOW_NORMAL_PRIORITY_CLASS
