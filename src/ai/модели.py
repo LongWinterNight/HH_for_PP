@@ -118,6 +118,9 @@ def память_карты() -> Optional[tuple]:
         ответ = subprocess.run(
             ["nvidia-smi", "--query-gpu=memory.used,memory.total", "--format=csv,noheader,nounits"],
             capture_output=True, text=True, timeout=15,
+            # Без окна: прогон без консоли получал мелькающее окно
+            # nvidia-smi перед каждой порцией, раз в три минуты.
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
         занято, всего = (int(часть.strip()) for часть in ответ.stdout.strip().splitlines()[0].split(","))
     except (OSError, subprocess.SubprocessError, ValueError, IndexError):

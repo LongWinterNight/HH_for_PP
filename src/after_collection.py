@@ -57,6 +57,7 @@ def тексты(запуск: Callable = subprocess.run) -> int:
                 [sys.executable, "-u", str(СКРИПТ_ТЕКСТОВ), "--yes", "--сеть", "--без-копии"],
                 cwd=str(PROJECT_ROOT), stdout=журнал, stderr=subprocess.STDOUT,
                 timeout=ТЕКСТЫ_НЕ_ДОЛЬШЕ_С, env=_окружение(),
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
             )
         return исход.returncode
     except Exception:

@@ -109,3 +109,37 @@ class TestОкноМодели:
         assert модели.флаги_процесса(True) & subprocess.CREATE_NO_WINDOW
         assert модели.флаги_процесса(True) & subprocess.BELOW_NORMAL_PRIORITY_CLASS, "в фоне — приоритет ниже обычного"
         assert not модели.флаги_процесса(False) & subprocess.BELOW_NORMAL_PRIORITY_CLASS
+
+
+class TestОкнаСлужебныхПрограмм:
+
+    def test_nvidia_smi_вызывается_без_окна(self, monkeypatch):
+        """Прогон без консоли получал мелькающее окно nvidia-smi перед каждой порцией."""
+        import subprocess
+        from types import SimpleNamespace
+
+        from src.ai import модели
+
+        вызов = {}
+
+        def запуск(команда, **kw):
+            вызов.update(kw)
+            return SimpleNamespace(returncode=0, stdout="1000, 12000\n")
+
+        monkeypatch.setattr(модели.subprocess, "run", запуск)
+        модели.память_карты()
+        assert вызов.get("creationflags", 0) == getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+    def test_докачка_после_сбора_без_окна(self, monkeypatch, tmp_path):
+        import subprocess
+        from types import SimpleNamespace
+
+        monkeypatch.setattr(after_collection, "ЖУРНАЛ_ТЕКСТОВ", tmp_path / "тексты.log")
+        вызов = {}
+
+        def запуск(команда, **kw):
+            вызов.update(kw)
+            return SimpleNamespace(returncode=0)
+
+        after_collection.тексты(запуск)
+        assert вызов.get("creationflags", 0) == getattr(subprocess, "CREATE_NO_WINDOW", 0)
