@@ -25,7 +25,10 @@ export const system = {
 // Слой понимания текста: что нашла модель и что с этим решил человек.
 export const ai = {
   state: (options) => get('/ai/state', {}, options),
-  candidates: (status, options) => get('/ai/candidates', { status }, options),
+  // Список листается и ищется: кандидатов на всей базе тысячи.
+  candidates: (params, options) => get('/ai/candidates', params, options),
+  // Навыки словаря — цель решения «это написание навыка…».
+  dictionary: (q, options) => get('/ai/dictionary/suggest', { q }, options),
   decide: (body, options) => post('/ai/candidates/decide', body, options)
 }
 

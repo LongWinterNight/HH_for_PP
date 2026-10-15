@@ -653,10 +653,15 @@ class SkillCandidateModel(Base):
     name_key = Column(String(200), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     kind = Column(String(30))
-    # new / confirmed / rejected
+    # new / confirmed / rejected / merged
     status = Column(String(20), nullable=False, default="new")
-    # В какой раздел словаря ушёл подтверждённый: hard / soft / tools.
+    # В какой раздел словаря ушёл подтверждённый: hard / soft / tools,
+    # либо synonym — стал написанием навыка, который словарь уже знал.
     section = Column(String(20))
+    # Во что кандидат слит (миграция 023): у слитого с другим кандидатом
+    # (status = merged) — ключ кандидата‑канона, у ставшего написанием
+    # навыка словаря — канон словаря.
+    target = Column(String(200))
     decided_at = Column(DateTime)
     created_at = Column(DateTime, nullable=False)
 

@@ -138,7 +138,9 @@ function onBlur() {
         @mouseenter="active = index"
       >
         <span class="ac__text">{{ item.label }}</span>
-        <span class="ac__count">{{ num(item.count) }}</span>
+        <!-- Числа может не быть: подсказка навыков словаря ничего не
+             считает, и «—» справа читался бы как «ноль вакансий». -->
+        <span v-if="item.count !== undefined && item.count !== null" class="ac__count">{{ num(item.count) }}</span>
       </li>
       <li class="ac__hint">↑ ↓ выбрать · enter применить</li>
     </ul>
