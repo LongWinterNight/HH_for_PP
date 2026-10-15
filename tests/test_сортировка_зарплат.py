@@ -53,7 +53,10 @@ def вакансия(vacancy_id: str, currency: str, salary_from, день: str 
         "salary_from": salary_from,
         "salary_to": None,
         "salary_currency": currency,
-        "employer_name": "Компания",
+        # Работодатель у каждой свой: одно название у одного работодателя —
+        # это копии одной вакансии по городам, и список с 15.10.2026
+        # показывает их одной строкой. Тест про порядок, а не про копии.
+        "employer_name": f"Компания {vacancy_id}",
         "employer_id": vacancy_id,
         "employer_url": "",
         "vacancy_url": "",

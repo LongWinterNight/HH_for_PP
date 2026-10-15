@@ -112,3 +112,52 @@ class TestУстойчивость:
 
         assert без_копий(пусто, "salary_from").empty
         assert сколько_копий(пусто) == 0
+
+
+class TestСписокПоВакансиям:
+    """
+    Список показывает вакансию одной строкой, а не строкой на город (V1‑1b).
+
+    «Инженер по MLOps» «Алабуги» стоял в списке одиннадцатью одинаковыми
+    строками. Теперь строка одна, а города — у неё в списке.
+    """
+
+    @pytest.fixture
+    def база(self, tmp_path, monkeypatch):
+        import src.storage as storage_module
+        from src.storage import VacancyStorage
+
+        monkeypatch.setattr(storage_module.settings, "db_path", tmp_path / "тест.db")
+        строки = [
+            {"vacancy_id": str(10 + i), "vacancy_name": "Инженер MLOps", "employer_name": "Алабуга",
+             "area": город, "vacancy_url": f"https://hh.ru/vacancy/{10 + i}", "salary_from": 277500,
+             "salary_currency": "RUR", "published_at": "2026-10-09"}
+            for i, город in enumerate(["Москва", "Казань", "Самара"])
+        ] + [{"vacancy_id": "99", "vacancy_name": "Аналитик", "employer_name": "Бета", "area": "Москва",
+              "vacancy_url": "https://hh.ru/vacancy/99", "salary_from": 150000, "salary_currency": "RUR",
+              "published_at": "2026-10-10"}]
+        хранилище = VacancyStorage()
+        try:
+            хранилище.replace_all_vacancies(pd.DataFrame(строки))
+        finally:
+            хранилище.close()
+
+    def test_вакансия_одной_строкой_с_городами(self, база):
+        from web.app.main import get_vacancies
+
+        ответ = get_vacancies(per_page=50)
+        assert ответ["total"] == 2, "две вакансии, а не четыре строки"
+        assert ответ["объявлений"] == 4
+        инженер = next(в for в in ответ["items"] if в["vacancy_name"] == "Инженер MLOps")
+        assert инженер["копий"] == 3
+        assert [г["area"] for г in инженер["города"]] == ["Казань", "Москва", "Самара"], "города по алфавиту"
+        assert all(г["vacancy_url"].endswith(г["vacancy_id"]) for г in инженер["города"]), "у каждого города своё объявление"
+
+    def test_фильтр_по_региону_оставляет_строку_своего_города(self, база):
+        from web.app.main import get_vacancies
+
+        ответ = get_vacancies(per_page=50, area="Самара")
+        assert ответ["total"] == 1
+        строка = ответ["items"][0]
+        assert строка["area"] == "Самара", "человеку из Самары нужна его строка"
+        assert строка["копий"] == 3, "а знать, что вакансия есть ещё в двух городах, всё равно полезно"

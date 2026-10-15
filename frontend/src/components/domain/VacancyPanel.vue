@@ -1,10 +1,10 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import BvButton from '@/components/ui/BvButton.vue'
 import BvChip from '@/components/ui/BvChip.vue'
 import BvIconButton from '@/components/ui/BvIconButton.vue'
 import BvStatus from '@/components/ui/BvStatus.vue'
-import { dateTime, money, moneyExact, salaryPeriod, timeAgo } from '@/utils/format'
+import { dateTime, money, moneyExact, plural, salaryPeriod, timeAgo } from '@/utils/format'
 
 // Панель выбранной вакансии. От 1024px стоит рядом со списком и липнет
 // к шапке, ниже — открывается нижним листом: на телефоне боковая панель
@@ -66,6 +66,16 @@ const отМодели = computed(() => {
   return найденные.filter((навык) => навык?.['название'] && !словарные.has(навык['название'].toLowerCase()))
 })
 
+// Где размещена вакансия. Работодатель выкладывает одну вакансию в
+// десятках городов, у каждой копии своё объявление на hh.ru, и
+// откликаться нужно на объявление своего города. Список сразу не
+// разворачивается целиком: у рекордной вакансии тридцать один город.
+const ГОРОДОВ_СРАЗУ = 8
+const всеГорода = ref(false)
+watch(() => props.vacancy?.vacancy_id, () => { всеГорода.value = false })
+const города = computed(() => props.vacancy?.['города'] ?? [])
+const показанныеГорода = computed(() => (всеГорода.value ? города.value : города.value.slice(0, ГОРОДОВ_СРАЗУ)))
+
 const details = computed(() => {
   const v = props.vacancy
   if (!v) return []
@@ -113,6 +123,21 @@ const details = computed(() => {
         <dd class="panel__value">{{ d.v }}</dd>
       </div>
     </dl>
+
+    <section v-if="города.length > 1" class="panel__places">
+      <h3 class="label">Где размещена · {{ города.length }} {{ plural(города.length, 'город', 'города', 'городов') }}</h3>
+      <ul class="panel__places-list">
+        <li v-for="город in показанныеГорода" :key="город.vacancy_id">
+          <span v-if="город.vacancy_id === String(vacancy.vacancy_id)" class="panel__place-here">{{ город.area }} · это объявление</span>
+          <a v-else-if="город.vacancy_url" :href="город.vacancy_url" target="_blank" rel="noopener">{{ город.area }} ↗</a>
+          <span v-else>{{ город.area }}</span>
+        </li>
+      </ul>
+      <BvButton v-if="города.length > ГОРОДОВ_СРАЗУ && !всеГорода" size="sm" variant="quiet" @click="всеГорода = true">
+        Показать ещё {{ города.length - ГОРОДОВ_СРАЗУ }}
+      </BvButton>
+      <p class="panel__hint">У каждого города своё объявление на hh.ru — откликайтесь на объявление своего города.</p>
+    </section>
 
     <section v-if="skills.length" class="panel__skills">
       <h3 class="label">Навыки · {{ skills.length }}</h3>
@@ -253,6 +278,32 @@ const details = computed(() => {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
+}
+
+.panel__places {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-2);
+}
+
+/* Города в две колонки: тридцать строк в одну вытянули бы панель на два экрана. */
+.panel__places-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  align-self: stretch;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--s-1) var(--s-3);
+  font-size: var(--t-ui-size);
+}
+
+.panel__places-list li { min-width: 0; overflow-wrap: anywhere; }
+
+.panel__place-here {
+  color: var(--c-text);
+  font-weight: var(--w-medium);
 }
 
 .panel__chips {

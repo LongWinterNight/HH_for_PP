@@ -270,6 +270,11 @@ watch(selected, (стало, было) => {
 
 const items = computed(() => list.data.value?.items ?? [])
 const total = computed(() => list.data.value?.total ?? 0)
+// Объявления — строки базы: копия вакансии в каждом городе своя. Список
+// с 15.10.2026 показывает вакансию одной строкой (V1‑1a), поэтому
+// вакансий и объявлений бывает разное число. С базой и с выгрузкой,
+// где каждая копия — своя строка, сверяются объявления.
+const объявлений = computed(() => list.data.value?.['объявлений'] ?? total.value)
 
 // Ссылка с открытой панелью: карточка ищется в приехавшем списке.
 //
@@ -325,7 +330,7 @@ const allTotal = computed(() => состояниеБазы.value?.active ?? null
 // бы «8342 из 1411», потому что общее число считается по открытым
 // вакансиям.
 const isNarrowed = computed(
-  () => activeChips.value.length > 0 && allTotal.value !== null && total.value <= allTotal.value
+  () => activeChips.value.length > 0 && allTotal.value !== null && объявлений.value <= allTotal.value
 )
 
 // Список вышел за пределы открытых вакансий: показан архив.
@@ -336,7 +341,7 @@ const showsArchive = computed(() => filters.value.include_inactive)
 // которое он смотрит, относится к фильтрам, а не ко всей базе.
 useScreenMeta(computed(() => {
   if (!list.data.value) return ''
-  return isNarrowed.value ? `${num(total.value)} из ${num(allTotal.value)}` : num(total.value)
+  return isNarrowed.value ? `${num(объявлений.value)} из ${num(allTotal.value)}` : num(объявлений.value)
 }))
 
 const activeChips = computed(() => {
@@ -376,17 +381,16 @@ function копийУ(вакансия) {
   return вакансия.копий || 1
 }
 
-function городов(сколько) {
-  const остаток = сколько % 100
-  if (остаток >= 11 && остаток <= 14) return 'городах'
-  const последняя = сколько % 10
-  if (последняя === 1) return 'городе'
-  return 'городах'
+function подписьКопий(вакансия) {
+  return `Та же вакансия размещена в ${копийУ(вакансия)} городах — список в панели вакансии. `
+    + 'В медиане зарплаты она считается за одну.'
 }
 
-function подписьКопий(вакансия) {
-  return `Та же вакансия размещена в ${копийУ(вакансия)} городах. `
-    + 'В медиане зарплаты она считается за одну.'
+// «+10 городов» рядом с регионом строки: вакансия одна, а размещена
+// в нескольких городах.
+function ещёГородов(вакансия) {
+  const n = копийУ(вакансия) - 1
+  return n > 0 ? `+${n} ${plural(n, 'город', 'города', 'городов')}` : ''
 }
 
 // Вакансия снята с публикации, если источник перестал её отдавать.
@@ -498,7 +502,8 @@ function downloadXlsx() {
   link.click()
   link.remove()
 
-  toast.progress('Готовим XLSX', `${countOf(total.value, 'строка', 'строки', 'строк')} — файл скачается сам`)
+  // В файле каждая копия вакансии по городам — своя строка.
+  toast.progress('Готовим XLSX', `${countOf(объявлений.value, 'строка', 'строки', 'строк')} — файл скачается сам`)
 }
 </script>
 
@@ -521,7 +526,8 @@ function downloadXlsx() {
                  врало на большинстве чисел. Стоит всегда, а не только
                  без фильтров: «Найдено 12» без слова читается как
                  обрывок. -->
-            Найдено <b>{{ num(total) }}</b>&nbsp;{{ plural(total, 'вакансия', 'вакансии', 'вакансий') }}<template v-if="allTotal !== null && !activeChips.length"> в базе</template>
+            Найдено <b>{{ num(total) }}</b>&nbsp;{{ plural(total, 'вакансия', 'вакансии', 'вакансий') }}<template v-if="allTotal !== null && !activeChips.length"> в базе</template><template
+              v-if="объявлений > total"> · {{ num(объявлений) }} {{ plural(объявлений, 'объявление', 'объявления', 'объявлений') }} по городам</template>
           </template>
         </p>
       </div>
@@ -622,7 +628,7 @@ function downloadXlsx() {
     <BvBanner
       v-if="isNarrowed"
       kind="filtered"
-      :title="`Выборка сужена: ${num(total)} из ${num(allTotal)} вакансий`"
+      :title="`Выборка сужена: ${num(объявлений)} из ${num(allTotal)} объявлений`"
       :text="`Активны условия: ${activeChips.map((c) => c.label).join(', ')}. Числа на экране относятся только к ним.`"
     >
       <template #actions>
@@ -711,16 +717,13 @@ function downloadXlsx() {
                        «по смыслу» выглядит ошибкой поиска: слов запроса
                        в строке нет, а она стоит третьей. -->
                   <span v-if="v.search_why" class="vac__why">найдено {{ v.search_why }}</span>
-                  <span v-if="копийУ(v) > 1" class="vac__copies" :title="подписьКопий(v)">
-                    ещё в {{ копийУ(v) - 1 }} {{ городов(копийУ(v) - 1) }}
-                  </span>
                 </span>
                 <!-- Сведения свёрнутых колонок. Когда таблице тесно —
                      открыта панель вакансии или экран узкий, — колонки
                      не прокручиваются вбок, а переезжают сюда. Какие
                      именно показаны, решает ширина таблицы (стили ниже). -->
                 <span class="vac__folded">
-                  <span v-if="v.area" class="vac__in vac__in--area">{{ v.area }}</span>
+                  <span v-if="v.area" class="vac__in vac__in--area">{{ ещёГородов(v) ? `${v.area} ${ещёГородов(v)}` : v.area }}</span>
                   <span v-if="v.experience" class="vac__in vac__in--exp">{{ v.experience }}</span>
                   <span v-if="v.published_at" class="vac__in vac__in--when" :title="dateTime(v.published_at)">{{ timeAgo(v.published_at) }}</span>
                 </span>
@@ -752,7 +755,11 @@ function downloadXlsx() {
                 </template>
                 <span v-else class="vac__empty">не указана</span>
               </td>
-              <td class="col-area">{{ v.area }}</td>
+              <td class="col-area">
+                {{ v.area }}
+                <!-- Вакансия одна, а городов несколько: какие — в панели. -->
+                <span v-if="ещёГородов(v)" class="vac__more" :title="подписьКопий(v)">{{ ещёГородов(v) }}</span>
+              </td>
               <td class="vac__exp col-exp">{{ v.experience || '—' }}</td>
               <!-- Срок, а не дата: при сортировке «сначала новые» порядок
                    должен читаться в самой строке, а «01.09.2026» через
@@ -1096,6 +1103,14 @@ function downloadXlsx() {
   font-size: var(--t-caption-size);
   color: var(--c-text-quiet);
   white-space: nowrap;
+}
+
+.vac__more {
+  display: block;
+  font-size: var(--t-caption-size);
+  color: var(--c-text-muted);
+  white-space: nowrap;
+  cursor: help;
 }
 
 .vac__copies {
