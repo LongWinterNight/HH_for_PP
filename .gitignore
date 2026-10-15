@@ -156,3 +156,13 @@ docs/private/
 data/*.db-journal
 data/*.db-wal
 data/*.db-shm
+
+# Данные вакансий в репозиторий не кладутся (требование 15.10.2026, Y1):
+# сырые и обработанные выгрузки, отчёты, копии базы, каталог профессий
+# с номерами вакансий и эталон из настоящих вакансий.
+data/raw/
+data/processed/
+data/reports/
+data/backups/
+data/professions_catalog.json
+tests/fixtures/private/

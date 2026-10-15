@@ -23,12 +23,17 @@ import pytest
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-ФАЙЛ = project_root / "tests" / "fixtures" / "эталон_навыков.json"
+# Эталон — настоящие вакансии, размеченные руками, а данные вакансий в
+# публичный репозиторий не кладутся (Y1‑1c). Он лежит в закрытой папке
+# рабочей машины; там, где его нет (проверка на GitHub), тесты
+# пропускаются, а не падают.
+ФАЙЛ = project_root / "tests" / "fixtures" / "private" / "эталон_навыков.json"
 
 
 @pytest.fixture(scope="module")
 def эталон():
-    assert ФАЙЛ.exists(), "эталонный набор не найден"
+    if not ФАЙЛ.exists():
+        pytest.skip("эталон навыков лежит вне репозитория: tests/fixtures/private/")
     return json.loads(ФАЙЛ.read_text(encoding="utf-8"))
 
 
